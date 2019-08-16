@@ -1,25 +1,25 @@
 # Neural Network Translator
 
-# 1. Set up environment
+# 1 Set up environment
 
 ## 1.1 Required software
 
-Die folgenden Softwarekomponenten und ihre Abhängigkeiten werden benötigt:
+The following software components and dependencies are needed:
 
 - GIT: https://git-scm.com/
 - Anaconda Python 2019.07: https://www.anaconda.com/download/
 
 ## 1.2 Installationprocess
 
-### 1. Install Anaconda Python 2019.07
+### 1.2.1 Install Anaconda Python 2019.07
 
-### 2. Clone GIT repository
+### 1.2.2 Clone GIT repository
 
 - Navigate to the desired target directory
 - Open Git Bash:
 - `git clone https://github.com/pg020196/Neural-Network-Translator.git`
 
-### 3. Set up python environment
+### 1.2.3 Set up python environment with requirements.txt
 
 - Start Anaconda Prompt and execute the following commands:
 
@@ -33,24 +33,20 @@ Die folgenden Softwarekomponenten und ihre Abhängigkeiten werden benötigt:
 
 - Open Anaconda Navigator and install Jupyter Notebook in version **6.0.0**
 
-- Open Anaconda Prompt and navigate to `setup\` 
+- Open Anaconda Prompt and navigate to `setup\`
 
 - Install NNT-Requirements: `pip install -r nnt_requirements.txt`
 
-# 2. Update environment
+### 1.2.4 Set up python environment with environment.yml
 
-- Open Git Bash and navigate to the NNT folder
-- Pull the current project from github: `git pull`
-- Change to the current branch `git checkout SprintXX`
-- In Anaconda Prompt, navigate to `FutureDrive\setup\`
-- Activate environment `activate futuredrive`
-- Update python environment:
-  - Install latest packages through the nnt_requirements.txt file: `pip install -r nnt_requirements.txt`
-- Reload environment: `activate nnt`
+- Create Anaconda environment from environment.yml
+  `conda env create -f environment.yml`
+- Activate new environment
+  `activate nnt`
 
-# 3. Components
+# 2 Components
 
-## 3.1 Frameworks
+## 2.1 Frameworks
 
 - [ ] **Keras**
 - [ ] TensorFlow
@@ -60,24 +56,24 @@ Die folgenden Softwarekomponenten und ihre Abhängigkeiten werden benötigt:
 - [ ] PyTorch
 - [ ] Apache mxnet
 
-## 3.2 Activation Functions
+## 2.2 Activation Functions
 
 - [ ] **ReLu**
 - [ ] Tanh
 - [ ] Sigmoid
 - [ ] Softmax
 
-## 3.3. Neural Network Structures
+## 2.3. Neural Network Structures
 
 - [ ] **(Deep) Feed Forward**
 - [ ] Recurrent
 
-## 3.4. Layers
+## 2.4. Layers
 
 - [ ] **Dense**
 - [ ] Convolutional
 
-# 4. Working with Git
+# 3 Working with Git
 
 Clone Git-repository: `git clone https://github.com/pg020196/Neural-Network-Translator.git`
 
@@ -116,8 +112,8 @@ Commit the merge and verify the changes.
 
 Push the merge to the github repository.
 
-`git push origin TARGETBRANCH` 
+`git push origin TARGETBRANCH`
 
-# 5. How to contribute
+# 4 How to contribute
 
 Contributing is not available at this stage.
