@@ -1,0 +1,265 @@
+{
+    "definitions": {},
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "$id": "http://example.com/root.json",
+    "type": "object",
+    "title": "The Root Schema",
+    "required": [
+        "class_name",
+        "config"
+    ],
+    "properties": {
+        "class_name": {
+            "$id": "#/properties/class_name",
+            "type": "string",
+            "title": "The Class_name Schema"
+        },
+        "config": {
+            "$id": "#/properties/config",
+            "type": "object",
+            "title": "The Config Schema",
+            "required": [
+                "name",
+                "layers"
+            ],
+            "properties": {
+                "name": {
+                    "$id": "#/properties/config/properties/name",
+                    "type": "string",
+                    "title": "The Name Schema"
+                },
+                "layers": {
+                    "$id": "#/properties/config/properties/layers",
+                    "type": "array",
+                    "title": "The Layers Schema",
+                    "items": {
+                        "$id": "#/properties/config/properties/layers/items",
+                        "type": "object",
+                        "title": "The Items Schema",
+                        "required": [
+                            "class_name",
+                            "config"
+                        ],
+                        "properties": {
+                            "class_name": {
+                                "$id": "#/properties/config/properties/layers/items/properties/class_name",
+                                "type": "string",
+                                "title": "The Class_name Schema"
+                            },
+                            "config": {
+                                "$id": "#/properties/config/properties/layers/items/properties/config",
+                                "type": "object",
+                                "title": "The Config Schema",
+                                "properties": {
+                                    "name": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/name",
+                                        "type": "string",
+                                        "title": "The Name Schema"
+                                    },
+                                    "trainable": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/trainable",
+                                        "type": "boolean",
+                                        "title": "The Trainable Schema"
+                                    },
+                                    "batch_input_shape": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/batch_input_shape",
+                                        "type": "array",
+                                        "title": "The Batch_input_shape Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/batch_input_shape/items",
+                                            "type": [
+                                                "null",
+                                                "integer"
+                                            ],
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "dtype": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/dtype",
+                                        "type": "string",
+                                        "title": "The Dtype Schema"
+                                    },
+                                    "filters": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/filters",
+                                        "type": "integer",
+                                        "title": "The Filters Schema"
+                                    },
+                                    "kernel_size": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_size",
+                                        "type": "array",
+                                        "title": "The Kernel_size Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_size/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "kernel_values": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_values",
+                                        "type": "array",
+                                        "title": "The kernel_values Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_values/items",
+                                            "type": "array",
+                                            "title": "The kernel_values_items Schema",
+                                            "items": {
+                                                "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_values/items/items",
+                                                "type": "number",
+                                                "title": "The kernel_values_items_items Schema"
+                                            }
+                                        }
+                                    },
+                                    "strides": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/strides",
+                                        "type": "array",
+                                        "title": "The Strides Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/strides/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "padding": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/padding",
+                                        "type": "string",
+                                        "title": "The Padding Schema"
+                                    },
+                                    "data_format": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/data_format",
+                                        "type": "string",
+                                        "title": "The Data_format Schema"
+                                    },
+                                    "dilation_rate": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/dilation_rate",
+                                        "type": "array",
+                                        "title": "The Dilation_rate Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/dilation_rate/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "activation": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/activation",
+                                        "type": "string",
+                                        "title": "The Activation Schema"
+                                    },
+                                    "use_bias": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/use_bias",
+                                        "type": "boolean",
+                                        "title": "The Use_bias Schema"
+                                    },
+                                    "bias_values": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_values",
+                                        "type": "array",
+                                        "title": "The bias_values Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_values/items",
+                                            "type": "number",
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "kernel_initializer": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer",
+                                        "type": "object",
+                                        "title": "The Kernel_initializer Schema",
+                                        "required": [
+                                            "class_name",
+                                            "config"
+                                        ],
+                                        "properties": {
+                                            "class_name": {
+                                                "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/class_name",
+                                                "type": "string",
+                                                "title": "The Class_name Schema"
+                                            },
+                                            "config": {
+                                                "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/config",
+                                                "type": "object",
+                                                "title": "The Config Schema",
+                                                "required": [
+                                                    "scale",
+                                                    "mode",
+                                                    "distribution",
+                                                    "seed"
+                                                ],
+                                                "properties": {
+                                                    "scale": {
+                                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/config/properties/scale",
+                                                        "type": "integer",
+                                                        "title": "The Scale Schema"
+                                                    },
+                                                    "mode": {
+                                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/config/properties/mode",
+                                                        "type": "string",
+                                                        "title": "The Mode Schema"
+                                                    },
+                                                    "distribution": {
+                                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/config/properties/distribution",
+                                                        "type": "string",
+                                                        "title": "The Distribution Schema"
+                                                    },
+                                                    "seed": {
+                                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_initializer/properties/config/properties/seed",
+                                                        "type": "null",
+                                                        "title": "The Seed Schema"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    },
+                                    "bias_initializer": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_initializer",
+                                        "type": "object",
+                                        "title": "The Bias_initializer Schema",
+                                        "required": [
+                                            "class_name",
+                                            "config"
+                                        ],
+                                        "properties": {
+                                            "class_name": {
+                                                "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_initializer/properties/class_name",
+                                                "type": "string",
+                                                "title": "The Class_name Schema"
+                                            },
+                                            "config": {
+                                                "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_initializer/properties/config",
+                                                "type": "object",
+                                                "title": "The Config Schema"
+                                            }
+                                        }
+                                    },
+                                    "kernel_regularizer": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_regularizer",
+                                        "type": "null",
+                                        "title": "The Kernel_regularizer Schema"
+                                    },
+                                    "bias_regularizer": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_regularizer",
+                                        "type": "null",
+                                        "title": "The Bias_regularizer Schema"
+                                    },
+                                    "activity_regularizer": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/activity_regularizer",
+                                        "type": "null",
+                                        "title": "The Activity_regularizer Schema"
+                                    },
+                                    "kernel_constraint": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_constraint",
+                                        "type": "null",
+                                        "title": "The Kernel_constraint Schema"
+                                    },
+                                    "bias_constraint": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/bias_constraint",
+                                        "type": "null",
+                                        "title": "The Bias_constraint Schema"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
