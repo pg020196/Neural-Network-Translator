@@ -48,7 +48,34 @@ Die folgenden Softwarekomponenten und ihre Abhängigkeiten werden benötigt:
   - Install latest packages through the nnt_requirements.txt file: `pip install -r nnt_requirements.txt`
 - Reload environment: `activate nnt`
 
-# 3. How to use the scripts?
+# 3. Components
+
+## 3.1 Frameworks
+
+- [ ] **Keras**
+- [ ] TensorFlow
+- [ ] Theano
+- [ ] Caffe
+- [ ] Microsoft Cognitive Toolkit
+- [ ] PyTorch
+- [ ] Apache mxnet
+
+## 3.2 Activation Functions
+
+- [ ] **ReLu**
+- [ ] Tanh
+- [ ] Sigmoid
+- [ ] Softmax
+
+## 3.3. Neural Network Structures
+
+- [ ] **(Deep) Feed Forward**
+- [ ] Recurrent
+
+## 3.4. Layers
+
+- [ ] **Dense**
+- [ ] Convolutional
 
 # 4. Working with Git
 
