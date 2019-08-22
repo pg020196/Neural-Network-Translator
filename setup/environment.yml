@@ -98,5 +98,3 @@ dependencies:
     - typed-ast==1.4.0
     - werkzeug==0.15.5
     - wrapt==1.11.2
-prefix: C:\Users\philippgrandeit\Anaconda3\envs\nnt
-
