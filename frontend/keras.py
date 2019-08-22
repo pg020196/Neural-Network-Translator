@@ -31,4 +31,4 @@ class Keras(Plugin):
             last_units = layer['config']['units']
             last_batch_input_shape = layer['config']['batch_input_shape']
 
-        return json.dumps(model_json)
+        return model_json

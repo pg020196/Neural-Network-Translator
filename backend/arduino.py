@@ -1,4 +1,5 @@
 from plugin_collection import Plugin
+import json
 
 class Keras(Plugin):
 
@@ -9,4 +10,4 @@ class Keras(Plugin):
 
     def translate_to_native_code(self, input):
         #! TODO translate input to native code
-        return input
+        return json.dumps(input)
