@@ -1,7 +1,8 @@
-from plugin_collection import PluginCollection
+import traceback
 import argparse
-from jsonschema import validate,ValidationError
 import json
+from plugin_collection import PluginCollection
+from jsonschema import validate,ValidationError
 
 def get_available_plugins(plugins):
     av_plugins=''
@@ -22,11 +23,7 @@ args = parser.parse_args()
 try:
     frontend = frontend_plugins.get_plugin(args.frontend.lower())
     backend = backend_plugins.get_plugin(args.backend.lower())
-except NotImplementedError:
-    print('Selected frontend/backend is not available')
-    exit()
 
-try:
     intermediate = frontend.transform_to_intermediate_format(args.input)
 
     with open('intermediate.schema.json') as json_file:
@@ -34,11 +31,19 @@ try:
         validate(intermediate, schema)
 
     native_code = backend.translate_to_native_code(intermediate)
+
+    with open(args.output, 'w') as file:
+        file.write(native_code)
+
 except ValidationError:
     print('Output of frontend plugin "' + frontend.identifier + '" does not match JSON schema.')
     exit()
-
-with open(args.output, 'w') as file:
-    file.write(native_code)
-
-
+except NotImplementedError:
+    print('Selected frontend/backend is not available')
+    exit()
+except IOError as ioerr:
+    print('Error occurred while opening the file: ')
+    traceback.format_exception_only(type(err), err)
+except Exception as err:
+    print('An error occurred: ')
+    traceback.format_exception_only(type(err), err)
