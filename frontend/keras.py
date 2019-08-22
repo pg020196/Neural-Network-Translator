@@ -15,14 +15,16 @@ class Keras(Plugin):
         model = load_model(input)
         model_json = json.loads(model.to_json())
 
-        weights = model.get_weights()
-
         count=0
         last_batch_input_shape=None
         last_units=0
 
         for layer in model_json['config']['layers']:
-            layer['weights'] = weights[count].tolist()
+            weights = model.layers[count].get_weights()[0]
+            biases = model.layers[count].get_weights()[1]
+            layer['kernel_values'] = weights.tolist()
+            layer['bias_values'] = biases.tolist()
+
             if (last_batch_input_shape!=None):
                 new_batch_input_shape = last_batch_input_shape
                 new_batch_input_shape[1]= last_units

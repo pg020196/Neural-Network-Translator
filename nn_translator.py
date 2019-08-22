@@ -37,13 +37,11 @@ try:
 
 except ValidationError:
     print('Output of frontend plugin "' + frontend.identifier + '" does not match JSON schema.')
-    exit()
 except NotImplementedError:
     print('Selected frontend/backend is not available')
-    exit()
 except IOError as ioerr:
     print('Error occurred while opening the file: ')
-    traceback.format_exception_only(type(err), err)
+    traceback.format_exception_only(type(ioerr), ioerr)
 except Exception as err:
     print('An error occurred: ')
     traceback.format_exception_only(type(err), err)
