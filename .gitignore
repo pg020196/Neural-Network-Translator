@@ -106,3 +106,7 @@ venv.bak/
 # Neural Network
 *.h5
 *.hdf5
+
+#JSON- & txt-Files
+*.json
+*.txt
