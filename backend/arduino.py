@@ -1,7 +1,7 @@
 from plugin_collection import Plugin
 import json
 
-class Keras(Plugin):
+class Arduino(Plugin):
 
     def __init__(self):
         super().__init__()
