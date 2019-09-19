@@ -31,4 +31,7 @@ class Keras(FrontendPlugin):
             last_units = layer['config']['units']
             last_batch_input_shape = layer['config']['batch_input_shape']
 
+        model_json.pop('keras_version', None)
+        model_json.pop('backend', None)
+
         return model_json

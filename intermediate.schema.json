@@ -8,6 +8,7 @@
         "class_name",
         "config"
     ],
+    "additionalProperties": false,
     "properties": {
         "class_name": {
             "$id": "#/properties/class_name",
