@@ -1,12 +1,10 @@
-from plugin_collection import Plugin
+from plugin_collection import BackendPlugin
 import json
 
-class Arduino(Plugin):
+class Arduino(BackendPlugin):
 
     def __init__(self):
-        super().__init__()
-        self.description = 'Arduino Backend Plugin'
-        self.identifier = 'arduino'
+        super().__init__('arduino','Arduino Backend Plugin', None)
 
     def translate_to_native_code(self, input):
         #! TODO translate input to native code

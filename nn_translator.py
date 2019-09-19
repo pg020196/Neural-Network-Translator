@@ -11,11 +11,13 @@ def get_available_plugins(plugins):
     return av_plugins[:-2]
 
 frontend_plugins = PluginCollection('frontend')
+conversion_plugins = PluginCollection('conversion')
 backend_plugins = PluginCollection('backend')
 
 parser = argparse.ArgumentParser(description='Translates high-level neural network model to native code for specified backend')
 parser.add_argument('-f', '--frontend', type=str, required=True, help='Frontend type of the input file, available at the momement: '+ get_available_plugins(frontend_plugins.plugins))
 parser.add_argument('-b', '--backend', type=str, required=True, help='Backend type to translate into, available at the momement: '+ get_available_plugins(backend_plugins.plugins))
+parser.add_argument('-c', '--conversions', nargs='+', help='Conversions to be performed on data, available at the momement: '+ get_available_plugins(conversion_plugins.plugins))
 parser.add_argument('-i', '--input', type=str, required=True, help='Input file containing the neural network model')
 parser.add_argument('-o', '--output', type=str, required=True, help='Output file to write to')
 args = parser.parse_args()
@@ -29,6 +31,16 @@ try:
     with open('intermediate.schema.json') as json_file:
         schema = json.load(json_file)
         validate(intermediate, schema)
+
+    if (args.conversions is not None):
+        for conversion in args.conversions:
+            conv_plugin = conversion_plugins.get_plugin(conversion)
+            intermediate = conv_plugin.process(intermediate)
+
+    if (backend.prerequisites is not None):
+        for prerequisite in backend.prerequisites:
+            conv_plugin = conversion_plugins.get_plugin(prerequisite)
+            intermediate = conv_plugin.process(intermediate)
 
     native_code = backend.translate_to_native_code(intermediate)
 

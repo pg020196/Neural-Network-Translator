@@ -3,16 +3,34 @@ import os
 import pkgutil
 
 class Plugin(object):
-    # Base class that each plugin must inherit from
+    def __init__(self, identifier, description):
+        self.description = description
+        self.identifier = identifier
 
-    def __init__(self):
-        self.description = 'UNKNOWN'
-        self.identifier = 'IDENTIFIER'
+class FrontendPlugin(Plugin):
+    # Base class that each frontend plugin must inherit from
+
+    def __init__(self, identifier, description):
+        super().__init__(identifier, description)
 
     def transform_to_intermediate_format(self, input):
         raise NotImplementedError
 
+class BackendPlugin(Plugin):
+    # Base class that each backend plugin must inherit from
+
+    def __init__(self, identifier, description, prerequisites):
+        super().__init__(identifier, description)
+        self.prerequisites = prerequisites
+
     def translate_to_native_code(self, input):
+        raise NotImplementedError
+
+class ConversionPlugin(Plugin):
+    def __init__(self, identifier, description):
+        super().__init__(identifier, description)
+
+    def process(self, input):
         raise NotImplementedError
 
 class PluginCollection(object):
@@ -45,5 +63,5 @@ class PluginCollection(object):
                 clsmembers = inspect.getmembers(plugin_module, inspect.isclass)
                 for (_, c) in clsmembers:
                     # Only add classes that are a sub class of Plugin, but not Plugin itself
-                    if issubclass(c, Plugin) & (c is not Plugin):
+                    if issubclass(c, Plugin) & (c is not Plugin and c is not FrontendPlugin and c is not BackendPlugin and c is not ConversionPlugin):
                         self.plugins.append(c())

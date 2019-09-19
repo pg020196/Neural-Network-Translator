@@ -1,12 +1,10 @@
-from plugin_collection import Plugin
+from plugin_collection import BackendPlugin
 import json
 
-class Json(Plugin):
+class Json(BackendPlugin):
 
     def __init__(self):
-        super().__init__()
-        self.description = 'JSON Backend Plugin'
-        self.identifier = 'json'
+        super().__init__('json', 'JSON Backend Plugin', ['float2int'])
 
     def translate_to_native_code(self, input):
         return json.dumps(input)

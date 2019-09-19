@@ -1,14 +1,12 @@
-from plugin_collection import Plugin
+from plugin_collection import FrontendPlugin
 from keras.models import Model
 from keras.models import load_model
 import json
 
-class Keras(Plugin):
+class Keras(FrontendPlugin):
 
     def __init__(self):
-        super().__init__()
-        self.description = 'Keras Frontend Plugin'
-        self.identifier = 'keras'
+        super().__init__('keras', 'Keras Frontend Plugin')
 
     def transform_to_intermediate_format(self, input):
 
