@@ -7,6 +7,7 @@ void setup() {
   int numberOfLayers = 3;
   int unitsInLayer[3] = {8, 8, 1};
   int maxUnitsInLayers = findmaxvalue();
+  int activationFunction = 3;
 
   float input[unitsInLayer[0]] =
   {
@@ -61,16 +62,18 @@ void setup() {
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
         // printMatrix(1,p,weights[currentLayer-1][i]);
-        out[n * i + j] = 0;
+
+        // initialize with bias value
+        out[n * i + j] = biases[currentLayer - 1][i];
         for (int k = 0; k < p; k++) {
           out[n * i + j] = out[n * i + j] + weights[currentLayer - 1][i][k] * input[n * k + j];
-
         }
+        out[n * i + j] = apply_activation_function(activationFunction, out[n * i + j]);
       }
     }
     Serial.print("====INPUT-BEFORE====");
     printMatrix(1, numberOfPreviousUnits, input);
-    memset(input,0,numberOfCurrentUnits);
+    memset(input, 0, numberOfCurrentUnits);
     //float input[numberOfCurrentUnits];
     for (int i = 0; i < numberOfCurrentUnits; i++)
     {
@@ -136,6 +139,27 @@ void predict()
 
 }
 
-void activation_function() {
-
+float apply_activation_function(int actFunc, float input)
+{
+  //RELU
+  if (actFunc == 0)
+  {
+    if (input > 0)
+    {
+      return input;
+    }
+    else
+    {
+      return 0;
+    }
+  }
+  //SIGMOID
+  else if (actFunc == 1)
+  {
+    return 1 / (1 + exp(input));
+  }
+  else
+  {
+    return input;
+  }
 }
