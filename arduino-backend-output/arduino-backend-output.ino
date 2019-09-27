@@ -4,11 +4,11 @@ void setup() {
 
   Serial.begin(9600); //opens serial port, sets data rate to 9600 bps
 
-  uint32_t ts1 = millis();
+  uint32_t ts1 = micros();
 
   int numberOfLayers = 3;
   int unitsInLayers[3] = {8, 8, 1};
-  int activationFunctions[2] = {3, 3};
+  int activationFunctions[2] = {1, 1};
   int startIndicesWeights[2] = {0, 64};
   int startIndicesBias[2] = {0, 8};
   bool useBias[2] = {true, true};
@@ -28,7 +28,7 @@ void setup() {
     -0.03326864913105965, 0.6471387147903442, -0.1343340277671814, 0.22081176936626434, 0.854404628276825, -1.670728087425232, -0.16672520339488983, 0.8519517779350281,
     1.2319378852844238, -0.01635606400668621, 0.28598904609680176, -0.34935298562049866, 0.049734167754650116, -1.2383219003677368, -0.7718221545219421, 0.7590272426605225,
     0.3540281057357788, -1.3175017833709717, 1.9483529329299927, -2.1833057403564453, -1.0394269227981567, -0.08081339299678802, -2.6470179557800293, -0.5022009611129761,
-    0.4447292983531952, -0.8422787189483643, 0.8797550797462463, -0.8606524467468262, -0.1518070250749588, 0.2564888298511505, -0.13789983093738556, -0.3959729075431824
+    -0.825276971, 1.235700488, 1.016688466, -1.355018616, 1.102616668, -1.69925952, -0.976960421, 0.830934107
   };
 
 
@@ -45,63 +45,60 @@ void setup() {
     int numberOfCurrentUnits = unitsInLayers[currentLayer];
 
     //Number of rows in A
-    int m = numberOfCurrentUnits;
+    int m = 1; //numberOfCurrentUnits;
     //Number of columns in A = Number of Rows in B
     int p = numberOfPreviousUnits;
     //Number of columns in B
-    int n = 1;
+    int n = numberOfCurrentUnits;
     float out[n * m];
     for (int i = 0; i < m; i++) {
       for (int j = 0; j < n; j++) {
-        // printMatrix(1,p,weights[currentLayer-1][i]);
-
-        // initialize with bias value
         out[n * i + j] = 0;
         if (useBias[currentLayer - 1])
         {
-          out[n * i + j] = biases[startIndicesBias[currentLayer - 1] + i];
+          out[n * i + j] = biases[startIndicesBias[currentLayer - 1] + j];
         }
-
         for (int k = 0; k < p; k++)
         {
-          out[n * i + j] = out[n * i + j] + weights[(p * i + k) + startIndicesWeights[currentLayer - 1]] * input[n * k + j];
+          out[n * i + j] = out[n * i + j] + input[p * i + k]*weights[(n * k + j) + startIndicesWeights[currentLayer - 1]];
         }
         out[n * i + j] = apply_activation_function(activationFunctions[currentLayer - 1], out[n * i + j]);
       }
     }
-    
+
     memset(input, 0, numberOfCurrentUnits);
-    
+
     for (int i = 0; i < numberOfCurrentUnits; i++)
     {
       input[i] = out[i];
     }
 
-    Serial.print("\n====OUTPUT LAYER "+String(currentLayer+1)+" ====");
-    printMatrix(1, numberOfCurrentUnits, input);
+    //Serial.print("\n====OUTPUT LAYER "+String(currentLayer+1)+" ====");
+    //printMatrix(1, numberOfCurrentUnits, input);
 
   }
-  uint32_t ts2 = millis();
+  uint32_t ts2 = micros();
+  printMatrix(1, 1, input);
   Serial.println("\ndone");
-  Serial.println(String(ts2 - ts1)+ " ms");
+  Serial.println(String(ts2 - ts1) + " ms");
 }
 
 void loop() {}
 
 void printMatrix(int rows, int columns, float matrix[])
 {
-    Serial.println();
-  
-    Serial.println();
-    for (int row = 0; row < rows; row++)
+  Serial.println();
+
+  Serial.println();
+  for (int row = 0; row < rows; row++)
+  {
+    for (int column = 0; column < columns; column++)
     {
-      for (int column = 0; column < columns; column++)
-      {
-        Serial.print(matrix[1 * row + column]);
-        Serial.print("   ");
-      };
-      Serial.print('\n');
+      Serial.print(matrix[1 * row + column],6);
+      Serial.print("   ");
     };
+    Serial.print('\n');
+  };
 }
 
 
