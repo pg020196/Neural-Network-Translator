@@ -110,3 +110,6 @@ venv.bak/
 #JSON- & txt-Files
 *.json
 *.txt
+
+#Others
+mp_nn/
