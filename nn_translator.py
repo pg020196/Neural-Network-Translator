@@ -42,10 +42,7 @@ try:
             conv_plugin = conversion_plugins.get_plugin(prerequisite)
             intermediate = conv_plugin.process(intermediate)
 
-    native_code = backend.translate_to_native_code(intermediate)
-
-    with open(args.output, 'w') as file:
-        file.write(native_code)
+    backend.translate_to_native_code(intermediate, args.output)
 
 except ValidationError:
     print('Output of frontend plugin "' + frontend.identifier + '" does not match JSON schema.')
@@ -53,7 +50,7 @@ except NotImplementedError:
     print('Selected frontend/backend is not available')
 except IOError as ioerr:
     print('Error occurred while opening the file: ')
-    traceback.format_exception_only(type(ioerr), ioerr)
+    print(traceback.format_exception_only(type(ioerr), ioerr))
 except Exception as err:
     print('An error occurred: ')
-    traceback.format_exception_only(type(err), err)
+    print(traceback.format_exception_only(type(err), err))
