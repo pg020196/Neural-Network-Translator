@@ -56,21 +56,22 @@ The following software components and dependencies are needed:
 - [ ] PyTorch
 - [ ] Apache mxnet
 
-## 2.2 Activation Functions
+## 2.2 Supported Activation Functions
 
-- [ ] **ReLu**
-- [ ] Tanh
-- [ ] Sigmoid
-- [ ] Softmax
+- [x] Linear (0)
+- [x] Sigmoid (1)
+- [x] ReLu (2)
+- [x] Tanh (3) [see Sprint03 branch]
+- [ ] Softmax (4) [implementation postponed]
 
 ## 2.3. Neural Network Structures
 
 - [ ] **(Deep) Feed Forward**
 - [ ] Recurrent
 
-## 2.4. Layers
+## 2.4. Supported Layers
 
-- [ ] **Dense**
+- [x] Dense
 - [ ] Convolutional
 
 # 3 Working with Git
