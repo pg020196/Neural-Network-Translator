@@ -1,14 +1,6 @@
-extern "C"{
+extern "C" {
 #include "backend-config.h"
 };
-
-//http://www.utopiamechanicus.com/article/arduino-setup-arrays/
-
-
-void predict()
-{
-
-}
 
 void setup() {
 
@@ -16,9 +8,35 @@ void setup() {
      Opens the serial port and sets the data rate to 9600 bps
   */
   Serial.begin(9600);
+  Serial.println("Enter input values:");
+}
 
-  float input[unitsInLayers[0]] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8};
+void loop()
+{  
+    if (Serial.available() > 0)
+    {
+      String inputString;
+      inputString = Serial.readString();
+      
+      Serial.println("Input is: "+inputString);
+ 
+      float input[unitsInLayers[0]] = {0};
+      char *tmp;
+      int i = 0;
+      tmp = strtok(&inputString[0], ",");
+      while (tmp) {
+        input[i++] = atof(tmp);
+        tmp = strtok(NULL, ",");
+      }
+  
+      predict(input);
 
+      Serial.println("\nEnter input values:");
+    }
+}
+
+void predict(float input[])
+{
   /*
        Takes the starting time
   */
@@ -32,28 +50,37 @@ void setup() {
     unsigned int numberOfPreviousUnits = unitsInLayers[currentLayer - 1];
     unsigned int numberOfCurrentUnits = unitsInLayers[currentLayer];
 
-    //Number of rows in A
-    const byte m = 1; //numberOfCurrentUnits;
-    //Number of columns in A = Number of Rows in B
+    /*
+       Number of columns in A = Number of Rows in B
+    */
     unsigned int p = numberOfPreviousUnits;
-    //Number of columns in B
+
+    /*
+      Number of columns in B
+    */
     unsigned int n = numberOfCurrentUnits;
-    float out[n * m];
-    for (unsigned int i = 0; i < m; i++) {
-      for (unsigned int j = 0; j < n; j++) {
-        out[n * i + j] = 0;
-        if (useBias[currentLayer - 1])
-        {
-          out[n * i + j] = biases[startIndicesBias[currentLayer - 1] + j];
-        }
-        for (unsigned int k = 0; k < p; k++)
-        {
-          out[n * i + j] = out[n * i + j] + input[p * i + k] * weights[(n * k + j) + startIndicesWeights[currentLayer - 1]];
-        }
-        out[n * i + j] = apply_activation_function(activationFunctions[currentLayer - 1], out[n * i + j]);
+
+    /*
+       Init output values
+    */
+    float out[n] = {0};
+
+    for (unsigned int i = 0; i < n; i++) {
+      if (useBias[currentLayer - 1])
+      {
+        out[i] = biases[startIndicesBias[currentLayer - 1] + i];
       }
+      for (unsigned int j = 0; j < p; j++)
+      {
+        out[i] = out[i] + input[j] * weights[(n * j + i) + startIndicesWeights[currentLayer - 1]];
+      }
+      out[i] = apply_activation_function(activationFunctions[currentLayer - 1], out[i]);
     }
 
+    /*
+       Re-init the input array with the dimenions of the current number of units
+       and set initial value to 0
+    */
     memset(input, 0, numberOfCurrentUnits);
 
     for (unsigned int i = 0; i < numberOfCurrentUnits; i++)
@@ -61,35 +88,11 @@ void setup() {
       input[i] = out[i];
     }
   }
-  
+
   uint32_t endTime = micros();
   Serial.println(input[0], 8);
-  Serial.println("\ndone");
+  Serial.println("done");
   Serial.println(String(endTime - startTime) + " microseconds");
-}
-
-void loop()
-{
-  //  if (Serial.available() > 0)
-  //  {
-  //    Serial.println("Enter input values:");
-  //    String a;
-  //    a = Serial.readString();
-  //    float ArrayKey[unitsInLayers[0]] = {0};
-  //    char *tmp;
-  //    int i = 0;
-  //    tmp = strtok(&a[0], ",");
-  //    while (tmp) {
-  //      ArrayKey[i++] = atof(tmp);
-  //      tmp = strtok(NULL, ",");
-  //    }
-  //
-  //    //  memset(input, 0, unitsInLayers[0];
-  //    for (int j = 0; j < unitsInLayers[0]; j++) {
-  //      Serial.println(ArrayKey[j], 8);
-  //      //      input[j] = ArrayKey[j];
-  //    }
-  //  }
 }
 
 /*
