@@ -61,8 +61,8 @@ The following software components and dependencies are needed:
 - [x] Linear (0)
 - [x] Sigmoid (1)
 - [x] ReLu (2)
-- [x] Tanh (3)
-- [x] Softmax (4)
+- [x] Tanh (3) [see Sprint03 branch]
+- [x] Softmax (4) [see Sprint03 branch]
 
 ## 2.3. Neural Network Structures
 
