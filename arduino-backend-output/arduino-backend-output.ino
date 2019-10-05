@@ -12,27 +12,46 @@ void setup() {
 }
 
 void loop()
-{  
-    if (Serial.available() > 0)
-    {
-      String inputString;
-      inputString = Serial.readString();
-      
-      Serial.println("Input is: "+inputString);
- 
-      float input[unitsInLayers[0]] = {0};
-      char *tmp;
-      int i = 0;
-      tmp = strtok(&inputString[0], ",");
-      while (tmp) {
-        input[i++] = atof(tmp);
-        tmp = strtok(NULL, ",");
-      }
-  
-      predict(input);
+{
+  /*
+     Get the number of bytes (characters) available for reading from the serial port. This is data that’s already arrived and stored in the serial receive buffer (which holds 64 bytes).
+  */
+  if (Serial.available() > 0)
+  {
+    String inputString;
+    /*
+       Reads characters from the serial buffer into a String.
+    */
+    inputString = Serial.readString();
 
-      Serial.println("\nEnter input values:");
+    Serial.println("Input is: " + inputString);
+
+    /*
+       Inits the input float array to zeros
+       The length of the array is determined through the number of units in layer 0 (input layer)
+    */
+    float input[unitsInLayers[0]] = {0};
+    char *tmp;
+    int i = 0;
+    /*
+       Tokenize the string on "," charakter
+    */
+    tmp = strtok(&inputString[0], ",");
+    while (tmp) {
+      /*
+         convert a string token to a float
+      */
+      input[i++] = atof(tmp);
+      tmp = strtok(NULL, ",");
     }
+
+    /*
+      Call the predict function with the input array
+    */
+    predict(input);
+
+    Serial.println("\nEnter input values:");
+  }
 }
 
 void predict(float input[])
