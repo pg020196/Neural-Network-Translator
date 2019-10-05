@@ -7,7 +7,7 @@ from jsonschema import validate,ValidationError
 def get_available_plugins(plugins):
     av_plugins=''
     for plugin in plugins:
-        av_plugins += plugin.identifier + ", "
+        av_plugins += plugin.identifier + ', '
     return av_plugins[:-2]
 
 frontend_plugins = PluginCollection('frontend')
@@ -26,6 +26,7 @@ try:
     frontend = frontend_plugins.get_plugin(args.frontend.lower())
     backend = backend_plugins.get_plugin(args.backend.lower())
 
+    print('Converting inputfile "' + args.input + '" to intermediate format with plugin "' + frontend.identifier + '"')
     intermediate = frontend.transform_to_intermediate_format(args.input)
 
     with open('intermediate.schema.json') as json_file:
@@ -35,14 +36,19 @@ try:
     if (args.conversions is not None):
         for conversion in args.conversions:
             conv_plugin = conversion_plugins.get_plugin(conversion)
+            print('Performing conversion: "' + conv_plugin.description + '"')
             intermediate = conv_plugin.process(intermediate)
 
     if (backend.prerequisites is not None):
         for prerequisite in backend.prerequisites:
             conv_plugin = conversion_plugins.get_plugin(prerequisite)
+            print('Performing required conversion by backend plugin "' + backend.identifier + '": "' + conv_plugin.description + '"')
             intermediate = conv_plugin.process(intermediate)
 
+    print('Translating intermediate format to native code with plugin "' + backend.identifier + '"')
     backend.translate_to_native_code(intermediate, args.output)
+
+    print('Translation of input-file "' + args.input + '" to output-file "' + args.output + '" successfully completed')
 
 except ValidationError:
     print('Output of frontend plugin "' + frontend.identifier + '" does not match JSON schema.')
