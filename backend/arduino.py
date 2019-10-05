@@ -1,10 +1,12 @@
 from plugin_collection import BackendPlugin
 import json
+import os
 from itertools import chain
 
 class Arduino(BackendPlugin):
 
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
+    layer_types = {'dense':0}
 
     def __init__(self):
         super().__init__('arduino','Arduino Backend Plugin', None)
@@ -38,6 +40,12 @@ class Arduino(BackendPlugin):
                 string = string + str(layer['config']['batch_input_shape'][1]) + ','
                 first_layer=False
             string = string + str(layer['config']['units']) + ','
+        return string[:-1] + '}'
+
+    def build_layer_types_string(self, input):
+        string = '{'
+        for layer in input['config']['layers']:
+            string = string + str(self.layer_types[layer['class_name'].lower()]) + ','
         return string[:-1] + '}'
 
     def get_number_of_layers(self, input):
@@ -85,11 +93,7 @@ class Arduino(BackendPlugin):
         return string[:-1] + '}'
 
     def translate_to_native_code(self, input, outputfile):
-        file = self.read_marker_file('./backend/arduino_marker_file.ino')
-
         markers = dict()
-
-        markers['###input_data###'] = '{6, 148, 72, 35, 0, 33.6, 0.627, 50}'
 
         markers['###numberLayers###'] = self.get_number_of_layers(input)
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
@@ -104,8 +108,15 @@ class Arduino(BackendPlugin):
         markers['###bias###'] = self.convert_array_to_string(bias_array)
         markers['###dimBias###'] = len(bias_array)
         markers['###indicesBias###'] = self.build_indices_bias_string(input)
+        markers['###layerTypes###'] = self.build_layer_types_string(input)
 
-        native_code = self.replace_markers(file, markers)
+        header_file = self.replace_markers(self.read_marker_file('./backend/arduino_config_marker.h'), markers)
 
-        with open(outputfile, 'w') as file:
-            file.write(native_code)
+        header_filename = os.path.splitext(outputfile)[0] + '.h'
+        with open(header_filename, 'w') as file:
+            file.write(header_file)
+
+        ino_file = self.replace_markers(self.read_marker_file('./backend/arduino_marker.ino'), {'###headerfile###': header_filename})
+
+        with open(os.path.splitext(outputfile)[0] + '.ino', 'w') as file:
+            file.write(ino_file)
