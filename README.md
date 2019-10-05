@@ -9,7 +9,7 @@ The following software components and dependencies are needed:
 - GIT: https://git-scm.com/
 - Anaconda Python 2019.07: https://www.anaconda.com/download/
 
-## 1.2 Installationprocess
+## 1.2 Installation process
 
 ### 1.2.1 Install Anaconda Python 2019.07
 
@@ -19,7 +19,7 @@ The following software components and dependencies are needed:
 - Open Git Bash:
 - `git clone https://github.com/pg020196/Neural-Network-Translator.git`
 
-### 1.2.3 Set up python environment with requirements.txt
+### 1.2.3 a) Set up python environment with requirements.txt
 
 - Start Anaconda Prompt and execute the following commands:
 
@@ -37,7 +37,7 @@ The following software components and dependencies are needed:
 
 - Install NNT-Requirements: `pip install -r nnt_requirements.txt`
 
-### 1.2.4 Set up python environment with environment.yml
+### 1.2.3 b) Set up python environment with environment.yml
 
 - Create Anaconda environment from environment.yml
   `conda env create -f environment.yml`
@@ -46,9 +46,9 @@ The following software components and dependencies are needed:
 
 # 2 Components
 
-## 2.1 Frameworks
+## 2.1 Supported Frameworks
 
-- [ ] **Keras**
+- [x] **Keras**
 - [ ] TensorFlow
 - [ ] Theano
 - [ ] Caffe
@@ -56,22 +56,27 @@ The following software components and dependencies are needed:
 - [ ] PyTorch
 - [ ] Apache mxnet
 
-## 2.2 Activation Functions
+## 2.2 Supported Activation Functions
 
-- [ ] **ReLu**
-- [ ] Tanh
-- [ ] Sigmoid
-- [ ] Softmax
+- [x] Linear (0)
+- [x] Sigmoid (1)
+- [x] ReLu (2)
+- [x] Tanh (3) [see Sprint03 branch]
+- [ ] Softmax (4) [implementation postponed]
 
 ## 2.3. Neural Network Structures
 
 - [ ] **(Deep) Feed Forward**
 - [ ] Recurrent
 
-## 2.4. Layers
+## 2.4. Supported Layers
 
-- [ ] **Dense**
+- [x] Dense
+- [ ] Activation
+- [x] (Dropout - seems like it only happens during training)
 - [ ] Convolutional
+- [ ] Pooling
+- [ ] Flatten
 
 # 3 Working with Git
 
@@ -102,7 +107,7 @@ Checkout the branch in which you want to merge (`TARGETBRANCH` (Mostly master- o
 
 `git checkout master`
 
-Pull desired branch from the online repositroy. This type of merge keeps the commit history:
+Pull desired branch from the online repository. This type of merge keeps the commit history:
 
 `git pull https://github.com/pg020196/Neural-Network-Translator.git BRANCH_NAME`
 
