@@ -92,8 +92,16 @@ void predict(float input[])
     float out[n] = {0};
 
     /*
+       Init the denominator for the softmax activation function.
+       If the softmax activation function is used, the denominator can be calucalted during the matrix calculation and thus
+       we do not have to loop through the array twice.
+    */
+    float softmaxDenominator = 0;
+
+    /*
        Loop through the number of units in the current layer.
     */
+
     for (unsigned int i = 0; i < n; i++) {
       /*
          If bias is activated for the current layer, replace the initial value with the bias value.
@@ -109,6 +117,14 @@ void predict(float input[])
       {
         out[i] = out[i] + input[j] * weights[(n * j + i) + startIndicesWeights[currentLayer - 1]];
       }
+
+      /*
+        Calculates the softmax denominator. This calculation is only required when using the softmax activation function.
+        Therefore, we check if the current layer uses the softmax activation function to improve the runtime if another activation function is used.
+      */
+      if (activationFunctions[currentLayer - 1] == 4) {
+        softmaxDenominator = softmaxDenominator + exp(out[i]);
+      }
       /*
         Apply activation function directly to element to prevent having to loop through the array a second time.
         If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value.
@@ -123,7 +139,7 @@ void predict(float input[])
        Apply the softmax activation function if necessary
     */
     if (activationFunctions[currentLayer - 1] == 4) {
-      applyActivationFunctionSoftmax(out, n);
+      applyActivationFunctionSoftmax(out, n, softmaxDenominator);
     }
 
 
@@ -182,18 +198,12 @@ float applyActivationFunction(int actFunc, float value)
 }
 
 /*
-  IMPLEMENTATION NOT VERIFIED
-
   Softmax requires a special implementation since the softmax function is applied on the complete vector.
 
   To verify the implementation see:
   https://en.wikipedia.org/wiki/Activation_function
 */
-void applyActivationFunctionSoftmax(float values[], unsigned int inputLength) {
-  float denominator = 0;
-  for (int j = 0; j < inputLength; j++) {
-    denominator = denominator + exp(values[j]);
-  }
+void applyActivationFunctionSoftmax(float values[], unsigned int inputLength, float denominator) {
   for (int i = 0; i < inputLength; i++) {
     float divisor = exp(values[i]);
     values[i] = divisor / denominator;
