@@ -7,9 +7,11 @@ from keras.models import Sequential
 from keras.layers import Dense
 import time
 
+#? Loading model and specifying input data
 model = load_model('diabetes_model.h5')
 data = np.array([[6,148,72,35,0,33.6,0.627,50]])
 
+#? Alternative way of loading the model and building a nn for each layer in order to debug through the nn
 # model = Sequential()
 # model.add(Dense(8, input_dim=8, activation='sigmoid'))
 # model.add(Dense(1, activation='sigmoid'))
@@ -34,11 +36,12 @@ data = np.array([[6,148,72,35,0,33.6,0.627,50]])
 # ouptut_dense_2 = model_dense_2.predict(output_dense_1)
 # print(ouptut_dense_2)
 
+#? Predict and measure the processing time
 before = int(round(time.time_ns() / 1000))
 output = model.predict(data)
 after = int(round(time.time_ns() / 1000))
 
-print("process time " + str(after - before))
+print("process time in microseconds: " + str(after - before))
 print (output)
 
 
