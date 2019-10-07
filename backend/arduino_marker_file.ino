@@ -55,7 +55,7 @@ void setup() {
   uint32_t ts2 = micros();
   printMatrix(1, 1, input);
   Serial.println("\ndone");
-  Serial.println(String(ts2 - ts1) + " ms");
+  Serial.println(String(ts2 - ts1) + " microseconds");
 }
 
 void loop() {}
