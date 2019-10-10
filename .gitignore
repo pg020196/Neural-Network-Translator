@@ -107,9 +107,11 @@ venv.bak/
 *.h5
 *.hdf5
 
-#JSON- & txt-Files
+# JSON- & txt-Files
 *.json
 *.txt
 
-#Others
+# Others
 mp_nn/
+_out/
+
