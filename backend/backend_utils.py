@@ -39,57 +39,57 @@ def read_marker_file(filename):
         return file.read()
 
 def build_activation_function_string(input, activation_functions):
-        """Returns a string containing an array of indices representing the activation function for each layer"""
-        string = '{'
-        for layer in input['config']['layers']:
-            #? Dictionary activation_functions contains the mapping to the indices
-            string = string + str(activation_functions[layer['config']['activation'].lower()]) + ','
-        return string[:-1] + '}'
+    """Returns a string containing an array of indices representing the activation function for each layer"""
+    array = []
+    for layer in input['config']['layers']:
+        #? Dictionary activation_functions contains the mapping to the indices
+        array.append(str(activation_functions[layer['config']['activation'].lower()]))
+    return convert_array_to_string(array)
 
 def build_use_bias_string(input):
     """Returns a string containing an array of bools indicating the usage of biases"""
-    string = '{'
+    array = []
     for layer in input['config']['layers']:
-        string = string + str(layer['config']['use_bias']).lower() + ','
-    return string[:-1] + '}'
+        array.append(str(layer['config']['use_bias']).lower())
+    return convert_array_to_string(array)
 
 def build_units_in_layers_string(input):
     """Returns a string containing an array of number of units for each layer"""
     first_layer = True
-    string = '{'
+    array = []
     for layer in input['config']['layers']:
         #? First layer has to be treated different because of input shape
         if (first_layer):
-            string = string + str(layer['config']['batch_input_shape'][1]) + ','
+            array.append(str(layer['config']['batch_input_shape'][1]))
             first_layer=False
-        string = string + str(layer['config']['units']) + ','
-    return string[:-1] + '}'
+        array.append(str(layer['config']['units']))
+    return convert_array_to_string(array)
 
 def build_layer_types_string(input, layer_types):
     """Returns a string containing an array of indices representing the layer type for each layer"""
-    string = '{'
+    array = []
     for layer in input['config']['layers']:
         #? Dictionary layer_types contains the mapping to the indices
-        string = string + str(layer_types[layer['class_name'].lower()]) + ','
-    return string[:-1] + '}'
+       array.append(str(layer_types[layer['class_name'].lower()]))
+    return convert_array_to_string(array)
 
 def build_indices_weights_string(input):
     """Returns a string containing an array of indices indicating the start position of weights for each layer"""
     last_layer_values = 0
-    string = '{'
+    array=[]
     for layer in input['config']['layers']:
-        string = string + str(last_layer_values) + ','
+        array.append(str(last_layer_values))
         last_layer_values = last_layer_values + int(layer['config']['units']) * int(layer['config']['batch_input_shape'][1])
-    return string[:-1] + '}'
+    return convert_array_to_string(array)
 
 def build_indices_bias_string(input):
     """Returns a string containing an array of indices indicating the start position of biases for each layer"""
     last_layer_values = 0
-    string = '{'
+    array=[]
     for layer in input['config']['layers']:
-        string = string + str(last_layer_values) + ','
+        array.append(str(last_layer_values))
         last_layer_values = last_layer_values + layer['config']['units']
-    return string[:-1] + '}'
+    return convert_array_to_string(array)
 
 def convert_array_to_string(array):
     """Returns a string containing the given array"""
