@@ -1,15 +1,6 @@
 from plugin_collection import FrontendPlugin
 import json
 
-#? redirecting stderr to /dev/null to hide information- and warning-messages from keras framework
-#? afterwards setting stderr back to initial value
-import sys, os
-stderr = sys.stderr
-sys.stderr = open(os.devnull, 'w')
-from keras.models import Model
-from keras.models import load_model
-sys.stderr = stderr
-
 class Keras(FrontendPlugin):
     """Keras frontend plugin transforms given Keras h5-file to the intermediate format"""
 
@@ -18,14 +9,12 @@ class Keras(FrontendPlugin):
 
     def transform_to_intermediate_format(self, input):
         """Returns the intermediate format represenation of the given h5-file"""
-        #? redirecting stderr to /dev/null to hide information- and warning-messages from keras framework
-        #? afterwards setting stderr back to initial value
-        stderr = sys.stderr
-        sys.stderr = open(os.devnull, 'w')
+        from tensorflow.keras.models import Model
+        from tensorflow.keras.models import load_model
+
         #? Loading the given model and transforming it to a json object
         model = load_model(input)
         model_json = json.loads(model.to_json())
-        sys.stderr = stderr
 
         count=0
         last_batch_input_shape=None
