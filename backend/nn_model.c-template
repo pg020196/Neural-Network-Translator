@@ -1,0 +1,81 @@
+﻿#include <stdint.h>
+#include <string.h>
+#include <math.h>
+#include "nn_model.h"
+
+float apply_activation_function(uint8_t act_func, float value) {
+  if (act_func == 1) {
+    return (1.0 / (1.0 + exp(-value)));
+  } else if (act_func == 2) {
+    if (value <= 0)
+      return 0;
+    else
+      return value;
+  } else if (act_func == 3) {
+    float expInput = exp(value);
+    float negExpInput = exp(-value);
+    return (expInput - negExpInput) / (expInput + negExpInput);
+  }
+  return value;
+}
+
+void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length) {
+  uint16_t i;
+  for (i = 0; i < input_length; i++) {
+    float divisor = exp(values[i]);
+    values[i] = divisor / denominator;
+  }
+}
+
+float predict(float input[]) {
+  float result;
+  uint16_t current_layer_index;
+  for (current_layer_index=1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++) {
+    uint16_t current_unit_index;
+    uint16_t NUMBER_OF_PREVIOUS_UNITS = UNITS_IN_LAYER[current_layer_index - 1];
+    uint16_t NUMBER_OF_CURRENT_UNITS = UNITS_IN_LAYER[current_layer_index];
+    float out[NUMBER_OF_CURRENT_UNITS];
+    memset(out, 0, NUMBER_OF_CURRENT_UNITS * sizeof(float));
+    float softmax_denominator = 0;
+
+    for (current_unit_index=0; current_unit_index < NUMBER_OF_CURRENT_UNITS; current_unit_index++) {
+      uint16_t previous_unit_index;
+
+      if (BIAS_ENABLED[current_layer_index - 1] == 1) {
+        out[current_unit_index] = BIASES[BIASES_START_INDEX[current_layer_index - 1] + current_unit_index];
+      }
+
+      for (previous_unit_index=0; previous_unit_index < NUMBER_OF_PREVIOUS_UNITS; previous_unit_index++) {
+        out[current_unit_index] =
+            out[current_unit_index] +
+            input[previous_unit_index] *
+                WEIGHTS[(NUMBER_OF_CURRENT_UNITS * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
+      }
+
+      if(ACTIVATION_FUNCTION[current_layer_index -1] == 4)
+      {
+        softmax_denominator = softmax_denominator + exp(out[current_unit_index]);
+      }
+
+      if (ACTIVATION_FUNCTION[current_layer_index - 1] != 0 &&
+          ACTIVATION_FUNCTION[current_layer_index - 1] != 4) {
+        out[current_unit_index] = apply_activation_function(ACTIVATION_FUNCTION[current_layer_index - 1],
+                                         out[current_unit_index]);
+      }
+    }
+
+    if (ACTIVATION_FUNCTION[current_layer_index - 1] == 4) {
+      apply_activation_function_softmax(out, softmax_denominator, NUMBER_OF_CURRENT_UNITS);
+    }
+
+    memset(input, 0, NUMBER_OF_CURRENT_UNITS);
+
+    for (current_unit_index=0; current_unit_index < NUMBER_OF_CURRENT_UNITS; current_unit_index++) {
+      input[current_unit_index] = out[current_unit_index];
+    }
+  }
+
+  return input[0];
+}
+
+void main(){}

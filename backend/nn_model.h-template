@@ -1,0 +1,34 @@
+const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
+
+/* defines the number of layers between 0 to 255 */
+const uint16_t UNITS_IN_LAYER[###numberLayers###] = ###unitsInLayers###;
+
+/* Defines the layer types */
+const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
+
+/*
+   Defines the activation functions for each layer
+   0: Linera
+   1: Sigmoid
+   2: Relu
+   3: TanH
+   4: Softmax
+*/
+const uint8_t ACTIVATION_FUNCTION[###dimNumberLayers###] = ###activationFunctions###;
+
+/*  Defines the index in which the first weight-element of the layer is present */
+const uint16_t WEIGHTS_START_INDEX[###dimNumberLayers###] = ###indicesWeights###;
+
+/* Defines the index in which the first weight-element of the layer is present */
+const uint16_t BIASES_START_INDEX[###dimNumberLayers###] = ###indicesBias###;
+
+/* Defines whether bias values should be applied to the layer */
+const uint8_t BIAS_ENABLED[###dimNumberLayers###] = ###useBias###;
+
+/* Holds the weights for each layer as flatted one-dimensional array */
+const float WEIGHTS[###dimWeights###] = ###weights###;
+
+/* Holds the biases for each layer as flatted one-dimensional array */
+const float BIASES[###dimBias###] = ###bias###;
+
+float predict(float input[]);
