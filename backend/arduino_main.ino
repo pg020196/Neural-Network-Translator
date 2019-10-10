@@ -52,12 +52,12 @@ void loop()
     /*
       Call the predict function with the input array.
     */
-    //uint32_t startTime = micros();
+    uint32_t startTime = micros();
     float result = predict(input);
-    //uint32_t endTime = micros();
+    uint32_t endTime = micros();
 
-    Serial.println(result);
-    //    Serial.println(String(endTime-startTime)+" microseconds");
+    Serial.println(result,8);
+    Serial.println(String(endTime-startTime)+" microseconds");
     Serial.println("\nEnter input values:");
   }
 }
