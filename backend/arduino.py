@@ -1,5 +1,6 @@
 from plugin_collection import BackendPlugin
 from backend import backend_utils
+from shutil import copyfile
 import os
 
 class Arduino(BackendPlugin):
@@ -33,14 +34,20 @@ class Arduino(BackendPlugin):
         markers['###layerTypes###'] = backend_utils.build_layer_types_string(input, self.layer_types)
 
         #? Reading the header file with markers and replacing them with the markers array
-        header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/arduino_config_marker.h'), markers)
+        header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/nn_model.h-template'), markers)
 
-        header_filename = os.path.splitext(outputfile)[0] + '.h'
+        out_directory_path = '_out/' + os.path.splitext(outputfile)[0]
+        if not os.path.exists(out_directory_path):
+            os.makedirs(out_directory_path)
+
+        header_filename = out_directory_path + '/nn_model.h'
         with open(header_filename, 'w') as file:
             file.write(header_file)
 
-        #? Reading the ino file with markers and inserting the correct header filename for the import
-        ino_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/arduino_marker.ino'), {'###headerfile###': header_filename})
+        c_file_source_path = './backend/nn_model.c-template'
+        c_file_destination_path = out_directory_path + '/nn_model.c'
+        ino_file_source_path = './backend/arduino_main.ino'
+        ino_file_destination_path = out_directory_path + '/' + os.path.splitext(outputfile)[0] + '.ino'
 
-        with open(os.path.splitext(outputfile)[0] + '.ino', 'w') as file:
-            file.write(ino_file)
+        copyfile(c_file_source_path, c_file_destination_path)
+        copyfile(ino_file_source_path, ino_file_destination_path)
