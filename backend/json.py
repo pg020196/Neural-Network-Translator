@@ -7,6 +7,7 @@ class Json(BackendPlugin):
     def __init__(self):
         super().__init__('json', 'JSON Backend Plugin', ['float2int'])
 
-    def translate_to_native_code(self, input):
+    def translate_to_native_code(self, input, outputfile):
         """Returns the given json input as string representation"""
-        return json.dumps(input)
+        with open(outputfile, 'w') as file:
+            file.write(json.dumps(input))
