@@ -65,7 +65,7 @@ class PluginCollection(object):
 
         imported_package = __import__(package, fromlist=[''])
 
-        #? Recursivly searching for classes inheriting from the specified 
+        #? Recursivly searching for classes inheriting from the specified
         for _, pluginname, ispkg in pkgutil.iter_modules(imported_package.__path__, imported_package.__name__ + '.'):
             if not ispkg:
                 plugin_module = __import__(pluginname, fromlist=[''])
