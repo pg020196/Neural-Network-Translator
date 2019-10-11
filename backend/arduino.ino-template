@@ -46,7 +46,7 @@ void loop()
 
     for(int i = 0; i < UNITS_IN_LAYER[NUMBER_OF_LAYERS-1]; i++)
     {
-      Serial.println(*(result+i));
+      Serial.println(*(result+i),8);
     }
     
     Serial.println(String(endTime-startTime)+" microseconds");

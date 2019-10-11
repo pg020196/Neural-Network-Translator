@@ -37,84 +37,91 @@ void apply_activation_function_softmax(float values[], float denominator, uint16
   }
 }
 
+float * dense(float * input, uint16_t current_layer_index)
+{
+  uint16_t current_unit_index;
+  uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
+  uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
+
+  float current_layer_results[number_of_current_units];
+
+  /* Allocate memory and set all initial values to 0.
+  The array cannot be initialized with 0 during its declaration, since some
+  compilers require the length of the array to be a constant number. */
+  memset(current_layer_results, 0, number_of_current_units*sizeof(float));
+
+  /* Initialize a variable to store the denominator for the softmax activation function.
+  If the softmax activation function is used, the denominator can be calculated easily
+  during the following matrix calculation and will lead to a performance increase, since
+  the calculation of the softmax denominator would otherwise  require a loop through the
+  whole array later on. */
+  float softmax_denominator = 0;
+
+  /* Loops through the number of units in the current layer. */
+  for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
+    
+    uint16_t previous_unit_index;
+
+    /* If the bias is activated for the current layer, the initial value
+    of the current_layer_results array can be replaced with the bias value. */
+    if (BIAS_ENABLED[current_layer_index - 1] == 1) {
+      current_layer_results[current_unit_index] = BIASES[BIASES_START_INDEX[current_layer_index - 1] + current_unit_index];
+    }
+
+    /* Loops through the number of previous units to calculate the dot product. */
+    for (previous_unit_index=0; previous_unit_index < number_of_previous_units; previous_unit_index++) {
+      current_layer_results[current_unit_index] =
+          current_layer_results[current_unit_index] +
+          *(input+previous_unit_index) *
+              WEIGHTS[(number_of_current_units * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
+    }
+
+    /* Calculates the softmax denominator. This calculation is only required when using the softmax activation function.
+    Therefore, we check if the current layer uses the softmax activation function and only perform the calculation when required.
+    This improves the runtime if another activation function is used. */
+    if(ACTIVATION_FUNCTION[current_layer_index -1] == 4)
+    {
+      softmax_denominator = softmax_denominator + exp(current_layer_results[current_unit_index]);
+    }
+    /* Apply activation function directly to the element to prevent having to
+    loop through the array a second time.
+    If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value. */
+    else if (ACTIVATION_FUNCTION[current_layer_index-1] != 0)
+    {
+      current_layer_results[current_unit_index] = apply_activation_function(ACTIVATION_FUNCTION[current_layer_index - 1],
+                                        current_layer_results[current_unit_index]);
+    }
+  }
+
+  /* Apply the softmax activation function if necessary. */
+  if (ACTIVATION_FUNCTION[current_layer_index - 1] == 4) {
+    apply_activation_function_softmax(current_layer_results, softmax_denominator, number_of_current_units);
+  }
+
+  /* Reallocates memory for the input array with the new dimenion of the current number of units. */
+  input = malloc(number_of_current_units * sizeof(float));
+
+  /* Copies the calculated values in the input array. */
+  for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
+    *(input+current_unit_index) = current_layer_results[current_unit_index];
+  }
+
+  return input;
+}
+
 /*
 Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
 */
-float * predict(float input[]) {
-  float result;
+float * predict(float * input) {
   uint16_t current_layer_index;
 
   /* Loops through each layer of the neural network.
   The initial value is set to 1, since the layer at index 0 is the input layer
   and there is no transformation required at the input layer level. */
   for (current_layer_index=1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++) {
-    uint16_t current_unit_index;
-    uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
-    uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
-
-    float current_layer_results[number_of_current_units];
-
-    /* Allocate memory and set all initial values to 0.
-    The array cannot be initialized with 0 during its declaration, since some
-    compilers require the length of the array to be a constant number. */
-    memset(current_layer_results, 0, number_of_current_units*sizeof(float));
-
-    /* Initialize a variable to store the denominator for the softmax activation function.
-    If the softmax activation function is used, the denominator can be calculated easily
-    during the following matrix calculation and will lead to a performance increase, since
-    the calculation of the softmax denominator would otherwise  require a loop through the
-    whole array later on. */
-    float softmax_denominator = 0;
-
-    /* Loops through the number of units in the current layer. */
-    for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
-      uint16_t previous_unit_index;
-
-      /* If the bias is activated for the current layer, the initial value
-      of the current_layer_results array can be replaced with the bias value. */
-      if (BIAS_ENABLED[current_layer_index - 1] == 1) {
-        current_layer_results[current_unit_index] = BIASES[BIASES_START_INDEX[current_layer_index - 1] + current_unit_index];
-      }
-
-      /* Loops through the number of previous units to calculate the dot product. */
-      for (previous_unit_index=0; previous_unit_index < number_of_previous_units; previous_unit_index++) {
-        current_layer_results[current_unit_index] =
-            current_layer_results[current_unit_index] +
-            input[previous_unit_index] *
-                WEIGHTS[(number_of_current_units * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
-      }
-
-      /* Calculates the softmax denominator. This calculation is only required when using the softmax activation function.
-      Therefore, we check if the current layer uses the softmax activation function and only perform the calculation when required.
-      This improves the runtime if another activation function is used. */
-      if(ACTIVATION_FUNCTION[current_layer_index -1] == 4)
-      {
-        softmax_denominator = softmax_denominator + exp(current_layer_results[current_unit_index]);
-      }
-      /* Apply activation function directly to the element to prevent having to
-      loop through the array a second time.
-      If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value. */
-      else if (ACTIVATION_FUNCTION[current_layer_index-1] != 0)
-      {
-        current_layer_results[current_unit_index] = apply_activation_function(ACTIVATION_FUNCTION[current_layer_index - 1],
-                                         current_layer_results[current_unit_index]);
-      }
-    }
-
-    /* Apply the softmax activation function if necessary. */
-    if (ACTIVATION_FUNCTION[current_layer_index - 1] == 4) {
-      apply_activation_function_softmax(current_layer_results, softmax_denominator, number_of_current_units);
-    }
-
-    /* Reallocates memory for the input array with the new dimenion of the current number of units. */
-    input = malloc(number_of_current_units * sizeof(float));
-
-    /* Copies the calculated values in the input array. */
-    for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
-      input[current_unit_index] = current_layer_results[current_unit_index];
-    }
+    input = dense(input, current_layer_index);
   }
 
   return input;
