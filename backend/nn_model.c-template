@@ -109,6 +109,21 @@ float * dense(float * input, uint16_t current_layer_index)
   return input;
 }
 
+// https://www.youtube.com/watch?v=8oOgPUO-TBY
+float * avg_pool_2d(float * input, uint16_t current_layer_index)
+{
+  uint16_t input_width = 0;
+  uint16_t input_height = 0;
+  uint16_t pool_size_height = 0;
+  uint16_t pool_size_width = 0;
+  uint16_t stride_height = 0; // vertical step size
+  uint16_t stride_width = 0; // horizontal step size
+  uint16_t padding_size_top = 0; // number of rows of padding to the top
+  uint16_t padding_size_right = 0; // number of rows of padding to the right
+  uint16_t padding_size_bottom = 0; // number of rows of padding to the bottom
+  uint16_t padding_size_left = 0; // number of rows of padding to the left
+}
+
 /*
 Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
