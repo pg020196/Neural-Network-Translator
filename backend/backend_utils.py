@@ -50,7 +50,7 @@ def build_use_bias_string(input):
     """Returns a string containing an array of bools indicating the usage of biases"""
     array = []
     for layer in input['config']['layers']:
-        array.append(str(layer['config']['use_bias']).lower())
+        array.append(str(int(layer['config']['use_bias'])))
     return convert_array_to_string(array)
 
 def build_units_in_layers_string(input):
