@@ -36,6 +36,7 @@ class Arduino(BackendPlugin):
         #? Reading the header file with markers and replacing them with the markers array
         header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/nn_model.h-template'), markers)
 
+        #? Creating directory if not existing 
         out_directory_path = '_out/' + os.path.splitext(outputfile)[0]
         if not os.path.exists(out_directory_path):
             os.makedirs(out_directory_path)
@@ -46,8 +47,9 @@ class Arduino(BackendPlugin):
 
         c_file_source_path = './backend/nn_model.c-template'
         c_file_destination_path = out_directory_path + '/nn_model.c'
-        ino_file_source_path = './backend/arduino_main.ino'
+        ino_file_source_path = './backend/arduino.ino-template'
         ino_file_destination_path = out_directory_path + '/' + os.path.splitext(outputfile)[0] + '.ino'
 
+        #? Copying files in defined output directory
         copyfile(c_file_source_path, c_file_destination_path)
         copyfile(ino_file_source_path, ino_file_destination_path)
