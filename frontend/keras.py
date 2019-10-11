@@ -37,8 +37,18 @@ class Keras(FrontendPlugin):
 
             count+=1
 
-        #? Deleting the keras_version and backend information from the json object
-        model_json.pop('keras_version', None)
-        model_json.pop('backend', None)
+        #? Deleting unnecessary information from the json object
+        del model_json['keras_version']
+        del model_json['backend']
+
+        for layer in model_json['config']['layers']:
+            del layer['config']['trainable']
+            del layer['config']['kernel_initializer']
+            del layer['config']['bias_initializer']
+            del layer['config']['kernel_regularizer']
+            del layer['config']['bias_regularizer']
+            del layer['config']['activity_regularizer']
+            del layer['config']['kernel_constraint']
+            del layer['config']['bias_constraint']
 
         return model_json
