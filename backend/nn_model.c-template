@@ -32,24 +32,24 @@ float predict(float input[]) {
   uint16_t current_layer_index;
   for (current_layer_index=1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++) {
     uint16_t current_unit_index;
-    uint16_t NUMBER_OF_PREVIOUS_UNITS = UNITS_IN_LAYER[current_layer_index - 1];
-    uint16_t NUMBER_OF_CURRENT_UNITS = UNITS_IN_LAYER[current_layer_index];
-    float out[NUMBER_OF_CURRENT_UNITS];
-    memset(out, 0, NUMBER_OF_CURRENT_UNITS);
+    uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
+    uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
+    float out[number_of_current_units];
+    memset(out, 0, number_of_current_units*sizeof(float));
     float softmax_denominator = 0;
 
-    for (current_unit_index=0; current_unit_index < NUMBER_OF_CURRENT_UNITS; current_unit_index++) {
+    for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
       uint16_t previous_unit_index;
 
       if (BIAS_ENABLED[current_layer_index - 1] == 1) {
         out[current_unit_index] = BIASES[BIASES_START_INDEX[current_layer_index - 1] + current_unit_index];
       }
 
-      for (previous_unit_index=0; previous_unit_index < NUMBER_OF_PREVIOUS_UNITS; previous_unit_index++) {
+      for (previous_unit_index=0; previous_unit_index < number_of_previous_units; previous_unit_index++) {
         out[current_unit_index] =
             out[current_unit_index] +
             input[previous_unit_index] *
-                WEIGHTS[(NUMBER_OF_CURRENT_UNITS * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
+                WEIGHTS[(number_of_current_units * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
       }
 
       if(ACTIVATION_FUNCTION[current_layer_index -1] == 4)
@@ -65,7 +65,7 @@ float predict(float input[]) {
     }
 
     if (ACTIVATION_FUNCTION[current_layer_index - 1] == 4) {
-      apply_activation_function_softmax(out, softmax_denominator, NUMBER_OF_CURRENT_UNITS);
+      apply_activation_function_softmax(out, softmax_denominator, number_of_current_units);
     }
 
     /*
@@ -75,11 +75,11 @@ float predict(float input[]) {
        MEMSET: 2600 microsec
        MALLOC: 2588 microsec
        CALLOC: 2604 microsec
-       //memset(input, 0, NUMBER_OF_CURRENT_UNITS);
+       //memset(input, 0, number_of_current_units);
     */
-    input = malloc(NUMBER_OF_CURRENT_UNITS * sizeof(float));
+    input = malloc(number_of_current_units * sizeof(float));
 
-    for (current_unit_index=0; current_unit_index < NUMBER_OF_CURRENT_UNITS; current_unit_index++) {
+    for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
       input[current_unit_index] = out[current_unit_index];
     }
   }
