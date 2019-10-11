@@ -42,7 +42,7 @@ Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
 */
-float predict(float input[]) {
+float * predict(float input[]) {
   float result;
   uint16_t current_layer_index;
 
@@ -117,5 +117,5 @@ float predict(float input[]) {
     }
   }
 
-  return input[0];
+  return input;
 }

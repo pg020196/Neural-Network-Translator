@@ -41,10 +41,14 @@ void loop()
 
     /* Call the predict function with the input array. */
     uint32_t startTime = micros();
-    float result = predict(input);
+    float * result = predict(input);
     uint32_t endTime = micros();
 
-    Serial.println(result,8);
+    for(int i = 0; i < UNITS_IN_LAYER[NUMBER_OF_LAYERS-1]; i++)
+    {
+      Serial.println(*(result+i));
+    }
+    
     Serial.println(String(endTime-startTime)+" microseconds");
     Serial.println("\nEnter input values:");
   }

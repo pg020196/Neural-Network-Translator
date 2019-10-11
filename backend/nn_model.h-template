@@ -33,4 +33,4 @@ const float WEIGHTS[###dimWeights###] = ###weights###;
 /* Holds the biases for each layer as flatted one-dimensional array. */
 const float BIASES[###dimBias###] = ###bias###;
 
-float predict(float input[]);
+float * predict(float input[]);
