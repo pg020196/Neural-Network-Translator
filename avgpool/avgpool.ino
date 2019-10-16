@@ -7,7 +7,7 @@ void setup()
   maxpool2d();
   Serial.println();
   avgpool2d();
-  
+
 
 }
 void loop()
@@ -17,7 +17,7 @@ void loop()
 
 void avgpool2d()
 {
-    int input_matrix[25] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5};
+  int input_matrix[25] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5};
   int matrix_width = 5;
   int matrix_height = 5;
   int pool_width = 3;
@@ -26,10 +26,11 @@ void avgpool2d()
   int step_height = 1;
   float result_matrix[pool_height * pool_width] = { 0 };
 
-
-  for (int i = 0; i < pool_height; i += step_height)
+  // i is the number of vertical steps
+  for (int i = 0; i < matrix_height - pool_height + 1; i += step_height)
   {
-    for (int j = 0; j < pool_width; j += step_width) {
+    // j is the number of horizontal steps
+    for (int j = 0; j < matrix_width - pool_width + 1; j += step_width) {
 
       float result = 0;
       for (int k = 0; k < pool_height; k++)
@@ -72,11 +73,11 @@ void maxpool2d()
       float result = input_matrix[i * matrix_width + j];
       for (int k = 0; k < pool_height; k++)
       {
-        // Init with 1 since the result value has 
+        // Init with 1 since the result value is already initialized with the first entry of the matrix
         for (int l = 1; l < pool_width; l++)
         {
           int index = l + k * matrix_width + i * matrix_width + j;
-          if(input_matrix[index] > result)
+          if (input_matrix[index] > result)
           {
             result = input_matrix[index];
           }
