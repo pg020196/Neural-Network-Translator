@@ -35,7 +35,7 @@ void test_for_avg_pooling() {
   int vertical_stride = 1;
   float input[input_width * input_height] = {1, 2, 3, 4, 5, 6};
 
-  apply_avg_pool(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride);
+  apply_avg_pool(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, 0);
 }
 
 void test_for_zero_padding()
@@ -82,6 +82,11 @@ void apply_zero_padding(float input[], int input_width, int input_height, int po
 */
 void apply_avg_pool(float input[], int input_width, int input_height, int pool_width, int pool_height, int horizontal_stride, int vertical_stride, int padding)
 {
+  /*
+   * WARNING: DOES NOT WORK YET!
+   * TODO: Implement return value of apply_zero_padding
+   * 
+   */
   if (padding == 1)
   {
     apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
