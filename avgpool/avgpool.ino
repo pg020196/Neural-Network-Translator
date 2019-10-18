@@ -2,42 +2,66 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println();
-  //maxpool2d(input);
+  //apply_max_pool(input);
   Serial.println();
-  float input[6] = {1,2,3,4,5,6};
-  avgpool2d(input);
-  
-  //apply_zero_padding(input);
-
-
+  //test_for_avg_pooling();
+  test_for_max_pooling();
 }
+
 void loop()
 {
 
 }
 
-void apply_zero_padding(float input[])
-{
-  int pool_height = 2;
+void test_for_max_pooling() {
+  int input_width = 6;
+  int input_height = 1;
   int pool_width = 2;
- 
-  int vertical_padding = (pool_height - 1) / 2;
-  int horizontal_padding = (pool_width - 1) / 2;
+  int pool_height  = 1;
+  int horizontal_stride = 1;
+  int vertical_stride = 1;
+  float input[input_width * input_height] = {1, 2, 3, 2, 1, 5};
 
-  int input_width = 1;
-  int input_height = 5;
-  
-  int output_width = input_width + horizontal_padding * 2;
-  int output_height = input_height + vertical_padding * 2;
+  apply_max_pool(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride);
+}
 
-  float output[output_width * output_height];
-  memset(output, 0, output_width*output_height*sizeof(float));
 
-  int input_index = 0;
+void test_for_avg_pooling() {
+  int input_width = 6;
+  int input_height = 1;
+  int pool_width = 2;
+  int pool_height  = 1;
+  int horizontal_stride = 1;
+  int vertical_stride = 1;
+  float input[input_width * input_height] = {1, 2, 3, 4, 5, 6};
+
+  apply_avg_pool(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride);
+}
+
+void test_for_zero_padding()
+{
+  int input_width = 6;
+  int input_height = 4;
+  int pool_width = 3;
+  int pool_height = 3;
+  float input[input_width * input_height] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4};
+
+  apply_zero_padding(input, input_width, input_height, pool_height, pool_width);
+}
+
+void apply_zero_padding(float input[], int input_width, int input_height, int pool_width, int pool_height)
+{
   int current_row;
   int current_column;
   int output_index;
-  
+  int input_index = 0;
+  int vertical_padding = (pool_height - 1) / 2;
+  int horizontal_padding = (pool_width - 1) / 2;
+  int output_width = input_width + horizontal_padding * 2;
+  int output_height = input_height + vertical_padding * 2;
+  float output[output_width * output_height];
+  memset(output, 0, output_width * output_height * sizeof(float));
+
   for (current_row = 0; current_row < output_height; current_row++)
   {
     for (current_column = 0; current_column < output_width; current_column++)
@@ -50,104 +74,92 @@ void apply_zero_padding(float input[])
       }
     }
   }
-
-  Serial.println();
-  for (int i = 0; i < output_width; i++) {
-    for (int j = 0; j < output_height; j++) {
-      Serial.print(String(output[j + i * output_width]) + "\t");
-    }
-    Serial.println();
-  }
-
+  print_matrix(output, output_width, output_height);
 }
 
-
-void avgpool2d(float input[])
+/*
+   Padding == 1 is activated
+*/
+void apply_avg_pool(float input[], int input_width, int input_height, int pool_width, int pool_height, int horizontal_stride, int vertical_stride, int padding)
 {
-  int matrix_width = 6;
-  int matrix_height = 1;
-  int pool_width = 3;
-  int pool_height  = 1;
-  int horizontal_stride = 1;
-  int vertical_stride = horizontal_stride;
+  if (padding == 1)
+  {
+    apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
+    
+    /* Update input_width and input_height to the new padded size */
+    input_width = input_width + pool_width - 1;
+    input_height = input_height + pool_height - 1;
+  }
 
+  int output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
+  int output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
+
+  Serial.println(String(output_width) + "," + String(output_height));
+
+  float output[output_height * output_width];
+  memset(output, 0, output_height * output_width * sizeof(float));
+
+  for (int vertical_step_index = 0; vertical_step_index < output_height ; vertical_step_index += vertical_stride)
+  {
+    for (int horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+    {
+      float result = 0;
+      for (int vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+      {
+        for (int horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
+        {
+          int index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
+          result = result + input[index];
+        }
+      }
+      output[horizontal_step_index + vertical_step_index * pool_width] = float(result) / (pool_width * pool_height);
+    }
+  }
+  print_matrix(output, output_width, output_height);
+}
+
+void apply_max_pool(float input[], int input_width, int input_height, int pool_width, int pool_height, int horizontal_stride, int vertical_stride)
+{
   int vertical_padding = 0;
   int horizontal_padding = 0;
 
-  // https://adeshpande3.github.io/A-Beginner's-Guide-To-Understanding-Convolutional-Neural-Networks-Part-2/
-  int result_matrix_height = ((matrix_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
-  int result_matrix_width = ((matrix_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
-  Serial.println(String(result_matrix_width)+","+String(result_matrix_height));
-  float result_matrix[result_matrix_height * result_matrix_width] = { 0 };
+  int output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
+  int output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
 
-  // i is the number of vertical steps
-  for (int i = 0; i < result_matrix_height ; i += vertical_stride)
+  Serial.println(String(output_width) + "," + String(output_height));
+
+  float output[output_height * output_width];
+  memset(output, 0, output_height * output_width * sizeof(float));
+
+  for (int vertical_step_index = 0; vertical_step_index < output_height ; vertical_step_index += vertical_stride)
   {
-    // j is the number of horizontal steps
-    for (int j = 0; j < result_matrix_width; j += horizontal_stride) {
-
-      float result = 0;
-      for (int k = 0; k < pool_height; k++)
+    for (int horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+    {
+      float result = input[vertical_step_index * input_width + horizontal_step_index];
+      for (int vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
       {
-        for (int l = 0; l < pool_width; l++)
+        for (int horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
         {
-          int index = l + k * matrix_width + i * matrix_width + j;
-          result += input[index];
-        }
-      }
-      result_matrix[j + i * pool_height] = float(result) / (pool_width * pool_height);
-    }
-
-  }
-
-  for (int i = 0; i < result_matrix_height; i++) {
-    for (int j = 0; j < result_matrix_width; j++) {
-      Serial.print(String(result_matrix[j + i * result_matrix_width]) + "     ");
-    }
-    Serial.println();
-  }
-
-}
-
-void maxpool2d()
-{
-  int input[25] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 1, 2, 3, 4, 5};
-  int matrix_width = 5;
-  int matrix_height = 5;
-  int pool_width = 3;
-  int pool_height  = 3;
-  int horizontal_stride = 1;
-  int vertical_stride = 1;
-  float result_matrix[pool_height * pool_width] = { 0 };
-
-
-  for (int i = 0; i < pool_height; i += vertical_stride)
-  {
-    for (int j = 0; j < pool_width; j += horizontal_stride) {
-      float result = input[i * matrix_width + j];
-      for (int k = 0; k < pool_height; k++)
-      {
-        // Init with 1 since the result value is already initialized with the first entry of the matrix
-        for (int l = 1; l < pool_width; l++)
-        {
-          int index = l + k * matrix_width + i * matrix_width + j;
+          int index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
           if (input[index] > result)
           {
             result = input[index];
           }
         }
       }
-      result_matrix[j + i * pool_height] = result;
+      output[horizontal_step_index + vertical_step_index * pool_width] = result;
     }
-
   }
+  print_matrix(output, output_width, output_height);
+}
 
-  for (int i = 0; i < 3; i++) {
-    for (int j = 0; j < 3; j++) {
-      Serial.print(String(result_matrix[j + i * 3]) + "     ");
+void print_matrix(float matrix[], int width, int height)
+{
+  Serial.println();
+  for (int i = 0; i < height; i++) {
+    for (int j = 0; j < width; j++) {
+      Serial.print(String(matrix[i * width + j]) + "\t");
     }
     Serial.println();
   }
-
-
 }
