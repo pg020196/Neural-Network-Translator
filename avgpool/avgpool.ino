@@ -85,12 +85,10 @@ void apply_avg_pool(float input[], int input_width, int input_height, int pool_w
   /*
    * WARNING: DOES NOT WORK YET!
    * TODO: Implement return value of apply_zero_padding
-   * 
    */
   if (padding == 1)
   {
     apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
-    
     /* Update input_width and input_height to the new padded size */
     input_width = input_width + pool_width - 1;
     input_height = input_height + pool_height - 1;
