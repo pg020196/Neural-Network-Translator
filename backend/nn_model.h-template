@@ -3,16 +3,16 @@
 const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
 
 /* Defines the number of units for each layer. */
-//! Remove this. Use LAYER_INPUT_WIDTH and LAYER_INPUT_HEIGHT instead
+//! This will be removed in a future version. Use LAYER_INPUT_WIDTH and LAYER_INPUT_HEIGHT instead
 const uint16_t UNITS_IN_LAYER[###numberLayers###] = ###unitsInLayers###;
 
 /* */
 //? NEW
-const uint16_t LAYER_INPUT_WIDTH[###numberLayers###] = ###layerInputWidth###;
+//const uint16_t LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerInputWidth###;
 
 /**/
 //? NEW
-const uint16_t LAYER_INPUT_HEIGHT[###numberLayers###] = ###layerInputHeight###;
+//const uint16_t LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerInputHeight###;
 
 /* Defines the layer types */
 const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
@@ -43,21 +43,21 @@ const float WEIGHTS[###dimWeights###] = ###weights###;
 const float BIASES[###dimBias###] = ###bias###;
 
 //? NEW
-const uint16_t POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
+//const uint16_t POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
 
 //? NEW
-const uint16_t POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
+//const uint16_t POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
 
 //? NEW
-const uint16_t HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
+//const uint16_t HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
 
 //? NEW
-const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
+//const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
 
 //? NEW
-const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
+//const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
 
 
 float * predict(float input[]);
 
-float * dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+float * dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function);
