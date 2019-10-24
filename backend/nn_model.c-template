@@ -123,7 +123,7 @@ float * predict(float * input) {
     uint16_t bias_start_index = BIAS_ENABLED[current_layer_index - 1];
     uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
     uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index -1];
-    input = dense(input, number_of_current_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function)
+    input = dense(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
   }
 
   return input;
