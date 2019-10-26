@@ -117,12 +117,22 @@ float * predict(float * input) {
   The initial value is set to 1, since the layer at index 0 is the input layer
   and there is no transformation required at the input layer level. */
   for (current_layer_index=1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++) {
+
+    //Checked
+
+    uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index -1];
     uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
     uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
     uint8_t bias_enabled = BIAS_ENABLED[current_layer_index - 1];
-    uint16_t bias_start_index = BIAS_ENABLED[current_layer_index - 1];
+
+    //Unchecked
+
+    
+    
+    
+    uint16_t bias_start_index = BIASES_START_INDEX[current_layer_index - 1];
     uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
-    uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index -1];
+    
     input = dense(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
   }
 
