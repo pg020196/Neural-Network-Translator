@@ -2,9 +2,10 @@ void setup()
 {
   Serial.begin(9600);
   Serial.println();
-  //apply_max_pool(input);
+  test_for_zero_padding();
   Serial.println();
-  //test_for_avg_pooling();
+  test_for_avg_pooling();
+  Serial.println();
   test_for_max_pooling();
 }
 
@@ -82,17 +83,8 @@ void apply_zero_padding(float input[], int input_width, int input_height, int po
 */
 void apply_avg_pool(float input[], int input_width, int input_height, int pool_width, int pool_height, int horizontal_stride, int vertical_stride, int padding)
 {
-  /*
-   * WARNING: DOES NOT WORK YET!
-   * TODO: Implement return value of apply_zero_padding
-   */
-  if (padding == 1)
-  {
-    apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
-    /* Update input_width and input_height to the new padded size */
-    input_width = input_width + pool_width - 1;
-    input_height = input_height + pool_height - 1;
-  }
+  int vertical_padding = 0;
+  int horizontal_padding = 0;
 
   int output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
   int output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
