@@ -26,7 +26,8 @@ void loop()
 
     /* Inits the input float array with zeros.
     The length of the array is determined through the number of units in layer 0 (input layer). */
-    float input[UNITS_IN_LAYER[0]] = {0};
+    float input[LAYER_OUTPUT_WIDTH[0]*LAYER_OUTPUT_HEIGHT[0]];
+    memset(input,0,LAYER_OUTPUT_WIDTH[0]*LAYER_OUTPUT_HEIGHT[0]*sizeof(float));
     char *tmp;
     int i = 0;
 
@@ -44,11 +45,14 @@ void loop()
     float * result = predict(input);
     uint32_t endTime = micros();
 
-    for(int i = 0; i < UNITS_IN_LAYER[NUMBER_OF_LAYERS-1]; i++)
+    for(int i = 0; i < LAYER_OUTPUT_HEIGHT[NUMBER_OF_LAYERS-1]; i++)
     {
-      Serial.println(*(result+i),8);
+      for(int j = 0; j < LAYER_OUTPUT_WIDTH[NUMBER_OF_LAYERS-1]; j++)
+      {
+        Serial.println(*(result+i*LAYER_OUTPUT_WIDTH[NUMBER_OF_LAYERS-1]+j),8);
+      }
     }
-    
+
     Serial.println(String(endTime-startTime)+" microseconds");
     Serial.println("\nEnter input values:");
   }

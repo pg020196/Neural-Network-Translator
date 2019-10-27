@@ -2,10 +2,6 @@
 /* Defines the number of layers. */
 const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
 
-/* Defines the number of units for each layer. */
-//! This will be removed in a future version. Use LAYER_INPUT_WIDTH and LAYER_INPUT_HEIGHT instead
-const uint16_t UNITS_IN_LAYER[###numberLayers###] = ###unitsInLayers###;
-
 /* */
 //? NEW
 const uint16_t LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;

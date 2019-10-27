@@ -179,19 +179,3 @@ def get_weight_information(input, layerOutputHeight):
     #? Flattening the array before returning
     weights_array = list(chain.from_iterable(output))
     return convert_array_to_string(weights_indices_array), weights_array
-
-#! REMOVE in the next version
-def get_units_in_layer_string(input):
-    units_array = []
-    for layer in input['config']['layers']:
-        if (layer['class_name']==DENSE_LAYER):
-            if 'batch_input_shape' in layer['config']:
-                units_array.append(layer['config']['batch_input_shape'][1])
-
-            units_array.append(layer['config']['units'])
-        else:
-            if 'batch_input_shape' in layer['config']:
-                units_array.append('0')
-            units_array.append('0')
-
-    return convert_array_to_string(units_array)

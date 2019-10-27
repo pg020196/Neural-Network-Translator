@@ -27,8 +27,6 @@ class Arduino(BackendPlugin):
         markers['###numberLayers###'] = backend_utils.get_number_of_layers(input)
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
         markers['###layerTypes###'] = backend_utils.get_layer_types_string(input, self.layer_types)
-        #! remove when finished
-        markers['###unitsInLayers###'] = backend_utils.get_units_in_layer_string(input)
 
         layerOutputHeight, layerOutputWidth = backend_utils.get_output_dimensions(input)
         markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
