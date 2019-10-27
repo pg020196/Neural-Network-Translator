@@ -10,12 +10,12 @@ class TestArduinoBackend(unittest.TestCase):
     inputs = []
     arduino = None
     precision = 8
-    model = '../diabetes_model.h5'
+    modelPath = '../diabetes_model.h5'
 
     def __init__(self, testname, com, baud, model):
         super(TestArduinoBackend, self).__init__(testname)
         self.arduino = serial.Serial(com,baud, timeout=5)
-        self.model = model
+        self.modelPath = model
 
     def setUp(self):
         self.inputs.append('6,148,72,35,0,33.6,0.627,50') #1
@@ -42,7 +42,7 @@ class TestArduinoBackend(unittest.TestCase):
             results_arduino.append(result.decode().rstrip('\r\n'))
 
         results_framework = []
-        model = tf.keras.models.load_model(model)
+        model = tf.keras.models.load_model(self.modelPath)
 
         for input_values in self.inputs:
             array = str(input_values).split(',')
