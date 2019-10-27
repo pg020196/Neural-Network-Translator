@@ -9,9 +9,10 @@ class Arduino(BackendPlugin):
     #? Dictionaries for mapping activation functions and layer types to integer values
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
     layer_types = {'dense':0, 'flatten':1,
-                   'maxpooling1d':2, 'maxpooling2d':3, 'maxpooling3d':4, 
+                   'maxpooling1d':2, 'maxpooling2d':3, 'maxpooling3d':4,
                    'avgpooling1d':5, 'avgpooling2d':6, 'avgpooling3d':7,
                    'conv1d':8, 'conv2d':9,'conv3d':10}
+    padding_types = {'valid':0, 'same':1}
 
     def __init__(self):
         super().__init__('arduino','Arduino Backend Plugin', None)
@@ -30,8 +31,8 @@ class Arduino(BackendPlugin):
         markers['###unitsInLayers###'] = backend_utils.get_units_in_layer_string(input)
 
         layerOutputHeight, layerOutputWidth = backend_utils.get_output_dimensions(input)
-        markers['###layerOutputWidth###'] = layerOutputWidth
-        markers['###layerOutputHeight###'] = layerOutputHeight
+        markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
+        markers['###layerOutputHeight###'] = backend_utils.convert_array_to_string(layerOutputHeight)
 
         #? Dense layer specific markers
         markers['###activationFunctions###'] = backend_utils.get_activation_function_string(input, self.activation_functions)
@@ -55,7 +56,7 @@ class Arduino(BackendPlugin):
         verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
         markers['###horizontalStride###'] = horizontalStrides
         markers['###verticalStride###'] = verticalStrides
-        markers['###padding###'] = backend_utils.get_padding_string(input)
+        markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
         #? Reading the header file with markers and replacing them with the markers array
         header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/nn_model.h-template'), markers)
