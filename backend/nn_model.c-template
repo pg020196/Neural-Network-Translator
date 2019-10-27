@@ -260,8 +260,8 @@ float *predict(float *input)
     if (LAYER_TYPE[current_layer_index -1] == 0)
     {
       uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
-      uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
-      uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
+      uint16_t number_of_previous_units =  LAYER_OUTPUT_HEIGHT[current_layer_index-1];
+      uint16_t number_of_current_units = LAYER_OUTPUT_HEIGHT[current_layer_index];
       uint8_t bias_enabled = BIAS_ENABLED[current_layer_index - 1];
       uint16_t bias_start_index = BIASES_START_INDEX[current_layer_index - 1];
       uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
