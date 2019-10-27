@@ -168,16 +168,6 @@ def get_weight_information(input, layerOutputHeight):
     for layer in input['config']['layers']:
         if (layer['class_name']==DENSE_LAYER):
             weights_indices_array.append(str(previous_layer_values))
-
-            # if ('batch_input_shape' in layer['config']):
-            #     units_previous_dense_layer = layer['config']['batch_input_shape'][1]
-            # elif (is_first_dense_layer):
-            #     units_previous_dense_layer = layer['config']['units']
-            #     is_first_dense_layer=False
-
-            #last_layer_values = last_layer_values + int(layer['config']['units']) * int(layer['config']['batch_input_shape'][1])
-            # TODO: ask Phiipp if this is correct
-
             previous_layer_values = previous_layer_values + int(layer['config']['units']) * layerOutputHeight[count]
 
             units_previous_dense_layer = int(layer['config']['units'])
@@ -190,6 +180,7 @@ def get_weight_information(input, layerOutputHeight):
     weights_array = list(chain.from_iterable(output))
     return convert_array_to_string(weights_indices_array), weights_array
 
+#! REMOVE in the next version
 def get_units_in_layer_string(input):
     units_array = []
     for layer in input['config']['layers']:
