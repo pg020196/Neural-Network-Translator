@@ -114,4 +114,4 @@ venv.bak/
 # Others
 mp_nn/
 _out/
-
+.vscode/
