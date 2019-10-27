@@ -75,6 +75,11 @@
                                         "type": "string",
                                         "title": "The Dtype Schema"
                                     },
+                                    "filters": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/filters",
+                                        "type": "integer",
+                                        "title": "The Filters Schema"
+                                    },
                                     "kernel_size": {
                                         "$id": "#/properties/config/properties/layers/items/properties/config/properties/kernel_size",
                                         "type": "array",
@@ -98,6 +103,36 @@
                                                 "type": "number",
                                                 "title": "The kernel_values_items_items Schema"
                                             }
+                                        }
+                                    },
+                                    "strides": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/strides",
+                                        "type": "array",
+                                        "title": "The Strides Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/strides/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
+                                        }
+                                    },
+                                    "padding": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/padding",
+                                        "type": "string",
+                                        "title": "The Padding Schema"
+                                    },
+                                    "data_format": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/data_format",
+                                        "type": "string",
+                                        "title": "The Data_format Schema"
+                                    },
+                                    "dilation_rate": {
+                                        "$id": "#/properties/config/properties/layers/items/properties/config/properties/dilation_rate",
+                                        "type": "array",
+                                        "title": "The Dilation_rate Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/dilation_rate/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
                                         }
                                     },
                                     "activation": {
