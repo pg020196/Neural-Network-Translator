@@ -1,14 +1,10 @@
-from keras.models import load_model
+from tensorflow import keras
 import numpy as np
 from collections import OrderedDict
-from keras import backend as K
-from keras.models import Model
-from keras.models import Sequential
-from keras.layers import Dense
 import time
 
 #? Loading model and specifying input data
-model = load_model('diabetes_model.h5')
+model = keras.models.load_model('diabetes_model.h5')
 data = np.array([[6,148,72,35,0,33.6,0.627,50]])
 
 #? Alternative way of loading the model and building a nn for each layer in order to debug through the nn

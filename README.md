@@ -61,8 +61,8 @@ The following software components and dependencies are needed:
 - [x] Linear (0)
 - [x] Sigmoid (1)
 - [x] ReLu (2)
-- [x] Tanh (3) [see Sprint03 branch]
-- [ ] Softmax (4) [implementation postponed]
+- [x] Tanh (3)
+- [x] Softmax (4)
 
 ## 2.3. Neural Network Structures
 
@@ -72,8 +72,6 @@ The following software components and dependencies are needed:
 ## 2.4. Supported Layers
 
 - [x] Dense
-- [ ] Activation
-- [x] (Dropout - seems like it only happens during training)
 - [ ] Convolutional
 - [ ] Pooling
 - [ ] Flatten

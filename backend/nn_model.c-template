@@ -8,15 +8,21 @@ Purpose: Applies the activation function to the input value
 Arguments: An integer value to specify the activation function, a float value
 Returns: The given value with the activation function applied
 */
-float apply_activation_function(uint8_t act_func, float value) {
-  if (act_func == 1) {
+float apply_activation_function(uint8_t act_func, float value)
+{
+  if (act_func == 1)
+  {
     return (1.0 / (1.0 + exp(-value)));
-  } else if (act_func == 2) {
+  }
+  else if (act_func == 2)
+  {
     if (value <= 0)
       return 0;
     else
       return value;
-  } else if (act_func == 3) {
+  }
+  else if (act_func == 3)
+  {
     float expInput = exp(value);
     float negExpInput = exp(-value);
     return (expInput - negExpInput) / (expInput + negExpInput);
@@ -29,26 +35,25 @@ Purpose: Applies the softmax activation function to an input array
 Arguments: A float array of input values, a float value as denominator, the length of the input array
 Returns: Nothing
 */
-void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length) {
+void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length)
+{
   uint16_t i;
-  for (i = 0; i < input_length; i++) {
+  for (i = 0; i < input_length; i++)
+  {
     float divisor = exp(values[i]);
     values[i] = divisor / denominator;
   }
 }
 
-float * dense(float * input, uint16_t current_layer_index)
+float *dense(float *input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
 {
   uint16_t current_unit_index;
-  uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
-  uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
-
   float current_layer_results[number_of_current_units];
 
   /* Allocate memory and set all initial values to 0.
   The array cannot be initialized with 0 during its declaration, since some
   compilers require the length of the array to be a constant number. */
-  memset(current_layer_results, 0, number_of_current_units*sizeof(float));
+  memset(current_layer_results, 0, number_of_current_units * sizeof(float));
 
   /* Initialize a variable to store the denominator for the softmax activation function.
   If the softmax activation function is used, the denominator can be calculated easily
@@ -58,43 +63,46 @@ float * dense(float * input, uint16_t current_layer_index)
   float softmax_denominator = 0;
 
   /* Loops through the number of units in the current layer. */
-  for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
-    
+  for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
+  {
     uint16_t previous_unit_index;
 
     /* If the bias is activated for the current layer, the initial value
     of the current_layer_results array can be replaced with the bias value. */
-    if (BIAS_ENABLED[current_layer_index - 1] == 1) {
-      current_layer_results[current_unit_index] = BIASES[BIASES_START_INDEX[current_layer_index - 1] + current_unit_index];
+    if (bias_enabled == 1)
+    {
+      current_layer_results[current_unit_index] = biases[bias_start_index + current_unit_index];
     }
 
     /* Loops through the number of previous units to calculate the dot product. */
-    for (previous_unit_index=0; previous_unit_index < number_of_previous_units; previous_unit_index++) {
+    for (previous_unit_index = 0; previous_unit_index < number_of_previous_units; previous_unit_index++)
+    {
       current_layer_results[current_unit_index] =
           current_layer_results[current_unit_index] +
-          *(input+previous_unit_index) *
-              WEIGHTS[(number_of_current_units * previous_unit_index + current_unit_index) + WEIGHTS_START_INDEX[current_layer_index - 1]];
+          *(input + previous_unit_index) *
+              weights[(number_of_current_units * previous_unit_index + current_unit_index) + weights_start_index];
     }
 
     /* Calculates the softmax denominator. This calculation is only required when using the softmax activation function.
     Therefore, we check if the current layer uses the softmax activation function and only perform the calculation when required.
     This improves the runtime if another activation function is used. */
-    if(ACTIVATION_FUNCTION[current_layer_index -1] == 4)
+    if (activation_function == 4)
     {
       softmax_denominator = softmax_denominator + exp(current_layer_results[current_unit_index]);
     }
     /* Apply activation function directly to the element to prevent having to
     loop through the array a second time.
     If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value. */
-    else if (ACTIVATION_FUNCTION[current_layer_index-1] != 0)
+    else if (activation_function != 0)
     {
-      current_layer_results[current_unit_index] = apply_activation_function(ACTIVATION_FUNCTION[current_layer_index - 1],
-                                        current_layer_results[current_unit_index]);
+      current_layer_results[current_unit_index] = apply_activation_function(activation_function,
+                                                                            current_layer_results[current_unit_index]);
     }
   }
 
   /* Apply the softmax activation function if necessary. */
-  if (ACTIVATION_FUNCTION[current_layer_index - 1] == 4) {
+  if (activation_function == 4)
+  {
     apply_activation_function_softmax(current_layer_results, softmax_denominator, number_of_current_units);
   }
 
@@ -102,11 +110,136 @@ float * dense(float * input, uint16_t current_layer_index)
   input = malloc(number_of_current_units * sizeof(float));
 
   /* Copies the calculated values in the input array. */
-  for (current_unit_index=0; current_unit_index < number_of_current_units; current_unit_index++) {
-    *(input+current_unit_index) = current_layer_results[current_unit_index];
+  for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
+  {
+    *(input + current_unit_index) = current_layer_results[current_unit_index];
   }
 
   return input;
+}
+
+// TODO: TEST THIS METHOD
+float *apply_zero_padding(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height)
+{
+  uint16_t current_row_index;
+  uint16_t current_column_index;
+  uint16_t output_index;
+  uint16_t input_index = 0;
+  uint16_t vertical_padding = (pool_height - 1) / 2;
+  uint16_t horizontal_padding = (pool_width - 1) / 2;
+  uint16_t output_width = input_width + horizontal_padding * 2;
+  uint16_t output_height = input_height + vertical_padding * 2;
+  float output[output_width * output_height];
+  memset(output, 0, output_width * output_height * sizeof(float));
+
+  for (current_row_index = 0; current_row_index < output_height; current_row_index++)
+  {
+    for (current_column_index = 0; current_column_index < output_width; current_column_index++)
+    {
+      if (current_row_index >= vertical_padding && current_row_index < (output_height - vertical_padding) && current_column_index >= horizontal_padding && current_column_index < (output_width - horizontal_padding))
+      {
+        output_index = current_row_index * output_width + current_column_index;
+        output[output_index] = *(input + input_index);
+        input_index = input_index + 1;
+      }
+    }
+  }
+  return output;
+}
+
+/*
+   Padding == 1 is activated
+*/
+// TODO: Test this method
+float *apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+{
+  uint16_t vertical_step_index;
+  uint16_t horizontal_step_index;
+  uint16_t vertical_padding = (pool_height - 1) / 2;
+  uint16_t horizontal_padding = (pool_width - 1) / 2;
+  uint16_t output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
+  uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
+  uint16_t vertical_pool_index;
+  uint16_t horizontal_pool_index;
+  uint16_t index = 0;
+  float result = 0;
+  float output[output_height * output_width];
+  memset(output, 0, output_height * output_width * sizeof(float));
+
+  if (padding == 1)
+  {
+    input = apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
+    /* Update input_width and input_height to the new padded size */
+    input_width = input_width + pool_width - 1;
+    input_height = input_height + pool_height - 1;
+  }
+
+  for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
+  {
+    for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+    {
+      result = 0;
+      for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+      {
+        for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
+        {
+          index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
+          result = result + *(input + index);
+        }
+      }
+      output[horizontal_step_index + vertical_step_index * pool_width] = (float)result / (pool_width * pool_height);
+    }
+  }
+  return output;
+}
+
+/*
+   Padding == 1 is activated
+*/
+// TODO: Test this method
+float *apply_max_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+{
+  uint16_t vertical_step_index;
+  uint16_t horizontal_step_index;
+  uint16_t vertical_padding = (pool_height - 1) / 2;
+  uint16_t horizontal_padding = (pool_width - 1) / 2;
+  uint16_t output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
+  uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
+  uint16_t vertical_pool_index;
+  uint16_t horizontal_pool_index;
+  uint16_t index = 0;
+  float result = 0;
+  float output[output_height * output_width];
+  memset(output, 0, output_height * output_width * sizeof(float));
+
+  if (padding == 1)
+  {
+    input = apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
+    /* Update input_width and input_height to the new padded size */
+    input_width = input_width + pool_width - 1;
+    input_height = input_height + pool_height - 1;
+  }
+
+  for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
+  {
+    for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+    {
+      result = *(input + (vertical_step_index * input_width + horizontal_step_index));
+      for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+      {
+        for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
+        {
+          index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
+          if (input[index] > result)
+          {
+            result = input[index];
+          }
+        }
+      }
+      output[horizontal_step_index + vertical_step_index * pool_width] = result;
+    }
+  }
+  return output;
 }
 
 /*
@@ -114,14 +247,39 @@ Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
 */
-float * predict(float * input) {
+float *predict(float *input)
+{
   uint16_t current_layer_index;
 
   /* Loops through each layer of the neural network.
   The initial value is set to 1, since the layer at index 0 is the input layer
   and there is no transformation required at the input layer level. */
-  for (current_layer_index=1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++) {
-    input = dense(input, current_layer_index);
+  for (current_layer_index = 1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++)
+  {
+
+    if (LAYER_TYPE[current_layer_index -1] == 0)
+    {
+      uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
+      uint16_t number_of_previous_units = UNITS_IN_LAYER[current_layer_index - 1];
+      uint16_t number_of_current_units = UNITS_IN_LAYER[current_layer_index];
+      uint8_t bias_enabled = BIAS_ENABLED[current_layer_index - 1];
+      uint16_t bias_start_index = BIASES_START_INDEX[current_layer_index - 1];
+      uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
+
+      input = dense(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
+    }
+    else if (LAYER_TYPE[current_layer_index -1] == 1)
+    {
+      // TODO: Implement AVG_Pool here
+    }
+    else if (LAYER_TYPE[current_layer_index -1] == 2)
+    {
+      // TODO: Implement Max_Pool here
+    }
+    else if (LAYER_TYPE[current_layer_index -1] == 3)
+    {
+      // TODO: Implement Flatten here
+    }
   }
 
   return input;
