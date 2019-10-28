@@ -49,8 +49,10 @@ void loop()
     {
       for(int j = 0; j < LAYER_OUTPUT_WIDTH[NUMBER_OF_LAYERS-1]; j++)
       {
+        //Change to print and add whitespaces
         Serial.println(*(result+i*LAYER_OUTPUT_WIDTH[NUMBER_OF_LAYERS-1]+j),8);
       }
+      //Add println
     }
 
     Serial.println(String(endTime-startTime)+" microseconds");
