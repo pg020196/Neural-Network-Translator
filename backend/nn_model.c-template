@@ -270,15 +270,15 @@ float *predict(float *input)
     }
     else if (LAYER_TYPE[current_layer_index -1] == 1)
     {
-      // TODO: Implement AVG_Pool here
+      // TODO: Implement Flatten here
     }
     else if (LAYER_TYPE[current_layer_index -1] == 2)
     {
       // TODO: Implement Max_Pool here
     }
-    else if (LAYER_TYPE[current_layer_index -1] == 3)
+    else if (LAYER_TYPE[current_layer_index -1] == 5)
     {
-      // TODO: Implement Flatten here
+      // TODO: Implement Avg_Pool here
     }
   }
 
