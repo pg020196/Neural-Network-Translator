@@ -8,7 +8,7 @@ Purpose: Applies the activation function to the input value
 Arguments: An integer value to specify the activation function, a float value
 Returns: The given value with the activation function applied
 */
-float apply_activation_function(uint8_t act_func, float value)
+static float apply_activation_function(uint8_t act_func, float value)
 {
   if (act_func == 1)
   {
@@ -35,7 +35,7 @@ Purpose: Applies the softmax activation function to an input array
 Arguments: A float array of input values, a float value as denominator, the length of the input array
 Returns: Nothing
 */
-void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length)
+static void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length)
 {
   uint16_t i;
   for (i = 0; i < input_length; i++)
@@ -45,7 +45,7 @@ void apply_activation_function_softmax(float values[], float denominator, uint16
   }
 }
 
-float *dense(float *input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+static float *dense(float *input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
 {
   uint16_t current_unit_index;
   float current_layer_results[number_of_current_units];
@@ -119,7 +119,7 @@ float *dense(float *input, uint16_t number_of_previous_units, uint16_t number_of
 }
 
 // TODO: TEST THIS METHOD
-float *apply_zero_padding(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height)
+static float *apply_zero_padding(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height)
 {
   uint16_t current_row_index;
   uint16_t current_column_index;
@@ -151,7 +151,7 @@ float *apply_zero_padding(float *input, uint16_t input_width, uint16_t input_hei
    Padding == 1 is activated
 */
 // TODO: Test this method
-float *apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float *apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
 {
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
@@ -197,7 +197,7 @@ float *apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height,
    Padding == 1 is activated
 */
 // TODO: Test this method
-float *apply_max_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float *apply_max_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
 {
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
