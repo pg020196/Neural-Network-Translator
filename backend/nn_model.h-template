@@ -56,4 +56,10 @@ const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
 
 float * predict(float input[]);
 
-float * dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function);
+static float * apply_dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function);
+static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding);
+static float * apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding);
+static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height);
+
+static void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length);
+static float apply_activation_function(uint8_t act_func, float value);
