@@ -8,10 +8,10 @@ class Arduino(BackendPlugin):
 
     #? Dictionaries for mapping activation functions and layer types to integer values
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
-    layer_types = {'dense':0, 'flatten':1,
-                   'maxpooling1d':2, 'maxpooling2d':3, 'maxpooling3d':4,
-                   'avgpooling1d':5, 'avgpooling2d':6, 'avgpooling3d':7,
-                   'conv1d':8, 'conv2d':9,'conv3d':10}
+    layer_types = {'dense':1, 'flatten':2,
+                   'maxpooling1d':3, 'maxpooling2d':4, 'maxpooling3d':5,
+                   'avgpooling1d':6, 'avgpooling2d':7, 'avgpooling3d':8,
+                   'conv1d':9, 'conv2d':10,'conv3d':11, 'dropout':0, 'activation':12}
     padding_types = {'valid':0, 'same':1}
 
     def __init__(self):
