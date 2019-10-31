@@ -3,7 +3,9 @@ import serial
 import numpy as np
 import argparse
 import sys
+import json
 import tensorflow as tf
+from backend.arduino import Arduino
 
 class TestArduinoBackend(unittest.TestCase):
 
@@ -11,11 +13,13 @@ class TestArduinoBackend(unittest.TestCase):
     arduino = None
     precision = 8
     modelPath = '../diabetes_model.h5'
+    intermediate = None
 
     def __init__(self, testname, com, baud, model):
         super(TestArduinoBackend, self).__init__(testname)
         self.arduino = serial.Serial(com,baud, timeout=5)
         self.modelPath = model
+        self.intermediate = json.load(open('test/test_dense_2layer_input.json'))
 
     def setUp(self):
         self.inputs.append('6,148,72,35,0,33.6,0.627,50') #1
@@ -29,7 +33,7 @@ class TestArduinoBackend(unittest.TestCase):
     def tearDown(self):
         return super().tearDown()
 
-    def test_dense_results(self):
+    def test_arduino_translate_to_native_code(self):
         results_arduino = []
 
         for input_values in self.inputs:
@@ -64,6 +68,28 @@ class TestArduinoBackend(unittest.TestCase):
                 self.assertTrue(False)
 
         self.assertTrue(True)
+
+    def test_build_markers(self):
+        markers = Arduino().build_markers(self.intermediate)
+        self.assertTrue('###numberLayers###' in markers and
+                        '###dimNumberLayers###' in markers and
+                        '###layerTypes###' in markers and
+                        '###layerTypes###' in markers and
+                        '###layerOutputWidth###' in markers and
+                        '###layerOutputHeight###' in markers and
+                        '###activationFunctions###' in markers and
+                        '###weights###' in markers and
+                        '###dimWeights###' in markers and
+                        '###indicesWeights###' in markers and
+                        '###bias###' in markers and
+                        '###dimBias###' in markers and
+                        '###indicesBias###' in markers and
+                        '###useBias###' in markers and
+                        '###poolWidth###' in markers and
+                        '###poolHeight###' in markers and
+                        '###horizontalStride###' in markers and
+                        '###verticalStride###' in markers and
+                        '###padding###' in markers)
 
 #? ############### INFO ###############
 #? This script has to be run with -m switch from parent directory in order to get the imports right
