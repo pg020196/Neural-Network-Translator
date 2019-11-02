@@ -1,6 +1,7 @@
 ﻿#include <stdint.h>
 #include <string.h>
 #include <math.h>
+#include <stdlib.h>
 #include "nn_model.h"
 
 /*
@@ -37,23 +38,18 @@ Returns: Nothing
 */
 static void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length)
 {
-  uint16_t i;
-  for (i = 0; i < input_length; i++)
+  uint16_t index;
+  for (index = 0; index < input_length; index++)
   {
-    float divisor = (float)exp(values[i]);
-    values[i] = divisor / denominator;
+    float divisor = (float)exp(values[index]);
+    values[index] = divisor / denominator;
   }
 }
 
-static float * apply_dense(float *input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+static float * apply_dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
 {
   uint16_t current_unit_index;
-  float current_layer_results[number_of_current_units];
-
-  /* Allocate memory and set all initial values to 0.
-  The array cannot be initialized with 0 during its declaration, since some
-  compilers require the length of the array to be a constant number. */
-  memset(current_layer_results, 0, number_of_current_units * sizeof(float));
+  float * current_layer_results = calloc(number_of_current_units, sizeof(float));
 
   /* Initialize a variable to store the denominator for the softmax activation function.
   If the softmax activation function is used, the denominator can be calculated easily
@@ -62,7 +58,6 @@ static float * apply_dense(float *input, uint16_t number_of_previous_units, uint
   whole array later on. */
   float softmax_denominator = 0;
 
-  /* Loops through the number of units in the current layer. */
   for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
   {
     uint16_t previous_unit_index;
@@ -106,16 +101,9 @@ static float * apply_dense(float *input, uint16_t number_of_previous_units, uint
     apply_activation_function_softmax(current_layer_results, softmax_denominator, number_of_current_units);
   }
 
-  /* Reallocates memory for the input array with the new dimenion of the current number of units. */
-  input = malloc(number_of_current_units * sizeof(float));
+  free(input);
 
-  /* Copies the calculated values in the input array. */
-  for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
-  {
-    *(input + current_unit_index) = current_layer_results[current_unit_index];
-  }
-
-  return input;
+  return current_layer_results;
 }
 
 // TODO: TEST THIS METHOD
@@ -129,8 +117,7 @@ static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t i
   uint16_t horizontal_padding = (pool_width - 1) / 2;
   uint16_t output_width = input_width + horizontal_padding * 2;
   uint16_t output_height = input_height + vertical_padding * 2;
-  float output[output_width * output_height];
-  memset(output, 0, output_width * output_height * sizeof(float));
+  float * output = calloc(output_width * output_height, sizeof(float));
 
   for (current_row_index = 0; current_row_index < output_height; current_row_index++)
   {
@@ -144,6 +131,7 @@ static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t i
       }
     }
   }
+  free(input);
   return output;
 }
 
@@ -151,7 +139,7 @@ static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t i
    Padding == 1 is activated
 */
 // TODO: Test this method
-static float * apply_avg_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float * apply_avg_pool(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
 {
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
@@ -163,8 +151,7 @@ static float * apply_avg_pool(float *input, uint16_t input_width, uint16_t input
   uint16_t horizontal_pool_index;
   uint16_t index = 0;
   float result = 0;
-  float output[output_height * output_width];
-  memset(output, 0, output_height * output_width * sizeof(float));
+  float * output = calloc(output_height * output_width, sizeof(float));
 
   if (padding == 1)
   {
@@ -190,6 +177,7 @@ static float * apply_avg_pool(float *input, uint16_t input_width, uint16_t input
       output[horizontal_step_index + vertical_step_index * pool_width] = (float)result / (pool_width * pool_height);
     }
   }
+  free(input);
   return output;
 }
 
@@ -209,8 +197,7 @@ static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input
   uint16_t horizontal_pool_index;
   uint16_t index = 0;
   float result = 0;
-  float output[output_height * output_width];
-  memset(output, 0, output_height * output_width * sizeof(float));
+  float * output = calloc(output_height * output_width, sizeof(float));
 
   if (padding == 1)
   {
@@ -239,6 +226,7 @@ static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input
       output[horizontal_step_index + vertical_step_index * pool_width] = result;
     }
   }
+  free(input);
   return output;
 }
 
@@ -247,7 +235,7 @@ Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
 */
-float *predict(float *input)
+float * predict(float * input)
 {
   uint16_t current_layer_index;
 
