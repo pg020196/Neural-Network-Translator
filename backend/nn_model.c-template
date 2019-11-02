@@ -149,8 +149,8 @@ static float * apply_avg_pool(float * input, uint16_t input_width, uint16_t inpu
   uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
-  uint16_t index = 0;
-  float result = 0;
+  uint16_t index;
+  float result;
   float * output = calloc(output_height * output_width, sizeof(float));
 
   if (padding == 1)
@@ -195,8 +195,8 @@ static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input
   uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
-  uint16_t index = 0;
-  float result = 0;
+  uint16_t index;
+  float result;
   float * output = calloc(output_height * output_width, sizeof(float));
 
   if (padding == 1)
