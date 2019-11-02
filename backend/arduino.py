@@ -8,10 +8,10 @@ class Arduino(BackendPlugin):
 
     #? Dictionaries for mapping activation functions and layer types to integer values
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
-    layer_types = {'dense':0, 'flatten':1,
-                   'maxpooling1d':2, 'maxpooling2d':3, 'maxpooling3d':4,
-                   'avgpooling1d':5, 'avgpooling2d':6, 'avgpooling3d':7,
-                   'conv1d':8, 'conv2d':9,'conv3d':10}
+    layer_types = {'dense':1, 'flatten':2,
+                   'maxpooling1d':3, 'maxpooling2d':4, 'maxpooling3d':5,
+                   'avgpooling1d':6, 'avgpooling2d':7, 'avgpooling3d':8,
+                   'conv1d':9, 'conv2d':10,'conv3d':11, 'dropout':0, 'activation':12}
     padding_types = {'valid':0, 'same':1}
 
     def __init__(self):
@@ -19,9 +19,33 @@ class Arduino(BackendPlugin):
 
     def translate_to_native_code(self, input, outputfile):
         """Translates the given input (intermediate format) to native Arduino code and writes a header- and a ino-file"""
-        markers = dict()
 
-        #? Building the markers array from the information in input
+        markers = self.build_markers(input)
+
+        #? Reading the header file with markers and replacing them with the markers array
+        header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/nn_model.h-template'), markers)
+
+        #? Creating directory if not existing
+        out_directory_path = '_out/' + os.path.splitext(outputfile)[0]
+        if not os.path.exists(out_directory_path):
+            os.makedirs(out_directory_path)
+
+        header_filename = out_directory_path + '/nn_model.h'
+        with open(header_filename, 'w') as file:
+            file.write(header_file)
+
+        c_file_source_path = './backend/nn_model.c-template'
+        c_file_destination_path = out_directory_path + '/nn_model.c'
+        ino_file_source_path = './backend/arduino.ino-template'
+        ino_file_destination_path = out_directory_path + '/' + os.path.splitext(outputfile)[0] + '.ino'
+
+        #? Copying files in defined output directory
+        copyfile(c_file_source_path, c_file_destination_path)
+        copyfile(ino_file_source_path, ino_file_destination_path)
+
+    def build_markers(self, input):
+        """Returns a markers array build from intermediate input information """
+        markers = dict()
 
         #? common markers
         markers['###numberLayers###'] = backend_utils.get_number_of_layers(input)
@@ -56,23 +80,4 @@ class Arduino(BackendPlugin):
         markers['###verticalStride###'] = verticalStrides
         markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
-        #? Reading the header file with markers and replacing them with the markers array
-        header_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/nn_model.h-template'), markers)
-
-        #? Creating directory if not existing
-        out_directory_path = '_out/' + os.path.splitext(outputfile)[0]
-        if not os.path.exists(out_directory_path):
-            os.makedirs(out_directory_path)
-
-        header_filename = out_directory_path + '/nn_model.h'
-        with open(header_filename, 'w') as file:
-            file.write(header_file)
-
-        c_file_source_path = './backend/nn_model.c-template'
-        c_file_destination_path = out_directory_path + '/nn_model.c'
-        ino_file_source_path = './backend/arduino.ino-template'
-        ino_file_destination_path = out_directory_path + '/' + os.path.splitext(outputfile)[0] + '.ino'
-
-        #? Copying files in defined output directory
-        copyfile(c_file_source_path, c_file_destination_path)
-        copyfile(ino_file_source_path, ino_file_destination_path)
+        return markers
