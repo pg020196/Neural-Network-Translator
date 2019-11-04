@@ -66,12 +66,12 @@ class TestBackendUtils(unittest.TestCase):
         self.assertTrue(backend_utils.get_number_of_layers(self.dense_3layer_input) == 4)
 
     def test_get_layer_types_string_dense2(self):
-        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{0,0}')
+        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{1,1}')
 
     def test_get_layer_types_string_flatten_avgpool3d(self):
         self.dense_2layer_input['config']['layers'][0]['class_name'] = 'Flatten'
         self.dense_2layer_input['config']['layers'][1]['class_name'] = 'AvgPooling3D'
-        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{1,7}')
+        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{2,8}')
 
     def test_get_output_dimensions_dense2(self):
         heights, widths = backend_utils.get_output_dimensions(self.dense_2layer_input)
