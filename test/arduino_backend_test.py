@@ -14,14 +14,18 @@ class TestArduinoBackend(unittest.TestCase):
     precision = 8
     modelPath = '../diabetes_model.h5'
     intermediate = None
+    com = 'COM3'
+    baud = 9600
 
     def __init__(self, testname, com, baud, model):
         super(TestArduinoBackend, self).__init__(testname)
-        self.arduino = serial.Serial(com,baud, timeout=5)
         self.modelPath = model
         self.intermediate = json.load(open('test/test_dense_2layer_input.json'))
+        self.com = com
+        self.baud = baud
 
     def setUp(self):
+        self.arduino = serial.Serial(self.com, self.baud, timeout=5)
         self.inputs.append('6,148,72,35,0,33.6,0.627,50') #1
         self.inputs.append('10,168,74,0,0,38,0.537,34') #1
         self.inputs.append('0,101,65,28,0,24.6,0.237,22') #0
@@ -31,6 +35,7 @@ class TestArduinoBackend(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self):
+        self.arduino.close()
         return super().tearDown()
 
     def test_arduino_translate_to_native_code(self):
