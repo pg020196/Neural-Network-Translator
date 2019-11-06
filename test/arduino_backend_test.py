@@ -8,6 +8,7 @@ import tensorflow as tf
 from backend.arduino import Arduino
 
 class TestArduinoBackend(unittest.TestCase):
+    """Test class for Arduino Backend"""
 
     inputs = []
     arduino = None
@@ -25,6 +26,7 @@ class TestArduinoBackend(unittest.TestCase):
         self.baud = baud
 
     def setUp(self):
+        """Preparation for test cases"""
         self.arduino = serial.Serial(self.com, self.baud, timeout=5)
         self.inputs.append('6,148,72,35,0,33.6,0.627,50') #1
         self.inputs.append('10,168,74,0,0,38,0.537,34') #1
@@ -35,12 +37,15 @@ class TestArduinoBackend(unittest.TestCase):
         return super().setUp()
 
     def tearDown(self):
+        """Clean up after test cases"""
         self.arduino.close()
         return super().tearDown()
 
     def test_arduino_translate_to_native_code(self):
+        """ Test case for translate to native code function"""
         results_arduino = []
 
+        #? Sending test inputs to Arduino and collecting results
         for input_values in self.inputs:
             self.arduino.readline()
             self.arduino.write(input_values.encode())
@@ -53,11 +58,13 @@ class TestArduinoBackend(unittest.TestCase):
         results_framework = []
         model = tf.keras.models.load_model(self.modelPath)
 
+        #? Collecting results from framework prediction for test inputs
         for input_values in self.inputs:
             array = str(input_values).split(',')
             array = np.array(array).reshape(1,len(array))
             results_framework.append(model.predict(array.astype(np.float)))
 
+        #? Checking if results from framework and arduino differ or not
         for i in range(0, len(results_arduino)):
             counter = 0
             dot_index = 0
@@ -75,7 +82,9 @@ class TestArduinoBackend(unittest.TestCase):
         self.assertTrue(True)
 
     def test_build_markers(self):
+        """Test case for build_markers function"""
         markers = Arduino().build_markers(self.intermediate)
+        #? Check if all markers were correctly added to the dictionary
         self.assertTrue('###numberLayers###' in markers and
                         '###dimNumberLayers###' in markers and
                         '###layerTypes###' in markers and
@@ -108,12 +117,15 @@ if __name__ == '__main__':
     parser.add_argument('-m', '--model', type=str, required=True, help='h5-model')
     args = parser.parse_args()
 
+    #? Searching for all test cases in TestArduinoBackend
     test_loader = unittest.TestLoader()
     test_names = test_loader.getTestCaseNames(TestArduinoBackend)
 
+    #? Adding all found test cases
     suite = unittest.TestSuite()
     for test_name in test_names:
         suite.addTest(TestArduinoBackend(test_name, args.com, args.baud, args.model))
 
+    #? Running the test suite
     result = unittest.TextTestRunner().run(suite)
     sys.exit(not result.wasSuccessful())

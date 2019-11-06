@@ -19,6 +19,8 @@ test_loader = unittest.TestLoader()
 
 #? Running tests for backend_utils
 print('######################### Running tests for backend_utils #########################')
+
+#? Finding all test cases in TestBackendUtils and executing the test suite
 backend_utils_test_names = test_loader.getTestCaseNames(TestBackendUtils)
 suite = unittest.TestSuite()
 for test_name in backend_utils_test_names:
@@ -29,11 +31,14 @@ print()
 
 #? Running tests for Arduino backend
 print('######################### Running tests for Arduino backend #########################')
+
+#? Finding all test cases in TestArduinoBackend and executing the test suite
 arduino_backend_test_names = test_loader.getTestCaseNames(TestArduinoBackend)
 suite = unittest.TestSuite()
 for test_name in arduino_backend_test_names:
     suite.addTest(TestArduinoBackend(test_name, args.com, args.baud, args.model))
 
 result_arduino_backend = unittest.TextTestRunner().run(suite)
+
 
 sys.exit(not (result_backend_utils.wasSuccessful() and result_arduino_backend.wasSuccessful()))
