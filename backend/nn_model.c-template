@@ -46,7 +46,7 @@ static void apply_activation_function_softmax(float values[], float denominator,
   }
 }
 
-static float * apply_dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, float weights[], uint16_t weights_start_index, float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+static float * apply_dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
 {
   uint16_t current_unit_index;
   float * current_layer_results = calloc(number_of_current_units, sizeof(float));
