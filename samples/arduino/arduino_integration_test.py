@@ -3,25 +3,21 @@ import serial
 import numpy as np
 import argparse
 import sys
-import json
 import tensorflow as tf
-from backend.arduino import Arduino
 
-class TestArduinoBackend(unittest.TestCase):
+class ArduinoIntegrationTest(unittest.TestCase):
     """Test class for Arduino Backend"""
 
     inputs = []
     arduino = None
     precision = 8
     modelPath = '../diabetes_model.h5'
-    intermediate = None
     com = 'COM3'
     baud = 9600
 
     def __init__(self, testname, com, baud, model):
-        super(TestArduinoBackend, self).__init__(testname)
+        super(ArduinoIntegrationTest, self).__init__(testname)
         self.modelPath = model
-        self.intermediate = json.load(open('test/test_dense_2layer_input.json'))
         self.com = com
         self.baud = baud
 
@@ -81,50 +77,26 @@ class TestArduinoBackend(unittest.TestCase):
 
         self.assertTrue(True)
 
-    def test_build_markers(self):
-        """Test case for build_markers function"""
-        markers = Arduino().build_markers(self.intermediate)
-        #? Check if all markers were correctly added to the dictionary
-        self.assertTrue('###numberLayers###' in markers and
-                        '###dimNumberLayers###' in markers and
-                        '###layerTypes###' in markers and
-                        '###layerTypes###' in markers and
-                        '###layerOutputWidth###' in markers and
-                        '###layerOutputHeight###' in markers and
-                        '###activationFunctions###' in markers and
-                        '###weights###' in markers and
-                        '###dimWeights###' in markers and
-                        '###indicesWeights###' in markers and
-                        '###bias###' in markers and
-                        '###dimBias###' in markers and
-                        '###indicesBias###' in markers and
-                        '###useBias###' in markers and
-                        '###poolWidth###' in markers and
-                        '###poolHeight###' in markers and
-                        '###horizontalStride###' in markers and
-                        '###verticalStride###' in markers and
-                        '###padding###' in markers)
-
 #? ############### INFO ###############
 #? This script has to be run with -m switch from parent directory in order to get the imports right
 #? Directory: Neural-Network-Translator (repository root directory)
 #? Command: python -m test.arduino_backend_test
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Arduino unit test')
+    parser = argparse.ArgumentParser(description='Arduino integration test')
     parser.add_argument('-c', '--com', type=str, required=True, help='COM of Arduino')
     parser.add_argument('-b', '--baud', type=str, required=True, help='Baud rate of Arduino')
     parser.add_argument('-m', '--model', type=str, required=True, help='h5-model')
     args = parser.parse_args()
 
-    #? Searching for all test cases in TestArduinoBackend
+    #? Searching for all test cases in ArduinoIntegrationTest
     test_loader = unittest.TestLoader()
-    test_names = test_loader.getTestCaseNames(TestArduinoBackend)
+    test_names = test_loader.getTestCaseNames(ArduinoIntegrationTest)
 
     #? Adding all found test cases
     suite = unittest.TestSuite()
     for test_name in test_names:
-        suite.addTest(TestArduinoBackend(test_name, args.com, args.baud, args.model))
+        suite.addTest(ArduinoIntegrationTest(test_name, args.com, args.baud, args.model))
 
     #? Running the test suite
     result = unittest.TextTestRunner().run(suite)
