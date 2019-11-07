@@ -1,8 +1,8 @@
 import unittest
 import sys
 import json
-from backend import backend_utils
-from backend.arduino import Arduino
+import backend.gcc.backend_utils as backend_utils
+from backend.gcc.gcc import GCC
 
 class TestBackendUtils(unittest.TestCase):
 
@@ -80,13 +80,13 @@ class TestBackendUtils(unittest.TestCase):
 
     def test_get_layer_types_string_dense2(self):
         """Test case for get_layer_types_string function in 2 layer dense network"""
-        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{1,1}')
+        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, GCC.layer_types) == '{1,1}')
 
     def test_get_layer_types_string_flatten_avgpool3d(self):
         """Test case for get_number_of_layers function with flattten and avgpooling3d layers"""
         self.dense_2layer_input['config']['layers'][0]['class_name'] = 'Flatten'
         self.dense_2layer_input['config']['layers'][1]['class_name'] = 'AvgPooling3D'
-        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, Arduino.layer_types) == '{2,8}')
+        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, GCC.layer_types) == '{2,8}')
 
     def test_get_output_dimensions_dense2(self):
         """Test case for get_output_dimensions function in 2 layer dense network"""
@@ -116,14 +116,14 @@ class TestBackendUtils(unittest.TestCase):
 
     def test_get_activation_function_string_relu_sigmoid(self):
         """Test case for get_activation_function_string function with relu and sigmoid function"""
-        self.assertTrue(backend_utils.get_activation_function_string(self.dense_3layer_input, Arduino.activation_functions) == '{2,2,1}')
+        self.assertTrue(backend_utils.get_activation_function_string(self.dense_3layer_input, GCC.activation_functions) == '{2,2,1}')
 
     def test_get_activation_function_string_linear_tanh_softmax(self):
         """Test case for get_activation_function_string function with linear, softmax and tanh function"""
         self.dense_3layer_input['config']['layers'][0]['config']['activation'] = 'linear'
         self.dense_3layer_input['config']['layers'][1]['config']['activation'] = 'tanh'
         self.dense_3layer_input['config']['layers'][2]['config']['activation'] = 'softmax'
-        self.assertTrue(backend_utils.get_activation_function_string(self.dense_3layer_input, Arduino.activation_functions) == '{0,3,4}')
+        self.assertTrue(backend_utils.get_activation_function_string(self.dense_3layer_input, GCC.activation_functions) == '{0,3,4}')
 
     def test_get_bias_information_dense3(self):
         """Test case for get_bias_information function in 3 layer dense network"""
