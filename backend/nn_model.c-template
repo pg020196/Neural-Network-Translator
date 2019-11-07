@@ -66,14 +66,14 @@ static float * apply_dense(float * input, uint16_t number_of_previous_units, uin
     of the current_layer_results array can be replaced with the bias value. */
     if (bias_enabled == 1)
     {
-      current_layer_results[current_unit_index] = biases[bias_start_index + current_unit_index];
+      *(current_layer_results+current_unit_index) = biases[bias_start_index + current_unit_index];
     }
 
     /* Loops through the number of previous units to calculate the dot product. */
     for (previous_unit_index = 0; previous_unit_index < number_of_previous_units; previous_unit_index++)
     {
-      current_layer_results[current_unit_index] =
-          current_layer_results[current_unit_index] +
+      *(current_layer_results+current_unit_index) =
+          *(current_layer_results+current_unit_index) +
           *(input + previous_unit_index) *
               weights[(number_of_current_units * previous_unit_index + current_unit_index) + weights_start_index];
     }
@@ -83,15 +83,15 @@ static float * apply_dense(float * input, uint16_t number_of_previous_units, uin
     This improves the runtime if another activation function is used. */
     if (activation_function == 4)
     {
-      softmax_denominator = softmax_denominator + (float)exp(current_layer_results[current_unit_index]);
+      softmax_denominator = softmax_denominator + (float)exp(*(current_layer_results+current_unit_index));
     }
     /* Apply activation function directly to the element to prevent having to
     loop through the array a second time.
     If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value. */
     else if (activation_function != 0)
     {
-      current_layer_results[current_unit_index] = apply_activation_function(activation_function,
-                                                                            current_layer_results[current_unit_index]);
+      *(current_layer_results+current_unit_index) = apply_activation_function(activation_function,
+                                                                            *(current_layer_results+current_unit_index));
     }
   }
 
