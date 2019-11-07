@@ -26,8 +26,7 @@ void loop()
 
     /* Inits the input float array with zeros.
     The length of the array is determined through the number of units in layer 0 (input layer). */
-    float input[LAYER_OUTPUT_WIDTH[0]*LAYER_OUTPUT_HEIGHT[0]];
-    memset(input,0,LAYER_OUTPUT_WIDTH[0]*LAYER_OUTPUT_HEIGHT[0]*sizeof(float));
+    float * input = calloc(LAYER_OUTPUT_WIDTH[0]*LAYER_OUTPUT_HEIGHT[0], sizeof(float));
     char *tmp;
     int i = 0;
 
