@@ -36,13 +36,13 @@ Purpose: Applies the softmax activation function to an input array
 Arguments: A float array of input values, a float value as denominator, the length of the input array
 Returns: Nothing
 */
-static void apply_activation_function_softmax(float values[], float denominator, uint16_t input_length)
+static void apply_activation_function_softmax(float  * values, float denominator, uint16_t input_length)
 {
   uint16_t index;
   for (index = 0; index < input_length; index++)
   {
-    float divisor = (float)exp(values[index]);
-    values[index] = divisor / denominator;
+    float divisor = (float)exp(*(values+index));
+    *(values+index) = divisor / denominator;
   }
 }
 
@@ -126,7 +126,7 @@ static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t i
       if (current_row_index >= vertical_padding && current_row_index < (output_height - vertical_padding) && current_column_index >= horizontal_padding && current_column_index < (output_width - horizontal_padding))
       {
         output_index = current_row_index * output_width + current_column_index;
-        output[output_index] = *(input + input_index);
+        *(output+output_index) = *(input + input_index);
         input_index = input_index + 1;
       }
     }
@@ -174,7 +174,7 @@ static float * apply_avg_pool(float * input, uint16_t input_width, uint16_t inpu
           result = result + *(input + index);
         }
       }
-      output[horizontal_step_index + vertical_step_index * pool_width] = (float)result / (pool_width * pool_height);
+      *(output+(horizontal_step_index + vertical_step_index * pool_width)) = (float)result / (pool_width * pool_height);
     }
   }
   free(input);
@@ -217,13 +217,13 @@ static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input
         for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
         {
           index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
-          if (input[index] > result)
+          if (*(input+index) > result)
           {
-            result = input[index];
+            result = *(input+index);
           }
         }
       }
-      output[horizontal_step_index + vertical_step_index * pool_width] = result;
+      *(output+(horizontal_step_index + vertical_step_index * pool_width)) = result;
     }
   }
   free(input);
@@ -256,19 +256,34 @@ float * predict(float * input)
 
       input = apply_dense(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
     }
-    else if (LAYER_TYPE[current_layer_index -1] == 2)
-    {
-      // TODO: Implement Flatten here
-    }
     else if (LAYER_TYPE[current_layer_index -1] == 3)
     {
-      // TODO: Implement Max_Pool here
+      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index-1];
+      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index-1];
+      uint16_t pool_width = POOL_WIDTH[current_layer_index];
+      uint16_t pool_height = POOL_HEIGHT[current_layer_index];
+      uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
+      uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
+      uint8_t padding = PADDING[current_layer_index];
+
+      input = apply_max_pool(input, input_width, input_height, pool_width, pool_height,horizontal_stride, vertical_stride, padding);
     }
     else if (LAYER_TYPE[current_layer_index -1] == 6)
     {
-      // TODO: Implement Avg_Pool here
+      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index-1];
+      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index-1];
+      uint16_t pool_width = POOL_WIDTH[current_layer_index];
+      uint16_t pool_height = POOL_HEIGHT[current_layer_index];
+      uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
+      uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
+      uint8_t padding = PADDING[current_layer_index];
+
+      input = apply_avg_pool(input, input_width, input_height, pool_width, pool_height,horizontal_stride, vertical_stride, padding);
     }
   }
+
+   /* We do not need to do anything for flatten layers since we're already using a flattened array structure
+      and the calculation of the proper sizing is already performed by the python backend. */
 
   return input;
 }
