@@ -74,3 +74,20 @@ class PluginCollection(object):
                     #? Only add classes that are a sub class of Frontend-, Backend- or ConversionPlugin, but not the class itself
                     if issubclass(c, Plugin) & (c is not Plugin and c is not FrontendPlugin and c is not BackendPlugin and c is not ConversionPlugin):
                         self.plugins.append(c())
+
+        all_current_paths = []
+        if isinstance(imported_package.__path__, str):
+            all_current_paths.append(imported_package.__path__)
+        else:
+            all_current_paths.extend([x for x in imported_package.__path__])
+
+        for pkg_path in all_current_paths:
+            if pkg_path not in self.seen_paths:
+                self.seen_paths.append(pkg_path)
+
+                # Get all subdirectory of the current package path directory
+                child_pkgs = [p for p in os.listdir(pkg_path) if os.path.isdir(os.path.join(pkg_path, p))]
+
+                # For each subdirectory, apply the walk_package method recursively
+                for child_pkg in child_pkgs:
+                    self.search_for_plugins(package + '.' + child_pkg)
