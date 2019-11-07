@@ -1,4 +1,6 @@
 from itertools import chain
+from shutil import copyfile
+import os
 
 DENSE_LAYER = 'Dense'
 CONV_2D_LAYER = 'Conv2D'
@@ -17,6 +19,26 @@ def read_marker_file(filename):
     """ Reads given filename"""
     with open(filename, 'r') as file:
         return file.read()
+
+def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_name, exec_file):
+    """Writes header- and c-file in given output directory (created if necessary)"""
+    #? Creating directory if not existing
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    h_filename = out_dir + '/' + h_file_name
+    with open(h_filename, 'w') as file:
+        file.write(h_file)
+
+    c_file_dest = out_dir + '/' + c_file_name
+
+    exec_file_dest = out_dir + '/' + os.path.basename(exec_file)
+
+    #? Copying files in defined output directory
+    copyfile(c_file_source, c_file_dest)
+
+    if (exec_file is not None):
+        copyfile(exec_file, exec_file_dest)
 
 def convert_array_to_string(array):
     """Returns a string containing the given array"""
