@@ -9,7 +9,7 @@ Purpose: Applies the activation function to the input value
 Arguments: An integer value to specify the activation function, a float value
 Returns: The given value with the activation function applied
 */
-static float apply_activation_function(uint8_t act_func, float value)
+static float activation_function_apply(uint8_t act_func, float value, float denominator)
 {
   if (act_func == 1)
   {
@@ -28,25 +28,27 @@ static float apply_activation_function(uint8_t act_func, float value)
     float negExpInput = (float)exp(-value);
     return (expInput - negExpInput) / (expInput + negExpInput);
   }
+  else if(act_func == 4)
+  {
+    float divisor = (float)exp(value);
+    return divisor/denominator;
+  }
   return value;
 }
 
-/*
-Purpose: Applies the softmax activation function to an input array
-Arguments: A float array of input values, a float value as denominator, the length of the input array
-Returns: Nothing
-*/
-static void apply_activation_function_softmax(float  * values, float denominator, uint16_t input_length)
+static float * activation_apply(float * values, uint16_t values_length, uint8_t act_func, float denominator)
 {
   uint16_t index;
-  for (index = 0; index < input_length; index++)
+  float * output = calloc(values_length, sizeof(float));
+  for(index = 0; index < values_length; index++)
   {
-    float divisor = (float)exp(*(values+index));
-    *(values+index) = divisor / denominator;
+    *(output + index) = activation_function_apply(act_func, *(values+index), denominator);
   }
+  free(values);
+  return output;
 }
 
-static float * apply_dense(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+static float * dense_apply(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
 {
   uint16_t current_unit_index;
   float * current_layer_results = calloc(number_of_current_units, sizeof(float));
@@ -54,9 +56,9 @@ static float * apply_dense(float * input, uint16_t number_of_previous_units, uin
   /* Initialize a variable to store the denominator for the softmax activation function.
   If the softmax activation function is used, the denominator can be calculated easily
   during the following matrix calculation and will lead to a performance increase, since
-  the calculation of the softmax denominator would otherwise  require a loop through the
+  the calculation of the softmax denominator would otherwise  require a second loop through the
   whole array later on. */
-  float softmax_denominator = 0;
+  float denominator = 0;
 
   for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
   {
@@ -83,40 +85,28 @@ static float * apply_dense(float * input, uint16_t number_of_previous_units, uin
     This improves the runtime if another activation function is used. */
     if (activation_function == 4)
     {
-      softmax_denominator = softmax_denominator + (float)exp(*(current_layer_results+current_unit_index));
-    }
-    /* Apply activation function directly to the element to prevent having to
-    loop through the array a second time.
-    If the activation function is equal to 0, no activation function shall be applied since 0 is defined as the linear activation function and thus does not change the value. */
-    else if (activation_function != 0)
-    {
-      *(current_layer_results+current_unit_index) = apply_activation_function(activation_function,
-                                                                            *(current_layer_results+current_unit_index));
+      denominator = denominator + (float)exp(*(current_layer_results+current_unit_index));
     }
   }
 
-  /* Apply the softmax activation function if necessary. */
-  if (activation_function == 4)
-  {
-    apply_activation_function_softmax(current_layer_results, softmax_denominator, number_of_current_units);
-  }
+  float * results_with_act = calloc(number_of_current_units, sizeof(float));
+  results_with_act = activation_apply(current_layer_results, number_of_current_units, activation_function, denominator);
 
   free(input);
-
-  return current_layer_results;
+  return results_with_act;
 }
 
 // TODO: TEST THIS METHOD
-static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height)
+static float * padding_zero_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height)
 {
   uint16_t current_row_index;
   uint16_t current_column_index;
   uint16_t output_index;
   uint16_t input_index = 0;
-  uint16_t vertical_padding = (pool_height - 1) / 2;
-  uint16_t horizontal_padding = (pool_width - 1) / 2;
-  uint16_t output_width = input_width + horizontal_padding * 2;
-  uint16_t output_height = input_height + vertical_padding * 2;
+  uint16_t vertical_padding = padding_calculate_size(pool_height);
+  uint16_t horizontal_padding = padding_calculate_size(pool_width);
+  uint16_t output_width = padding_calculate_output_size(input_width, horizontal_padding);
+  uint16_t output_height = padding_calculate_output_size(input_height, vertical_padding);
   float * output = calloc(output_width * output_height, sizeof(float));
 
   for (current_row_index = 0; current_row_index < output_height; current_row_index++)
@@ -135,31 +125,15 @@ static float * apply_zero_padding(float *input, uint16_t input_width, uint16_t i
   return output;
 }
 
-/*
-   Padding == 1 is activated
-*/
-// TODO: Test this method
-static float * apply_avg_pool(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height)
 {
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
-  uint16_t vertical_padding = (pool_height - 1) / 2;
-  uint16_t horizontal_padding = (pool_width - 1) / 2;
-  uint16_t output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
-  uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t index;
   float result;
   float * output = calloc(output_height * output_width, sizeof(float));
-
-  if (padding == 1)
-  {
-    input = apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
-    /* Update input_width and input_height to the new padded size */
-    input_width = input_width + pool_width - 1;
-    input_height = input_height + pool_height - 1;
-  }
 
   for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
   {
@@ -181,31 +155,15 @@ static float * apply_avg_pool(float * input, uint16_t input_width, uint16_t inpu
   return output;
 }
 
-/*
-   Padding == 1 is activated
-*/
-// TODO: Test this method
-static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height)
 {
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
-  uint16_t vertical_padding = (pool_height - 1) / 2;
-  uint16_t horizontal_padding = (pool_width - 1) / 2;
-  uint16_t output_height = ((input_height - pool_height + 2 * vertical_padding) / vertical_stride) + 1;
-  uint16_t output_width = ((input_width - pool_width + 2 * horizontal_padding) / horizontal_stride) + 1;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t index;
   float result;
   float * output = calloc(output_height * output_width, sizeof(float));
-
-  if (padding == 1)
-  {
-    input = apply_zero_padding(input, input_width, input_height, pool_width, pool_height);
-    /* Update input_width and input_height to the new padded size */
-    input_width = input_width + pool_width - 1;
-    input_height = input_height + pool_height - 1;
-  }
 
   for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
   {
@@ -228,6 +186,55 @@ static float * apply_max_pool(float *input, uint16_t input_width, uint16_t input
   }
   free(input);
   return output;
+}
+
+static float * pooling_apply(uint8_t pooling_type,float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+{
+  uint16_t vertical_padding = padding_calculate_size(pool_height);
+  uint16_t horizontal_padding = padding_calculate_size(pool_width);
+  uint16_t output_height = pooling_calculate_output_size(input_height, pool_height, vertical_padding, vertical_stride);
+  uint16_t output_width = pooling_calculate_output_size(input_width, pool_width, horizontal_padding, horizontal_stride);
+
+  if (padding == 1)
+  {
+    input = padding_zero_apply(input, input_width, input_height, pool_width, pool_height);
+    /* Update input_width and input_height to the new padded size */
+    input_width = padding_calculate_output_size(input_width, horizontal_padding);
+    input_height = padding_calculate_output_size(input_height, vertical_padding);
+  }
+
+  if(pooling_type == 0)
+  {
+    return pooling_max_apply(input, input_width, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height);
+  }
+  else if(pooling_type == 1)
+  {
+    return pooling_avg_apply(input, input_width, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height);
+  }
+  else
+  {
+    return input;
+  }
+}
+
+static uint16_t pooling_calculate_output_size(uint16_t input_dimension, uint16_t pool_dimension, uint16_t padding_dimension, uint16_t stride_size)
+{
+  return ((input_dimension-pool_dimension + 2 * padding_dimension)/stride_size)+1;
+}
+
+static uint16_t padding_calculate_size(uint16_t pool_dimension)
+{
+  return (pool_dimension-1)/2;
+}
+
+static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t padding_dimension)
+{
+  return input_dimension + padding_dimension * 2;
+}
+
+static float * convolution_apply()
+{
+// TODO Implement convolution layer logic
 }
 
 /*
@@ -254,9 +261,9 @@ float * predict(float * input)
       uint16_t bias_start_index = BIASES_START_INDEX[current_layer_index - 1];
       uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
 
-      input = apply_dense(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
+      input = dense_apply(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
     }
-    else if (LAYER_TYPE[current_layer_index -1] == 3)
+    else if (LAYER_TYPE[current_layer_index -1] == 3 || LAYER_TYPE[current_layer_index -1] == 4)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index-1];
       uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index-1];
@@ -266,19 +273,7 @@ float * predict(float * input)
       uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
       uint8_t padding = PADDING[current_layer_index];
 
-      input = apply_max_pool(input, input_width, input_height, pool_width, pool_height,horizontal_stride, vertical_stride, padding);
-    }
-    else if (LAYER_TYPE[current_layer_index -1] == 6)
-    {
-      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index-1];
-      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index-1];
-      uint16_t pool_width = POOL_WIDTH[current_layer_index];
-      uint16_t pool_height = POOL_HEIGHT[current_layer_index];
-      uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
-      uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
-      uint8_t padding = PADDING[current_layer_index];
-
-      input = apply_avg_pool(input, input_width, input_height, pool_width, pool_height,horizontal_stride, vertical_stride, padding);
+      input = pooling_apply(LAYER_TYPE[current_layer_index-1], input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, padding);
     }
   }
 
