@@ -6,7 +6,7 @@ DENSE_LAYER = 'Dense'
 CONV_2D_LAYER = 'Conv2D'
 CONV_1D_LAYER = 'Conv1D'
 MAX_POOL_2D_LAYER = 'MaxPooling2D'
-AVG_POOL_2D_LAYER = 'AvgPooling2D'
+AVG_POOL_2D_LAYER = 'AveragePooling2D'
 FLATTEN_LAYER = 'Flatten'
 
 def replace_markers(file, markers):
@@ -32,12 +32,11 @@ def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_
 
     c_file_dest = out_dir + '/' + c_file_name
 
-    exec_file_dest = out_dir + '/' + os.path.basename(exec_file)
-
     #? Copying files in defined output directory
     copyfile(c_file_source, c_file_dest)
 
     if (exec_file is not None):
+        exec_file_dest = out_dir + '/' + os.path.basename(exec_file)
         copyfile(exec_file, exec_file_dest)
 
 def convert_array_to_string(array):

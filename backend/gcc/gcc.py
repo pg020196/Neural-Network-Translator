@@ -9,7 +9,7 @@ class GCC(BackendPlugin):
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
     layer_types = {'dense':1, 'flatten':2,
                    'maxpooling1d':3, 'maxpooling2d':3, 'maxpooling3d':3,
-                   'avgpooling1d':4, 'avgpooling2d':4, 'avgpooling3d':4,
+                   'averagepooling1d':4, 'averagepooling2d':4, 'averagepooling3d':4,
                    'conv1d':5, 'conv2d':5,'conv3d':5, 'dropout':0, 'activation':6}
     padding_types = {'valid':0, 'same':1}
 
