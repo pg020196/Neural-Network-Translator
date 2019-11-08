@@ -86,7 +86,7 @@ class TestBackendUtils(unittest.TestCase):
         """Test case for get_number_of_layers function with flattten and avgpooling3d layers"""
         self.dense_2layer_input['config']['layers'][0]['class_name'] = 'Flatten'
         self.dense_2layer_input['config']['layers'][1]['class_name'] = 'AvgPooling3D'
-        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, GCC.layer_types) == '{2,8}')
+        self.assertTrue(backend_utils.get_layer_types_string(self.dense_2layer_input, GCC.layer_types) == '{2,4}')
 
     def test_get_output_dimensions_dense2(self):
         """Test case for get_output_dimensions function in 2 layer dense network"""
