@@ -133,7 +133,7 @@ static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t p
   uint16_t horizontal_step_index;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
-  uint16_t index;
+  uint16_t input_index;
   float result;
   float * output = calloc(output_height * output_width, sizeof(float));
 
@@ -146,8 +146,8 @@ static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t p
       {
         for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
         {
-          index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
-          result = result + *(input + index);
+          input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
+          result = result + *(input + input_index);
         }
       }
       *(output+(horizontal_step_index + vertical_step_index * pool_width)) = (float)result / (pool_width * pool_height);
@@ -163,7 +163,7 @@ static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t p
   uint16_t horizontal_step_index;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
-  uint16_t index;
+  uint16_t input_index;
   float result;
   float * output = calloc(output_height * output_width, sizeof(float));
 
@@ -176,10 +176,10 @@ static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t p
       {
         for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
         {
-          index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
-          if (*(input+index) > result)
+          input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
+          if (*(input+input_index) > result)
           {
-            result = *(input+index);
+            result = *(input+input_index);
           }
         }
       }
