@@ -95,13 +95,14 @@ def get_output_dimensions(input):
             act_height = last_output_height * last_output_width
             act_width = 1
         if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER):
-            vertical_padding = (layer['config']['pool_size'][0] - 1) / 2
+            vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
-            horizontal_padding = (layer['config']['pool_size'][1] - 1) / 2
+
+            horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
 
-        height_array.append(act_height)
-        width_array.append(act_width)
+        height_array.append(int(act_height))
+        width_array.append(int(act_width))
 
         last_output_height = act_height
         last_output_width = act_width
@@ -164,14 +165,14 @@ def get_bias_information(input):
     use_bias_array = []
     for layer in input['config']['layers']:
         if (layer['class_name']==DENSE_LAYER):
-            use_bias_array.append(str(int(layer['config']['use_bias'])))
-            bias_indices_array.append(str(last_layer_values))
+            use_bias_array.append(int(layer['config']['use_bias']))
+            bias_indices_array.append(int(last_layer_values))
             last_layer_values = last_layer_values + layer['config']['units']
             output.append(layer['bias_values'])
             count = count + 1
         else:
-            use_bias_array.append('0')
-            bias_indices_array.append('0')
+            use_bias_array.append(0)
+            bias_indices_array.append(0)
 
     #? Flattening the array before returning
     bias_array = list(chain.from_iterable(output))
@@ -188,13 +189,13 @@ def get_weight_information(input, layerOutputHeight):
     weights_indices_array=[]
     for layer in input['config']['layers']:
         if (layer['class_name']==DENSE_LAYER):
-            weights_indices_array.append(str(previous_layer_values))
+            weights_indices_array.append(int(previous_layer_values))
             previous_layer_values = previous_layer_values + int(layer['config']['units']) * layerOutputHeight[count]
 
             units_previous_dense_layer = int(layer['config']['units'])
             output.append(list(chain.from_iterable(layer['kernel_values'])))
         else:
-            weights_indices_array.append('0')
+            weights_indices_array.append(0)
         count = count + 1
 
     #? Flattening the array before returning
