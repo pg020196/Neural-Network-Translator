@@ -105,6 +105,8 @@ static float * padding_zero_apply(float * input, uint16_t input_width, uint16_t 
   uint16_t input_index = 0;
   uint16_t vertical_padding = padding_calculate_size(pool_height);
   uint16_t horizontal_padding = padding_calculate_size(pool_width);
+
+  //! I think this calculation cannot be moved to the backend since it is only a temporary calculation
   uint16_t output_width = padding_calculate_output_size(input_width, horizontal_padding);
   uint16_t output_height = padding_calculate_output_size(input_height, vertical_padding);
   float * output = calloc(output_width * output_height, sizeof(float));
@@ -188,17 +190,20 @@ static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t p
   return output;
 }
 
-static float * pooling_apply(uint8_t pooling_type,float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float * pooling_apply(uint8_t pooling_type,float *input, uint16_t input_width, uint16_t input_height,uint16_t output_width, uint16_t output_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
 {
   uint16_t vertical_padding = padding_calculate_size(pool_height);
   uint16_t horizontal_padding = padding_calculate_size(pool_width);
-  uint16_t output_height = pooling_calculate_output_size(input_height, pool_height, vertical_padding, vertical_stride);
-  uint16_t output_width = pooling_calculate_output_size(input_width, pool_width, horizontal_padding, horizontal_stride);
+
+  //! Check with Christoph if these functions can be removed
+  // uint16_t output_height = pooling_calculate_output_size(input_height, pool_height, vertical_padding, vertical_stride);
+  // uint16_t output_width = pooling_calculate_output_size(input_width, pool_width, horizontal_padding, horizontal_stride);
 
   if (padding == 1)
   {
     input = padding_zero_apply(input, input_width, input_height, pool_width, pool_height);
     /* Update input_width and input_height to the new padded size */
+    //! These function calls cannot be moved to the backend since this is only a temporary transformation of the matrix
     input_width = padding_calculate_output_size(input_width, horizontal_padding);
     input_height = padding_calculate_output_size(input_height, vertical_padding);
   }
@@ -217,6 +222,7 @@ static float * pooling_apply(uint8_t pooling_type,float *input, uint16_t input_w
   }
 }
 
+//! If the above function calls can be removed, this function can be removed as well
 static uint16_t pooling_calculate_output_size(uint16_t input_dimension, uint16_t pool_dimension, uint16_t padding_dimension, uint16_t stride_size)
 {
   return ((input_dimension-pool_dimension + 2 * padding_dimension)/stride_size)+1;
@@ -267,13 +273,15 @@ float * predict(float * input)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index-1];
       uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index-1];
+      uint16_t output_width = LAYER_OUTPUT_WIDTH[current_layer_index];
+      uint16_t output_height = LAYER_OUTPUT_HEIGHT[current_layer_index];
       uint16_t pool_width = POOL_WIDTH[current_layer_index];
       uint16_t pool_height = POOL_HEIGHT[current_layer_index];
       uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
       uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
       uint8_t padding = PADDING[current_layer_index];
 
-      input = pooling_apply(LAYER_TYPE[current_layer_index-1], input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, padding);
+      input = pooling_apply(LAYER_TYPE[current_layer_index-1], input, input_width, input_height,output_width, output_height, pool_width, pool_height, horizontal_stride, vertical_stride, padding);
     }
   }
 
