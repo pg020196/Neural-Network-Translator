@@ -241,6 +241,8 @@ static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t
 static float * convolution_apply()
 {
 // TODO Implement convolution layer logic
+// Add custom padding. Therefore, calculate the padding size and loop through the to be implemented padding method to add enough padding layers
+// Afterwards, one can apply the convolution
 }
 
 /*
