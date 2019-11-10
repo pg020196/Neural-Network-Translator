@@ -11,9 +11,9 @@ void setup() {
 void test_padding()
 {
   //Input variables
-  uint16_t number_of_padding_layers = 0;
-  uint16_t input_width = 2;
-  uint16_t input_height = 2;
+  uint16_t number_of_padding_layers = 1;
+  uint16_t input_width = 1;
+  uint16_t input_height = 4;
   uint16_t output_width = input_width + 2 * number_of_padding_layers;
   uint16_t output_height = input_height + 2 * number_of_padding_layers;
 
@@ -141,10 +141,14 @@ float * padding_values_apply(float * input, uint16_t input_width, uint16_t input
       output_index = output_height * output_width - output_width + output_column_index;
       input_index = input_height * input_width - input_width + output_column_index - 1;
 
-      if (input_index < input_height * input_width - input_width)
+      Serial.println(String(output_index)+","+(String(input_index)));
+
+      if (input_index < input_height * input_width - input_width || input_index < 0)
       {
         input_index = input_height * input_width - input_width;
       }
+      Serial.println();
+      Serial.println(String(output_index)+","+(String(input_index)));
 
       if (input_index >= input_height * input_width) {
         input_index = input_height * input_width - 1;
@@ -156,7 +160,7 @@ float * padding_values_apply(float * input, uint16_t input_width, uint16_t input
     //Extend left side
     for (output_row_index = 1; output_row_index < output_height - 1; output_row_index++)
     {
-      output_index = output_row_index * output_height;
+      output_index = output_row_index * output_width;
       input_index = (output_row_index - 1) * input_width;
 
       if (input_index < 0)
@@ -170,7 +174,7 @@ float * padding_values_apply(float * input, uint16_t input_width, uint16_t input
     // Extend right side
     for (output_row_index = 1; output_row_index < output_height - 1; output_row_index++)
     {
-      output_index = output_row_index * output_height + output_width - 1;
+      output_index = output_row_index * output_width + output_width - 1;
       input_index = (output_row_index - 1) * input_width + input_width - 1;
 
       output[output_index] = input[input_index];
