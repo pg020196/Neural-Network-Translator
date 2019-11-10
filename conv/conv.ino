@@ -2,9 +2,9 @@ void setup() {
 
   /* Opens the serial port and sets the data rate to 9600 bps. */
   Serial.begin(9600);
-  test_padding();
+  //test_padding();
   Serial.println();
-  convolution_apply();
+  test_convolution();
 
 }
 
@@ -36,46 +36,27 @@ void test_padding()
   }
 }
 
-void convolution_apply()
+void test_convolution()
 {
-  float input[64] = {7, 7, 6, 5, 5, 6, 7, 7, 7, 7, 6, 5, 5, 6, 7, 7, 6, 6, 4, 3, 3, 4, 6, 6, 5, 5, 3, 2, 2, 3, 5, 5, 5, 5, 3, 2, 2, 3, 5, 5, 6, 6, 4, 3, 3, 4, 6, 6, 7, 7, 6, 5, 5, 6, 7, 7, 7, 7, 6, 5, 5, 6, 7, 7};
-  uint16_t input_width = 8;
-  uint16_t input_height = 8;
+  uint16_t input_width = 6;
+  uint16_t input_height = 6;
+  float * input = calloc(input_width * input_height, sizeof(float));
+  float data[input_width * input_height] = {7, 6, 5, 5, 6, 7, 6, 4, 3, 3, 4, 6, 5, 3, 2, 2, 3, 5, 5, 3, 2, 2, 3, 5, 6, 4, 3, 3, 4, 6, 7, 6, 5, 5, 6, 7};
+  for (uint16_t i = 0; i < input_width * input_height; i++)
+  {
+    *(input + i) = data[i];
+  }
+
+  
   uint16_t kernel_width = 3;
   uint16_t kernel_height = 3;
-  //float * kernel = calloc(kernel_width*kernel_height, sizeof(float));
-  float kernel[9] = {0, -1, 0, -1, 5, -1, 0, -1, 0};
+  const float kernel[9] = {0, -1, 0, -1, 5, -1, 0, -1, 0};
   uint16_t vertical_stride = 1;
   uint16_t horizontal_stride = 1;
-  uint16_t vertical_step_index;
-  uint16_t horizontal_step_index;
-  uint16_t vertical_kernel_index;
-  uint16_t horizontal_kernel_index;
-  uint16_t input_index;
-  uint16_t kernel_index;
   uint16_t output_height = 6;
   uint16_t output_width = 6;
-  float result;
-  float * output = calloc(output_height * output_width, sizeof(float));
-  //Loop through output matrix
-  for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
-  {
-    //Loop through output matrix
-    for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
-    {
-      result = 0;
-      for (vertical_kernel_index = 0; vertical_kernel_index < kernel_height; vertical_kernel_index++)
-      {
-        for (horizontal_kernel_index = 0; horizontal_kernel_index < kernel_width; horizontal_kernel_index++)
-        {
-          input_index = horizontal_kernel_index + vertical_kernel_index * input_width + vertical_step_index * input_width + horizontal_step_index;
-          kernel_index = vertical_kernel_index * kernel_width + horizontal_kernel_index;
-          result = result + (*(input + input_index) * kernel[kernel_index]);
-        }
-      }
-      *(output + (horizontal_step_index + vertical_step_index * kernel_width)) = result;
-    }
-  }
+
+  float * output = convolution_apply(input, input_width, input_height, kernel, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_width, output_height);
 
   for (int i = 0; i < output_height; i++) {
     for (int j = 0; j < output_width; j++) {
@@ -84,6 +65,52 @@ void convolution_apply()
     }
     Serial.println();
   }
+}
+
+float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, const float kernel[], uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height)
+{
+  uint16_t output_row_index;
+  uint16_t output_column_index;
+  uint16_t kernel_row_index;
+  uint16_t kernel_column_index;
+  uint16_t input_index;
+  uint16_t kernel_index;
+  uint16_t output_index;
+  float result;
+  float * output;
+
+  uint16_t number_of_padding_layers = 1;
+
+  input = padding_values_apply(input, input_width, input_height, number_of_padding_layers);
+
+  input_width = input_width + number_of_padding_layers * 2;
+  input_height = input_height + number_of_padding_layers * 2;
+
+  output = calloc(output_height * output_width, sizeof(float));
+
+  //Loop through output matrix
+  for (output_row_index = 0; output_row_index < output_height; output_row_index += vertical_stride)
+  {
+    //Loop through output matrix
+    for (output_column_index = 0; output_column_index < output_width; output_column_index += horizontal_stride)
+    {
+      result = 0;
+      for (kernel_row_index = 0; kernel_row_index < kernel_height; kernel_row_index++)
+      {
+        for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index++)
+        {
+          input_index = kernel_column_index + kernel_row_index * input_width + output_row_index * input_width + output_column_index;
+          kernel_index = kernel_row_index * kernel_width + kernel_column_index;
+          result = result + (*(input + input_index) * kernel[kernel_index]);
+        }
+      }
+      output_index = output_column_index + output_row_index * output_width;
+      *(output + output_index) = result;
+    }
+  }
+
+  free(input);
+  return output;
 }
 
 float * padding_values_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t number_of_padding_layers)
@@ -141,14 +168,10 @@ float * padding_values_apply(float * input, uint16_t input_width, uint16_t input
       output_index = output_height * output_width - output_width + output_column_index;
       input_index = input_height * input_width - input_width + output_column_index - 1;
 
-      Serial.println(String(output_index)+","+(String(input_index)));
-
       if (input_index < input_height * input_width - input_width || input_index < 0)
       {
         input_index = input_height * input_width - input_width;
       }
-      Serial.println();
-      Serial.println(String(output_index)+","+(String(input_index)));
 
       if (input_index >= input_height * input_width) {
         input_index = input_height * input_width - 1;
