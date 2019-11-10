@@ -79,6 +79,7 @@ float * convolution_apply(float * input, uint16_t input_width, uint16_t input_he
   float result;
   float * output;
 
+  // This can be calculated later
   uint16_t number_of_padding_layers = 1;
 
   input = padding_values_apply(input, input_width, input_height, number_of_padding_layers);
