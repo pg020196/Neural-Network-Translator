@@ -41,9 +41,10 @@ class GCC(BackendPlugin):
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
         markers['###layerTypes###'] = backend_utils.get_layer_types_string(input, self.layer_types)
 
-        layerOutputHeight, layerOutputWidth = backend_utils.get_output_dimensions(input)
+        layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions(input)
         markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
         markers['###layerOutputHeight###'] = backend_utils.convert_array_to_string(layerOutputHeight)
+        markers['###layerOutputDepth###'] = backend_utils.convert_array_to_string(layerOutputDepth)
 
         #? Dense layer specific markers
         markers['###activationFunctions###'] = backend_utils.get_activation_function_string(input, self.activation_functions)

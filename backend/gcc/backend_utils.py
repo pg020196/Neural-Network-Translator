@@ -69,34 +69,51 @@ def get_output_dimensions(input):
     last_output_height=0
     width_array = []
     last_output_width=0
+    depth_array = []
+    last_output_depth =0
 
     for layer in input['config']['layers']:
         input_height = last_output_height
         input_width = last_output_width
+        input_depth = last_output_depth
 
         if 'batch_input_shape' in layer['config']:
+            #? Extraction of 3rd dimension (height)
             height_array.append(layer['config']['batch_input_shape'][1])
             input_height = layer['config']['batch_input_shape'][1]
 
-            last_output_height = layer['config']['batch_input_shape'][1]
+            last_output_height = input_height
 
+            #? Extraction of 2nd dimension (width)
             if (len(layer['config']['batch_input_shape'])>2):
                 width_array.append(layer['config']['batch_input_shape'][2])
                 input_width = layer['config']['batch_input_shape'][2]
 
-                last_output_width = layer['config']['batch_input_shape'][2]
+                last_output_width = input_width
+
+                #? Extraction of 3rd dimension (depth)
+                if (len(layer['config']['batch_input_shape'])>3):
+                    depth_array.append(layer['config']['batch_input_shape'][3])
+                    input_depth = layer['config']['batch_input_shape'][3]
+
+                    last_output_depth = input_depth
+                else:
+                    depth_array.append(1)
+                    input_depth = 1
+                    last_output_depth = input_depth
             else:
                 width_array.append(1)
                 input_width = 1
-
-                last_output_width = 1
+                last_output_width = input_width
 
         if (layer['class_name']==DENSE_LAYER):
             act_height = len(layer['kernel_values'][0])
             act_width = 1
+            act_depth = 1
         if (layer['class_name']==FLATTEN_LAYER):
-            act_height = last_output_height * last_output_width
+            act_height = last_output_height * last_output_width * last_output_depth
             act_width = 1
+            act_depth = 1
         if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
             vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
@@ -104,13 +121,17 @@ def get_output_dimensions(input):
             horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
 
+            act_depth = last_output_depth
+
         height_array.append(int(act_height))
         width_array.append(int(act_width))
+        depth_array.append(int(act_depth))
 
         last_output_height = act_height
         last_output_width = act_width
+        last_output_depth = act_depth
 
-    return height_array, width_array
+    return height_array, width_array, depth_array
 
 def get_pool_size_strings(input):
     width_array=[]
