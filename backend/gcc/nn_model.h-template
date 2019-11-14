@@ -10,6 +10,8 @@ const uint16_t LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;
 //? NEW
 const uint16_t LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerOutputHeight###;
 
+const uint16_t LAYER_OUTPUT_DEPTH[###numberLayers###] = ###layerOutputDepth###;
+
 /* Defines the layer types */
 const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
 
