@@ -92,26 +92,30 @@ class TestBackendUtils(unittest.TestCase):
 
     def test_get_output_dimensions_dense2(self):
         """Test case for get_output_dimensions function in 2 layer dense network"""
-        heights, widths = backend_utils.get_output_dimensions(self.dense_2layer_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.dense_2layer_input)
         self.assertTrue(backend_utils.convert_array_to_string(heights) == '{8,8,1}'
-                    and backend_utils.convert_array_to_string(widths) == '{1,1,1}')
+                    and backend_utils.convert_array_to_string(widths) == '{1,1,1}'
+                    and backend_utils.convert_array_to_string(depths) == '{1,1,1}')
 
     def test_get_output_dimensions_dense3(self):
         """Test case for get_output_dimensions function in 3 layer dense network"""
-        heights, widths = backend_utils.get_output_dimensions(self.dense_3layer_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.dense_3layer_input)
         self.assertTrue(backend_utils.convert_array_to_string(heights) == '{8,16,8,1}'
-                    and backend_utils.convert_array_to_string(widths) == '{1,1,1,1}')
+                    and backend_utils.convert_array_to_string(widths) == '{1,1,1,1}'
+                    and backend_utils.convert_array_to_string(depths) == '{1,1,1,1}')
 
     def test_get_output_dimensions_flatten_dense_dropout(self):
         """Test case for get_output_dimensions function with flatten, dense and dropout layers"""
-        heights, widths = backend_utils.get_output_dimensions(self.mnist_flatten_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.mnist_flatten_input)
         self.assertTrue(backend_utils.convert_array_to_string(heights) == '{28,784,128,128,10}'
-                    and backend_utils.convert_array_to_string(widths) =='{28,1,1,1,1}')
+                    and backend_utils.convert_array_to_string(widths) =='{28,1,1,1,1}'
+                    and backend_utils.convert_array_to_string(depths) == '{1,1,1,1,1}')
 
     def test_get_output_dimensions_pool(self):
-        heights, widths = backend_utils.get_output_dimensions(self.mnist_pool_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.mnist_pool_input)
         self.assertTrue(backend_utils.convert_array_to_string(heights) == '{28,14,196,128,10}'
-                    and backend_utils.convert_array_to_string(widths) =='{28,14,1,1,1}')
+                    and backend_utils.convert_array_to_string(widths) =='{28,14,1,1,1}'
+                    and backend_utils.convert_array_to_string(depths) == '{1,1,1,1,1}')
 
     def test_get_output_dimensions_activation(self):
         # TODO implement for neural network with activation layer
@@ -152,7 +156,7 @@ class TestBackendUtils(unittest.TestCase):
 
     def test_get_weight_information_dense3(self):
         """Test case for get_weight_information function in 3 layer dense network"""
-        heights, widths = backend_utils.get_output_dimensions(self.dense_3layer_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.dense_3layer_input)
         weights_indices_string, weights_array = backend_utils.get_weight_information(self.dense_3layer_input, heights)
         self.assertTrue(weights_indices_string == '{0,128,256}'
                     and len(weights_array) == 264
@@ -160,14 +164,14 @@ class TestBackendUtils(unittest.TestCase):
 
     def test_get_weight_information_dense2(self):
         """Test case for get_weight_information function in 2 layer dense network"""
-        heights, widths = backend_utils.get_output_dimensions(self.dense_2layer_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.dense_2layer_input)
         weights_indices_string, weights_array = backend_utils.get_weight_information(self.dense_2layer_input, heights)
         self.assertTrue(weights_indices_string == '{0,64}'
                     and len(weights_array) == 72
                     and backend_utils.convert_array_to_string(weights_array) == '{-0.15035194158554077,1.430967926979065,0.5391924381256104,-0.3918966054916382,0.4462871849536896,0.5552943348884583,0.7700048089027405,0.28981146216392517,-1.689786672592163,1.042858362197876,2.2847230434417725,-1.9677045345306396,-0.06611120700836182,-0.061966150999069214,-0.6471585631370544,1.4964995384216309,0.19608011841773987,-0.6369050741195679,0.09111300855875015,0.13803385198116302,-0.3828596770763397,-0.4359494745731354,0.7322076559066772,-0.049885910004377365,0.4382251799106598,0.7386993169784546,-0.7968388199806213,0.40169671177864075,1.0121262073516846,0.2377474009990692,0.4582376778125763,-0.26966771483421326,0.1630777269601822,-0.869050920009613,-0.4613328278064728,0.2624562084674835,-0.9985146522521973,-0.6456401944160461,-0.12137659639120102,1.0982298851013184,-0.03326864913105965,0.6471387147903442,-0.1343340277671814,0.22081176936626434,0.854404628276825,-1.670728087425232,-0.16672520339488983,0.8519517779350281,1.2319378852844238,-0.01635606400668621,0.28598904609680176,-0.34935298562049866,0.049734167754650116,-1.2383219003677368,-0.7718221545219421,0.7590272426605225,0.3540281057357788,-1.3175017833709717,1.9483529329299927,-2.1833057403564453,-1.0394269227981567,-0.08081339299678802,-2.6470179557800293,-0.5022009611129761,-0.8252769708633423,1.2357004880905151,1.0166884660720825,-1.3550186157226562,1.1026166677474976,-1.6992595195770264,-0.9769604206085205,0.8309341073036194}')
 
     def test_get_weight_information_mixed(self):
-        heights, widths = backend_utils.get_output_dimensions(self.mnist_pool_input)
+        heights, widths, depths = backend_utils.get_output_dimensions(self.mnist_pool_input)
         weights_indices_string, weights_array = backend_utils.get_weight_information(self.mnist_pool_input, heights)
         self.assertTrue(weights_indices_string == '{0,0,0,25088}'
                     and len(weights_array) == 26368)
