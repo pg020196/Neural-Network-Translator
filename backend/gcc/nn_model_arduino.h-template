@@ -1,19 +1,20 @@
+#include <avr/pgmspace.h>
 
 /* Defines the number of layers. */
 const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
 
 /* */
 //? NEW
-const uint16_t LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;
+const uint16_t PROGMEM LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;
 
 /**/
 //? NEW
-const uint16_t LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerOutputHeight###;
+const uint16_t PROGMEM LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerOutputHeight###;
 
-const uint16_t LAYER_OUTPUT_DEPTH[###numberLayers###] = ###layerOutputDepth###;
+const uint16_t PROGMEM LAYER_OUTPUT_DEPTH[###numberLayers###] = ###layerOutputDepth###;
 
 /* Defines the layer types */
-const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
+const uint8_t PROGMEM LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
 
 /*
    Defines the activation functions for each layer as follows:
@@ -23,37 +24,37 @@ const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
    3: TanH
    4: Softmax
 */
-const uint8_t ACTIVATION_FUNCTION[###dimNumberLayers###] = ###activationFunctions###;
+const uint8_t PROGMEM ACTIVATION_FUNCTION[###dimNumberLayers###] = ###activationFunctions###;
 
 /*  Defines the index in which the first weight-element of the layer is present. */
-const uint16_t WEIGHTS_START_INDEX[###dimNumberLayers###] = ###indicesWeights###;
+const uint16_t PROGMEM WEIGHTS_START_INDEX[###dimNumberLayers###] = ###indicesWeights###;
 
 /* Defines the index in which the first weight-element of the layer is present. */
-const uint16_t BIASES_START_INDEX[###dimNumberLayers###] = ###indicesBias###;
+const uint16_t PROGMEM BIASES_START_INDEX[###dimNumberLayers###] = ###indicesBias###;
 
 /* Defines whether bias values should be applied to the layer. */
-const uint8_t BIAS_ENABLED[###dimNumberLayers###] = ###useBias###;
+const uint8_t PROGMEM BIAS_ENABLED[###dimNumberLayers###] = ###useBias###;
 
 /* Holds the weights for each layer as flatted one-dimensional array. */
-const float WEIGHTS[###dimWeights###] = ###weights###;
+const float PROGMEM WEIGHTS[###dimWeights###] = ###weights###;
 
 /* Holds the biases for each layer as flatted one-dimensional array. */
-const float BIASES[###dimBias###] = ###bias###;
+const float PROGMEM BIASES[###dimBias###] = ###bias###;
 
 //? NEW
-const uint16_t POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
+const uint16_t PROGMEM POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
 
 //? NEW
-const uint16_t POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
+const uint16_t PROGMEM POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
 
 //? NEW
-const uint16_t HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
+const uint16_t PROGMEM HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
 
 //? NEW
-const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
+const uint16_t PROGMEM VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
 
 //? NEW
-const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
+const uint8_t PROGMEM PADDING[###dimNumberLayers###] = ###padding###;
 
 
 float * predict(float input[]);
