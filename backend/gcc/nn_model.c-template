@@ -135,7 +135,7 @@ static float * padding_zero_apply(float * input, uint16_t input_width, uint16_t 
   return output;
 }
 
-static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
 {
   uint16_t current_z_index;
   uint16_t vertical_step_index;
@@ -159,7 +159,7 @@ static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t p
         {
           for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
           {
-            input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index + current_z_index * (output_height*output_width);
+            input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index + current_z_index * (input_width*input_height);
             result = result + *(input + input_index);
           }
         }
@@ -172,33 +172,41 @@ static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t p
   return output;
 }
 
-static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height)
+static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
 {
+  uint16_t current_z_index;
   uint16_t vertical_step_index;
   uint16_t horizontal_step_index;
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t input_index;
+  uint16_t output_index;
   float result;
+  uint16_t initial_result_index;
   float * output = calloc(output_height * output_width, sizeof(float));
 
-  for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
+  for(current_z_index = 0; current_z_index < output_depth; current_z_index)
   {
-    for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+    for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
     {
-      result = *(input + (vertical_step_index * input_width + horizontal_step_index));
-      for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+      for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
       {
-        for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
+        initial_result_index = (vertical_step_index * input_width + horizontal_step_index) + current_z_index * (input_width*input_height);
+        result = *(input + initial_result_index);
+        for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
         {
-          input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index;
-          if (*(input+input_index) > result)
+          for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
           {
-            result = *(input+input_index);
+            input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index + current_z_index * (input_width*input_height);
+            if (*(input+input_index) > result)
+            {
+              result = *(input+input_index);
+            }
           }
         }
+        output_index = (horizontal_step_index + vertical_step_index * pool_width) + current_z_index * (output_width*output_height);
+        *(output+output_index) = result;
       }
-      *(output+(horizontal_step_index + vertical_step_index * pool_width)) = result;
     }
   }
   free(input);
