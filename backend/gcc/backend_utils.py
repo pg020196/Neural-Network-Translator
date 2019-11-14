@@ -105,6 +105,9 @@ def get_output_dimensions(input):
                 width_array.append(1)
                 input_width = 1
                 last_output_width = input_width
+                depth_array.append(1)
+                input_depth = 1
+                last_output_depth = input_depth
 
         if (layer['class_name']==DENSE_LAYER):
             act_height = len(layer['kernel_values'][0])
