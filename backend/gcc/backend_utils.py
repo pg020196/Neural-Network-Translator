@@ -6,8 +6,11 @@ DENSE_LAYER = 'Dense'
 CONV_2D_LAYER = 'Conv2D'
 CONV_1D_LAYER = 'Conv1D'
 MAX_POOL_2D_LAYER = 'MaxPooling2D'
+MAX_POOL_1D_LAYER = 'MaxPooling1D'
 AVG_POOL_2D_LAYER = 'AveragePooling2D'
+AVG_POOL_1D_LAYER = 'AveragePooling1D'
 FLATTEN_LAYER = 'Flatten'
+ACTIVATION_LAYER = 'Activation'
 
 def replace_markers(file, markers):
     """ Replaces all given markes in given file with their respective value"""
@@ -94,7 +97,7 @@ def get_output_dimensions(input):
         if (layer['class_name']==FLATTEN_LAYER):
             act_height = last_output_height * last_output_width
             act_width = 1
-        if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER):
+        if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
             vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
 
