@@ -111,7 +111,7 @@ static float * padding_zero_apply(float * input, uint16_t input_width, uint16_t 
   //! Create own arguments for these variables and move this method call to the predict method
   uint16_t output_width = padding_calculate_output_size(input_width, horizontal_padding);
   uint16_t output_height = padding_calculate_output_size(input_height, vertical_padding);
-  uint16_t output_depth = input_width;
+  uint16_t output_depth = input_depth;
 
   float * output = calloc(output_width * output_height * output_depth, sizeof(float));
 
@@ -142,6 +142,7 @@ static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t p
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t input_index;
+
   float result;
   float * output = calloc(output_height * output_width, sizeof(float));
 
