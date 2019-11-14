@@ -59,15 +59,14 @@ const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
 float * predict(float input[]);
 
 static float * dense_apply(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function);
-static float * padding_zero_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height);
-static float * padding_values_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t number_of_padding_layers);
-static float * pooling_avg_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height);
-static float * pooling_max_apply(float * input, uint16_t input_width, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height);
-static float * pooling_apply(uint8_t pooling_type,float *input, uint16_t input_width, uint16_t input_height,uint16_t output_width, uint16_t output_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding);
-static float * activation_apply(float * values, uint16_t values_length, uint8_t act_func, float denominator);
-static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, const float kernel[], uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height);
+static float * padding_zero_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t pool_width, uint16_t pool_height);
+static float * padding_values_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t number_of_padding_layers);
+static float * pooling_avg_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
+static float * pooling_max_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
+static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth,uint16_t output_width, uint16_t output_height, uint16_t output_depth, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding);
+static float * activation_apply(float *values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func);
+static float * convolution_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
 
-static uint16_t pooling_calculate_output_size(uint16_t input_dimension, uint16_t pool_dimension, uint16_t padding_dimension, uint16_t stride_size);
 static uint16_t padding_calculate_size(uint16_t pool_dimension);
 static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t padding_dimension);
 
