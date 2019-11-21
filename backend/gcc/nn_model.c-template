@@ -225,7 +225,7 @@ static float *pooling_max_apply(float *input, uint16_t input_width, uint16_t inp
   return output;
 }
 
-static float *pooling_apply(uint8_t pooling_type, float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t output_width, uint16_t output_height, uint16_t output_depth, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t output_width, uint16_t output_height, uint16_t output_depth, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
 {
   uint16_t vertical_padding = padding_calculate_size(pool_height);
   uint16_t horizontal_padding = padding_calculate_size(pool_width);
@@ -386,7 +386,7 @@ static float *padding_values_apply(float *input, uint16_t input_width, uint16_t 
   return input;
 }
 
-static float * convolution_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
 {
   uint16_t output_y_index;
   uint16_t output_x_index;
@@ -425,7 +425,7 @@ static float * convolution_apply(float *input, uint16_t input_width, uint16_t in
           for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index++)
           {
             input_index = kernel_column_index + kernel_row_index * input_width + output_y_index * input_width + output_x_index + output_z_index * (output_width * output_height);
-            kernel_index = kernel_row_index * kernel_width + kernel_column_index;
+            kernel_index = kernel_row_index * kernel_width + kernel_column_index + kernel_start_index;
             result = result + (*(input + input_index) * kernel[kernel_index]);
           }
         }
@@ -492,6 +492,27 @@ float *predict(float *input)
       uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index -1];
       uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
       input = activation_apply(input, input_width, input_height, input_depth, activation_function);
+    }
+    //Convolution
+    else if(LAYER_TYPE[current_layer_index -1] == 5)
+    {
+      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
+      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
+      uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index - 1];
+
+      uint16_t kernel_width = KERNEL_WIDTH[current_layer_index-1];
+      uin16_t kernel_height = KERNEL_HEIGHT[current_layer_index-1];
+      uint16_t kernel_start_index = KERNEL_VALUES_START_INDEX[current_layer_index-1];
+
+      uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
+      uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
+
+      uint16_t output_width = LAYER_OUTPUT_WIDTH[current_layer_index];
+      uint16_t output_height = LAYER_OUTPUT_HEIGHT[current_layer_index];
+      uint16_t output_depth = LAYER_OUTPUT_DEPTH[current_layer_index];
+
+      input = convolution_apply(input, input_width, input_height, input_depth, KERNEL_VALUES, kernel_start_index, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
+
     }
   }
 
