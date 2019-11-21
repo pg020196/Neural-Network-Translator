@@ -9,26 +9,36 @@ Purpose: Applies the activation function to the input value
 Arguments: An integer value to specify the activation function, a float value
 Returns: The given value with the activation function applied
 */
+
+enum
+{
+  af_linear = 0,
+  af_sigmoid = 1,
+  af_relu = 2,
+  af_tanh = 3,
+  af_softmax = 4
+};
+
 static float activation_function_apply(uint8_t act_func, float value, float denominator)
 {
-  if (act_func == 1)
+  if (act_func == af_sigmoid)
   {
     return (1.0 / (1.0 + (float)exp(-value)));
   }
-  else if (act_func == 2)
+  else if (act_func == af_relu)
   {
     if (value <= 0)
       return 0;
     else
       return value;
   }
-  else if (act_func == 3)
+  else if (act_func == af_tanh)
   {
     float expInput = (float)exp(value);
     float negExpInput = (float)exp(-value);
     return (expInput - negExpInput) / (expInput + negExpInput);
   }
-  else if (act_func == 4)
+  else if (act_func == af_softmax)
   {
     float divisor = (float)exp(value);
     return divisor / denominator;
@@ -400,7 +410,7 @@ static float * convolution_apply(float * input, uint16_t input_width, uint16_t i
   float result;
   float *output;
 
-  // TODO Calculate the number of padding_layers later
+  //! TODO Calculate the number of padding_layers later
   uint16_t number_of_padding_layers = 1;
 
   input = padding_values_apply(input, input_width, input_height, input_depth, number_of_padding_layers);

@@ -55,11 +55,11 @@ const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
 //? NEW
 const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
 
-const float KERNEL_VALUES[###dimKernelValues###] = ###kernelValues###
+const float KERNEL_VALUES[###dimKernelValues###] = ###kernelValues###;
 
-const uint16_t KERNEL_WIDTH[###dimNumberLayers###] = ###kernelwidth###
+const uint16_t KERNEL_WIDTH[###dimNumberLayers###] = ###kernelwidth###;
 
-const uin16_t KERNEL_HEIGHT[###dimNumberLayers###] = ###kernelheight###
+const uin16_t KERNEL_HEIGHT[###dimNumberLayers###] = ###kernelheight###;
 
 const uint16_t KERNEL_VALUES_START_INDEX[###dimNumberLayers###] = ###kernelvaluesstartindex###;
 
