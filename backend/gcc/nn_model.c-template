@@ -19,6 +19,9 @@ enum
   af_softmax = 4
 };
 
+// TODO enum for padding (same, valid)
+// TODO enum for layer type
+
 static float activation_function_apply(uint8_t act_func, float value, float denominator)
 {
   if (act_func == af_sigmoid)
