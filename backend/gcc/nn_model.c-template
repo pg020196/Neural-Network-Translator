@@ -21,6 +21,11 @@ enum
 
 // TODO enum for padding (same, valid)
 // TODO enum for layer type
+// TODO unify variable names for Loops
+// TODO unify argument names
+// TODO implement missing code segments
+// TODO insert new avg and max pooling
+// TODO Update method signatures
 
 static float activation_function_apply(uint8_t act_func, float value, float denominator)
 {
@@ -413,17 +418,17 @@ static float *padding_values_apply(float *input, uint16_t input_width, uint16_t 
   return input;
 }
 
-static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
 {
-  uint16_t output_y_index;
-  uint16_t output_x_index;
-  uint16_t output_z_index;
-
+  uint16_t input_y_index;
+  uint16_t input_x_index;
+  uint16_t input_z_index;
+  uint16_t initial_result_index;
   uint16_t kernel_row_index;
   uint16_t kernel_column_index;
   uint16_t input_index;
   uint16_t kernel_index;
-  uint16_t output_index;
+  uint16_t output_index = 0;
   float result;
   float *output;
 
@@ -438,31 +443,35 @@ static float * convolution_apply(float * input, uint16_t input_width, uint16_t i
 
   output = calloc(output_height * output_width * output_depth, sizeof(float));
 
-  for (output_z_index = 0; output_z_index < output_depth; output_z_index++)
+  for (input_z_index = 0; input_z_index < input_depth; input_z_index++)
   {
-    //Loop through output matrix
-    for (output_y_index = 0; output_y_index < output_height; output_y_index += vertical_stride)
+    //Loop through input matrix
+    for (input_y_index = 0; input_y_index < input_height - kernel_height; input_y_index += vertical_stride)
     {
-      //Loop through output matrix
-      for (output_x_index = 0; output_x_index < output_width; output_x_index += horizontal_stride)
+      //Loop through input matrix
+      for (input_x_index = 0; input_x_index < input_width - kernel_width; input_x_index += horizontal_stride)
       {
+        initial_result_index = (input_y_index * input_width + input_x_index) + input_z_index * (input_width * input_height);
         result = 0;
-        for (kernel_row_index = 0; kernel_row_index < kernel_height; kernel_row_index++)
+        for (kernel_row_index = 0; kernel_row_index < kernel_height; kernel_row_index = kernel_row_index + vertical_dilation_rate)
         {
-          for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index++)
+          for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index = kernel_column_index + horizontal_dilation_rate)
           {
-            input_index = kernel_column_index + kernel_row_index * input_width + output_y_index * input_width + output_x_index + output_z_index * (output_width * output_height);
-            kernel_index = kernel_row_index * kernel_width + kernel_column_index + kernel_start_index;
+            input_index = kernel_column_index + kernel_row_index * input_width + input_y_index * input_width + initial_result_index;
+            kernel_index =  kernel_column_index + kernel_row_index * kernel_width + kernel_start_index;
             result = result + (*(input + input_index) * kernel[kernel_index]);
           }
         }
-        output_index = output_x_index + output_y_index * output_width + output_z_index * (output_width * output_height);
         *(output + output_index) = result;
+        output_index++;
       }
     }
   }
 
   free(input);
+
+  // TODO: Implement bias function call here
+  // TODO: Implement activation function call here
   return output;
 }
 
