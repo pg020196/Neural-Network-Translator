@@ -47,7 +47,9 @@ def convert_array_to_string(array):
     string = '{'
     for value in array:
         string = string + str(value) + ','
-    return string[:-1] + '}'
+    if (len(string)!=1):
+        string = string[:-1]
+    return string + '}'
 
 def get_number_of_layers(input):
     """Returns the number of layers in the neural network"""
