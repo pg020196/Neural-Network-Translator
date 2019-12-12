@@ -119,7 +119,16 @@ def get_output_dimensions(input):
             act_height = last_output_height * last_output_width * last_output_depth
             act_width = 1
             act_depth = 1
-        if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
+        if (layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER):
+            vertical_padding = 0
+            if (layer['config']['padding'].lower() == 'same'):
+                vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
+
+            act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
+            act_width=1
+            act_depth = last_output_depth
+
+        if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER):
             vertical_padding = 0
             horizontal_padding = 0
 
@@ -129,7 +138,6 @@ def get_output_dimensions(input):
 
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
-
             act_depth = last_output_depth
 
         height_array.append(int(act_height))
@@ -147,11 +155,14 @@ def get_pool_size_strings(input):
     height_array=[]
     for layer in input['config']['layers']:
         if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
-            width_array.append(layer['config']['pool_size'][1])
             height_array.append(layer['config']['pool_size'][0])
+            width_array.append(layer['config']['pool_size'][1])
+        elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
+            height_array.append(layer['config']['pool_size'][0])
+            width_array.append(1)
         else:
-            width_array.append(0)
             height_array.append(0)
+            width_array.append(0)
     return convert_array_to_string(width_array), convert_array_to_string(height_array)
 
 def get_strides_strings(input):
@@ -159,11 +170,14 @@ def get_strides_strings(input):
     height_array=[]
     for layer in input['config']['layers']:
         if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
-            width_array.append(layer['config']['strides'][1])
             height_array.append(layer['config']['strides'][0])
+            width_array.append(layer['config']['strides'][1])
+        elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
+            height_array.append(layer['config']['pool_size'][0])
+            width_array.append(1)
         else:
-            width_array.append(0)
             height_array.append(0)
+
     return convert_array_to_string(width_array), convert_array_to_string(height_array)
 
 def get_padding_string(input, padding_types):
