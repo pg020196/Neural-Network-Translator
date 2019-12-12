@@ -33,7 +33,6 @@ enum
 };
 
 // TODO implement missing code segments
-// TODO Update method signatures
 
 /*
 Purpose: Applies the activation function to the input value
