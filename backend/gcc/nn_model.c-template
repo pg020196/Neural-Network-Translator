@@ -30,39 +30,39 @@ enum
   lt_activation = 6,
   lt_batch_normalization = 7,
   lt_bias = 8
-}
+};
 
-// TODO unify variable names for Loops
-// TODO unify argument names
 // TODO implement missing code segments
-// TODO insert new avg and max pooling
 // TODO Update method signatures
 
 /*
 Purpose: Applies the activation function to the input value
-Arguments: An integer value to specify the activation function, a float value
+Arguments:
+- activation: One of the defined activation functions, such as af_linear, af_sigmoid, af_relu, ...
+- value: the value to which the activation function should be applied to
+- denominator: If activation_function == af_softmax the denominator must be passed - otherwise set this argument to 0
 Returns: The given value with the activation function applied
 */
-static float activation_function_apply(uint8_t act_func, float value, float denominator)
+static float activation_function_apply(uint8_t activation, float value, float denominator)
 {
-  if (act_func == af_sigmoid)
+  if (activation == af_sigmoid)
   {
     return (1.0 / (1.0 + (float)exp(-value)));
   }
-  else if (act_func == af_relu)
+  else if (activation == af_relu)
   {
     if (value <= 0)
       return 0;
     else
       return value;
   }
-  else if (act_func == af_tanh)
+  else if (activation == af_tanh)
   {
     float expInput = (float)exp(value);
     float negExpInput = (float)exp(-value);
     return (expInput - negExpInput) / (expInput + negExpInput);
   }
-  else if (act_func == af_softmax)
+  else if (activation == af_softmax)
   {
     float divisor = (float)exp(value);
     return divisor / denominator;
@@ -70,119 +70,140 @@ static float activation_function_apply(uint8_t act_func, float value, float deno
   return value;
 }
 
-static float * activation_apply(float * values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func)
+/*
+Purpose: Implementation of the activation layer
+Arguments:
+Returns:
+*/
+static float * activation_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint8_t activation)
 {
-  uint16_t current_x_index;
-  uint16_t current_y_index;
-  uint16_t current_z_index;
-  uint32_t index;
-  float *output = calloc(values_width * values_height * values_depth, sizeof(float));
+  uint16_t input_column_index;
+  uint16_t input_row_index;
+  uint16_t input_depth_index;
+  uint32_t input_index;
+
+  float *output = calloc(input_columns * input_rows * input_depth, sizeof(float));
   float denominator;
 
-  for (current_z_index = 0; current_z_index < values_depth; current_z_index++)
+  for (input_depth_index = 0; input_depth_index < input_depth; input_depth_index++)
   {
     denominator = 1;
-    if (act_func == 4)
+    if (activation == 4)
     {
       denominator = 0;
-      for (current_y_index = 0; current_y_index < values_height; current_y_index++)
+      for (input_row_index = 0; input_row_index < input_rows; input_row_index++)
       {
-        for (current_x_index = 0; current_x_index < values_width; current_x_index++)
+        for (input_column_index = 0; input_column_index < input_columns; input_column_index++)
         {
-          index = current_z_index * values_width * values_height + current_y_index * values_width + current_x_index;
-          denominator = denominator + (float)exp(*(values + index));
+          input_index = input_depth_index * input_columns * input_rows + input_row_index * input_columns + input_column_index;
+          denominator = denominator + (float)exp(*(input + input_index));
         }
       }
     }
 
-    for (current_y_index = 0; current_y_index < values_height; current_y_index++)
+    for (input_row_index = 0; input_row_index < input_rows; input_row_index++)
     {
-      for (current_x_index = 0; current_x_index < values_width; current_x_index++)
+      for (input_column_index = 0; input_column_index < input_columns; input_column_index++)
       {
-        index = current_z_index * values_width * values_height + current_y_index * values_width + current_x_index;
-        *(output + index) = activation_function_apply(act_func, (*(values + index)), denominator);
+        input_index = input_depth_index * input_columns * input_rows + input_row_index * input_columns + input_column_index;
+        *(output + input_index) = activation_function_apply(activation, (*(input + input_index)), denominator);
       }
     }
   }
 
-  free(values);
+  free(input);
   return output;
 }
 
-static float * bias_apply(float *input, uint16_t input_size, const float biases[], uint16_t bias_start_index)
+/*
+Purpose: Implementation of the bias layer
+Arguments:
+Returns:
+*/
+static float * bias_apply(float * input, uint16_t input_length, const float biases[], uint16_t bias_start_index)
 {
-  float * result = calloc(input_size, sizeof(float));
-  uint16_t current_index;
-  for (current_index = 0; current_index < input_size; current_index++)
+  float * output = calloc(input_length, sizeof(float));
+  uint16_t input_index;
+  for (input_index = 0; input_index < input_length; input_index++)
   {
-    *(result + current_index) = *(input + current_index) + biases[bias_start_index + current_index];
+    *(output + input_index) = *(input + input_index) + biases[bias_start_index + input_index];
   }
   free(input);
-  return result;
+  return output;
 }
 
-static float * dense_apply(float *input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function)
+/*
+Purpose: Implementation of the dense layer
+Arguments:
+Returns:
+*/
+static float * dense_apply(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t use_bias, uint8_t activation)
 {
   uint16_t previous_unit_index;
   uint16_t current_unit_index;
-  float * results = calloc(number_of_current_units, sizeof(float));
-  float * results_with_activation_function = calloc(number_of_current_units, sizeof(float));
-  float * results_with_bias;
+  float * output = calloc(number_of_current_units, sizeof(float));
+  float * output_with_activation_function = calloc(number_of_current_units, sizeof(float));
+  float * output_with_bias;
 
   for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
   {
     /* Loops through the number of previous units to calculate the dot product. */
     for (previous_unit_index = 0; previous_unit_index < number_of_previous_units; previous_unit_index++)
     {
-      *(results + current_unit_index) =
-        *(results + current_unit_index) +
+      *(output + current_unit_index) =
+        *(output + current_unit_index) +
         *(input + previous_unit_index) *
         weights[(number_of_current_units * previous_unit_index + current_unit_index) + weights_start_index];
     }
   }
 
-  if (bias_enabled == 1)
+  if (use_bias == 1)
   {
-    results_with_bias = calloc(number_of_current_units, sizeof(float));
-    results_with_bias = bias_apply(results, number_of_current_units, biases, bias_start_index);
-    results_with_activation_function = activation_apply(results_with_bias, 1, number_of_current_units, 1, activation_function);
+    output_with_bias = calloc(number_of_current_units, sizeof(float));
+    output_with_bias = bias_apply(output, number_of_current_units, biases, bias_start_index);
+    output_with_activation_function = activation_apply(output_with_bias, 1, number_of_current_units, 1, activation);
   }
   else
   {
-    results_with_activation_function = activation_apply(results, 1, number_of_current_units, 1, activation_function);
+    output_with_activation_function = activation_apply(output, 1, number_of_current_units, 1, activation);
   }
 
   free(input);
-  return results_with_activation_function;
+  return output_with_activation_function;
 }
 
-static float *padding_zero_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t pool_width, uint16_t pool_height)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * padding_zero_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height)
 {
-  uint16_t current_x_index;
-  uint16_t current_y_index;
-  uint16_t current_z_index;
+  uint16_t current_column_index;
+  uint16_t current_row_index;
+  uint16_t current_depth_index;
   uint16_t output_index;
   uint16_t input_index;
 
-  uint16_t vertical_padding = padding_calculate_size(pool_height);
-  uint16_t horizontal_padding = padding_calculate_size(pool_width);
+  uint16_t padding_size_height = padding_calculate_size(pool_size_height);
+  uint16_t padding_size_width = padding_calculate_size(pool_size_width);
 
-  uint16_t output_width = padding_calculate_output_size(input_width, horizontal_padding);
-  uint16_t output_height = padding_calculate_output_size(input_height, vertical_padding);
+  uint16_t output_columns = padding_calculate_output_size(input_columns, padding_size_width);
+  uint16_t output_rows = padding_calculate_output_size(input_rows, padding_size_height);
   uint16_t output_depth = input_depth;
-  
-  float *output = calloc(output_width * output_height * output_depth, sizeof(float));
 
-  for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
+  float *output = calloc(output_columns * output_rows * output_depth, sizeof(float));
+
+  for (current_depth_index = 0; current_depth_index < output_depth; current_depth_index++)
   {
-    input_index = current_z_index * output_depth;
-    for (current_y_index = 0; current_y_index < output_height; current_y_index++)
+    input_index = current_depth_index * output_depth;
+    for (current_row_index = 0; current_row_index < output_rows; current_row_index++)
     {
-      for (current_x_index = 0; current_x_index < output_width; current_x_index++)
+      for (current_column_index = 0; current_column_index < output_columns; current_column_index++)
       {
-        if (current_y_index >= vertical_padding && current_y_index < (output_height - vertical_padding) && current_x_index >= horizontal_padding && current_x_index < (output_width - horizontal_padding))
+        if (current_row_index >= padding_size_height && current_row_index < (output_rows - padding_size_height) && current_column_index >= padding_size_width && current_column_index < (output_columns - padding_size_width))
         {
-          output_index = current_y_index * output_width + current_x_index + current_z_index * (output_height * output_width);
+          output_index = current_row_index * output_columns + current_column_index + current_depth_index * (output_rows * output_columns);
           *(output + output_index) = *(input + input_index);
           input_index = input_index + 1;
         }
@@ -193,37 +214,41 @@ static float *padding_zero_apply(float *input, uint16_t input_width, uint16_t in
   return output;
 }
 
-static float *pooling_avg_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * pooling_avg_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_columns, uint16_t output_rows)
 {
-  uint16_t current_z_index;
-  uint16_t vertical_step_index;
-  uint16_t horizontal_step_index;
-  uint16_t vertical_pool_index;
-  uint16_t horizontal_pool_index;
+  uint16_t current_depth_index;
+  uint16_t current_row_index;
+  uint16_t current_column_index;
+  uint16_t filter_current_row_index;
+  uint16_t filter_current_column_index;
   uint16_t input_index;
   uint16_t output_index = 0;
   float result;
-  uint16_t initial_result_index;
-  float *output = calloc(output_height * output_width * output_height, sizeof(float));
+  uint16_t filter_position_index; // Represents the index of the upper left corner of the filter matrix
+  float *output = calloc(output_rows * output_columns * output_rows, sizeof(float));
 
-  for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
+  for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
   {
-    for (vertical_step_index = 0; vertical_step_index <= input_height - pool_height; vertical_step_index += vertical_stride)
+    for (current_row_index = 0; current_row_index <= input_rows - pool_size_height; current_row_index += vertical_stride)
     {
-      for (horizontal_step_index = 0; horizontal_step_index <= input_width - pool_width; horizontal_step_index += horizontal_stride)
+      for (current_column_index = 0; current_column_index <= input_columns - pool_size_width; current_column_index += horizontal_stride)
       {
-        //Initial result index represents the index of the upper left corner of the filter matrix
-        initial_result_index = (vertical_step_index * input_width + horizontal_step_index) + current_z_index * (input_width * input_height);
+        filter_position_index = (current_row_index * input_columns + current_column_index) + current_depth_index * (input_columns * input_rows);
         result = 0;
-        for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+        for (filter_current_row_index = 0; filter_current_row_index < pool_size_height; filter_current_row_index++)
         {
-          for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
+          for (filter_current_column_index = 0; filter_current_column_index < pool_size_width; filter_current_column_index++)
           {
-            input_index = initial_result_index + vertical_pool_index * input_width + horizontal_pool_index;
+            input_index = filter_position_index + filter_current_row_index * input_columns + filter_current_column_index;
             result = result + *(input+input_index);
           }
         }
-        *(output + output_index) = (float)result / (pool_width*pool_height);
+        *(output + output_index) = (float)result / (pool_size_width*pool_size_height);
         output_index++;
       }
     }
@@ -232,33 +257,37 @@ static float *pooling_avg_apply(float *input, uint16_t input_width, uint16_t inp
   return output;
 }
 
-static float *pooling_max_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * pooling_max_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_columns, uint16_t output_rows)
 {
-  uint16_t current_z_index;
-  uint16_t vertical_step_index;
-  uint16_t horizontal_step_index;
-  uint16_t vertical_pool_index;
-  uint16_t horizontal_pool_index;
+  uint16_t current_depth_index;
+  uint16_t current_row_index;
+  uint16_t current_column_index;
+  uint16_t filter_current_row_index;
+  uint16_t filter_current_column_index;
   uint16_t input_index;
   uint16_t output_index = 0;
   float result;
-  uint16_t initial_result_index;
-  float *output = calloc(output_height * output_width * output_height, sizeof(float));
+  uint16_t filter_position_index; // Represents the index of the upper left corner of the filter matrix
+  float *output = calloc(output_rows * output_columns * output_rows, sizeof(float));
 
-  for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
+  for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
   {
-    for (vertical_step_index = 0; vertical_step_index <= input_height - pool_height; vertical_step_index += vertical_stride)
+    for (current_row_index = 0; current_row_index <= input_rows - pool_size_height; current_row_index += vertical_stride)
     {
-      for (horizontal_step_index = 0; horizontal_step_index <= input_width - pool_width; horizontal_step_index += horizontal_stride)
+      for (current_column_index = 0; current_column_index <= input_columns - pool_size_width; current_column_index += horizontal_stride)
       {
-        //Initial result index represents the index of the upper left corner of the filter matrix
-        initial_result_index = (vertical_step_index * input_width + horizontal_step_index) + current_z_index * (input_width * input_height);
-        result = *(input + initial_result_index);
-        for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
+        filter_position_index = (current_row_index * input_columns + current_column_index) + current_depth_index * (input_columns * input_rows);
+        result = *(input + filter_position_index);
+        for (filter_current_row_index = 0; filter_current_row_index < pool_size_height; filter_current_row_index++)
         {
-          for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
+          for (filter_current_column_index = 0; filter_current_column_index < pool_size_width; filter_current_column_index++)
           {
-            input_index = initial_result_index + vertical_pool_index * input_width + horizontal_pool_index;
+            input_index = filter_position_index + filter_current_row_index * input_columns + filter_current_column_index;
             if (*(input + input_index) > result)
             {
               result = *(input + input_index);
@@ -274,27 +303,35 @@ static float *pooling_max_apply(float *input, uint16_t input_width, uint16_t inp
   return output;
 }
 
-static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t output_width, uint16_t output_height, uint16_t output_depth, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * pooling_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint8_t pooling_type, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding, uint16_t output_columns, uint16_t output_rows)
 {
-  uint16_t vertical_padding = padding_calculate_size(pool_height);
-  uint16_t horizontal_padding = padding_calculate_size(pool_width);
+  uint16_t padding_size_height;
+  uint16_t padding_size_width;
 
   if (padding == padding_same)
   {
-    input = padding_zero_apply(input, input_width, input_height, input_depth, pool_width, pool_height);
-    /* Update input_width and input_height to the new padded size */
-    //! These function calls cannot be moved to the backend since this is only a temporary transformation of the matrix
-    input_width = padding_calculate_output_size(input_width, horizontal_padding);
-    input_height = padding_calculate_output_size(input_height, vertical_padding);
+    input = padding_zero_apply(input, input_columns, input_rows, input_depth, pool_size_width, pool_size_height);
+
+    padding_size_height = padding_calculate_size(pool_size_height);
+    padding_size_width = padding_calculate_size(pool_size_width);
+
+    /* Update input_columns and input_rows to the new padded size */
+    input_columns = padding_calculate_output_size(input_columns, padding_size_width);
+    input_rows = padding_calculate_output_size(input_rows, padding_size_height);
   }
 
   if (pooling_type == lt_max_pooling)
   {
-    return pooling_max_apply(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
+    return pooling_max_apply(input, input_columns, input_rows, input_depth, pool_size_width, pool_size_height, horizontal_stride, vertical_stride, output_columns, output_rows);
   }
   else if (pooling_type == lt_avg_pooling)
   {
-    return pooling_avg_apply(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
+    return pooling_avg_apply(input, input_columns, input_rows, input_depth, pool_size_width, pool_size_height, horizontal_stride, vertical_stride, output_columns, output_rows);
   }
   else
   {
@@ -302,132 +339,144 @@ static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_
   }
 }
 
-static uint16_t padding_calculate_size(uint16_t pool_dimension)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static uint16_t padding_calculate_size(uint16_t pool_size)
 {
-  return (pool_dimension - 1) / 2;
+  return (pool_size - 1) / 2;
 }
 
-static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t padding_dimension)
+static uint16_t padding_calculate_output_size(uint16_t input_size, uint16_t padding_size)
 {
-  return input_dimension + padding_dimension * 2;
+  return input_size + padding_size * 2;
 }
 
-static float *padding_values_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t number_of_padding_layers)
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * padding_values_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t number_of_padding_layers)
 {
-  uint16_t current_z_index;
+  uint16_t current_depth_index;
   uint16_t current_padding_layer_index;
-  uint16_t output_width = input_width;
-  uint16_t output_height = input_height;
+
+  float *output;
+
+  uint16_t output_columns = input_columns;
+  uint16_t output_rows = input_rows;
   uint16_t output_depth = input_depth;
+  uint16_t output_row_index;
+  uint16_t output_column_index;
+  uint16_t output_depth_index;
+
   int16_t input_index;
   int16_t output_index;
-  float *output;
-  uint16_t output_x_index;
-  uint16_t output_y_index;
-  uint16_t output_z_index;
 
   for (current_padding_layer_index = 0; current_padding_layer_index < number_of_padding_layers; current_padding_layer_index++)
   {
     input_index = 0;
-    output_width = output_width + 2;
-    output_height = output_height + 2;
-    output = calloc(output_width * output_height * output_depth, sizeof(float));
+    output_columns = output_columns + 2;
+    output_rows = output_rows + 2;
+    output = calloc(output_columns * output_rows * output_depth, sizeof(float));
 
     //Copy values from input to output
-    for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
+    for (current_depth_index = 0; current_depth_index < output_depth; current_depth_index++)
     {
-      // Do you have to update the input_index here? Currently I don't think so...
-      for (output_x_index = 0; output_x_index < output_height; output_x_index++)
+      for (output_row_index = 0; output_row_index < output_rows; output_row_index++)
       {
-        for (output_y_index = 0; output_y_index < output_width; output_y_index++)
+        for (output_column_index = 0; output_column_index < output_columns; output_column_index++)
         {
-          if (!(output_y_index < 1 || output_y_index > input_width || output_x_index < 1 || output_x_index > input_height))
+          if (!(output_column_index < 1 || output_column_index > input_columns || output_row_index < 1 || output_row_index > input_rows))
           {
-            output_index = output_x_index * output_width + output_y_index + current_z_index * (output_width * output_height);
+            output_index = output_row_index * output_columns + output_column_index + current_depth_index * (output_columns * output_rows);
             output[output_index] = input[input_index];
             input_index = input_index + 1;
           }
         }
       }
     }
-    for (current_z_index = 0; current_z_index < input_depth; current_z_index++)
+    for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
     {
       // Copy upper row and extend upper corners
-      for (output_x_index = 0; output_x_index < output_width; output_x_index++)
+      for (output_row_index = 0; output_row_index < output_columns; output_row_index++)
       {
-        input_index = output_x_index - 1 + current_z_index * (input_width * input_height);
+        input_index = output_row_index - 1 + current_depth_index * (input_columns * input_rows);
 
         if (input_index < 0)
         {
           input_index = 0;
         }
 
-        if (input_index >= input_width)
+        if (input_index >= input_columns)
         {
-          input_index = input_width - 1;
+          input_index = input_columns - 1;
         }
-        input_index = input_index + current_z_index * (input_width * input_height);
-        output_index = output_x_index + current_z_index * (output_width * output_height);
+        input_index = input_index + current_depth_index * (input_columns * input_rows);
+        output_index = output_row_index + current_depth_index * (output_columns * output_rows);
         output[output_index] = input[input_index];
       }
     }
 
     // Copy lower row and extend lower corners
-    for (current_z_index = 0; current_z_index < input_depth; current_z_index++)
+    for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
     {
-      for (output_x_index = 0; output_x_index < output_width; output_x_index++)
+      for (output_row_index = 0; output_row_index < output_columns; output_row_index++)
       {
-        output_index = output_height * output_width - output_width + output_x_index;
-        input_index = input_height * input_width - input_width + output_x_index - 1;
+        output_index = output_rows * output_columns - output_columns + output_row_index;
+        input_index = input_rows * input_columns - input_columns + output_row_index - 1;
 
-        if (input_index < input_height * input_width - input_width || input_index < 0)
+        if (input_index < input_rows * input_columns - input_columns || input_index < 0)
         {
-          input_index = input_height * input_width - input_width;
+          input_index = input_rows * input_columns - input_columns;
         }
 
-        if (input_index >= input_height * input_width)
+        if (input_index >= input_rows * input_columns)
         {
-          input_index = input_height * input_width - 1;
+          input_index = input_rows * input_columns - 1;
         }
-        input_index = input_index + current_z_index * (input_width * input_height);
-        output_index = output_x_index + current_z_index * (output_width * output_height);
+        input_index = input_index + current_depth_index * (input_columns * input_rows);
+        output_index = output_row_index + current_depth_index * (output_columns * output_rows);
         output[output_index] = input[input_index];
       }
     }
     //Extend left side (without corners)
-    for (current_z_index = 0; current_z_index < input_depth; current_z_index++)
+    for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
     {
-      for (output_y_index = 1; output_y_index < output_height - 1; output_y_index++)
+      for (output_column_index = 1; output_column_index < output_rows - 1; output_column_index++)
       {
-        output_index = output_y_index * output_width;
-        input_index = (output_y_index - 1) * input_width;
+        output_index = output_column_index * output_columns;
+        input_index = (output_column_index - 1) * input_columns;
 
         if (input_index < 0)
         {
           input_index = 0;
         }
 
-        input_index = input_index + current_z_index * (input_width * input_height);
-        output_index = output_x_index + current_z_index * (output_width * output_height);
+        input_index = input_index + current_depth_index * (input_columns * input_rows);
+        output_index = output_row_index + current_depth_index * (output_columns * output_rows);
         output[output_index] = input[input_index];
       }
     }
     // Extend right side (without corners)
-    for (current_z_index = 0; current_z_index < input_depth; current_z_index++)
+    for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
     {
-      for (output_y_index = 1; output_y_index < output_height - 1; output_y_index++)
+      for (output_column_index = 1; output_column_index < output_rows - 1; output_column_index++)
       {
-        output_index = output_y_index * output_width + output_width - 1;
-        input_index = (output_y_index - 1) * input_width + input_width - 1;
+        output_index = output_column_index * output_columns + output_columns - 1;
+        input_index = (output_column_index - 1) * input_columns + input_columns - 1;
 
-        input_index = input_index + current_z_index * (input_width * input_height);
-        output_index = output_x_index + current_z_index * (output_width * output_height);
+        input_index = input_index + current_depth_index * (input_columns * input_rows);
+        output_index = output_row_index + current_depth_index * (output_columns * output_rows);
         output[output_index] = input[input_index];
       }
     }
 
-    input_width = output_width;
-    input_height = output_height;
+    input_columns = output_columns;
+    input_rows = output_rows;
     free(input);
     input = output;
   }
@@ -436,7 +485,7 @@ static float *padding_values_apply(float *input, uint16_t input_width, uint16_t 
 }
 
 /*
-static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
+static float * convolution_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_columns, uint16_t output_rows, uint16_t output_depth)
 {
   uint16_t input_y_index;
   uint16_t input_x_index;
@@ -453,29 +502,29 @@ static float * convolution_apply(float * input, uint16_t input_width, uint16_t i
   //! TODO Calculate the number of padding_layers later
   uint16_t number_of_padding_layers = 1;
 
-  input = padding_values_apply(input, input_width, input_height, input_depth, number_of_padding_layers);
+  input = padding_values_apply(input, input_columns, input_rows, input_depth, number_of_padding_layers);
 
 
-  input_width = input_width + number_of_padding_layers * 2;
-  input_height = input_height + number_of_padding_layers * 2;
+  input_columns = input_columns + number_of_padding_layers * 2;
+  input_rows = input_rows + number_of_padding_layers * 2;
 
-  output = calloc(output_height * output_width * output_depth, sizeof(float));
+  output = calloc(output_rows * output_columns * output_depth, sizeof(float));
 
   for (input_z_index = 0; input_z_index < input_depth; input_z_index++)
   {
     //Loop through input matrix
-    for (input_y_index = 0; input_y_index < input_height - kernel_height; input_y_index += vertical_stride)
+    for (input_y_index = 0; input_y_index < input_rows - kernel_height; input_y_index += vertical_stride)
     {
       //Loop through input matrix
-      for (input_x_index = 0; input_x_index < input_width - kernel_width; input_x_index += horizontal_stride)
+      for (input_x_index = 0; input_x_index < input_columns - kernel_width; input_x_index += horizontal_stride)
       {
-        initial_result_index = (input_y_index * input_width + input_x_index) + input_z_index * (input_width * input_height);
+        initial_result_index = (input_y_index * input_columns + input_x_index) + input_z_index * (input_columns * input_rows);
         result = 0;
         for (kernel_row_index = 0; kernel_row_index < kernel_height; kernel_row_index = kernel_row_index + vertical_dilation_rate)
         {
           for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index = kernel_column_index + horizontal_dilation_rate)
           {
-            input_index = kernel_column_index + kernel_row_index * input_width + input_y_index * input_width + initial_result_index;
+            input_index = kernel_column_index + kernel_row_index * input_columns + input_y_index * input_columns + initial_result_index;
             kernel_index =  kernel_column_index + kernel_row_index * kernel_width + kernel_start_index;
             result = result + (*(input + input_index) * kernel[kernel_index]);
           }
@@ -499,7 +548,7 @@ Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
 */
-float *predict(float *input)
+float * predict(float * input)
 {
   uint16_t current_layer_index;
 
@@ -511,49 +560,49 @@ float *predict(float *input)
     //Dense
     if (LAYER_TYPE[current_layer_index - 1] == lt_dense)
     {
-      uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
+      uint8_t activation = ACTIVATION_FUNCTION[current_layer_index - 1];
       uint16_t number_of_previous_units = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
       uint16_t number_of_current_units = LAYER_OUTPUT_HEIGHT[current_layer_index];
-      uint8_t bias_enabled = BIAS_ENABLED[current_layer_index - 1];
+      uint8_t use_bias = BIAS_ENABLED[current_layer_index - 1];
       uint16_t bias_start_index = BIASES_START_INDEX[current_layer_index - 1];
       uint16_t weights_start_index = WEIGHTS_START_INDEX[current_layer_index - 1];
 
-      input = dense_apply(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
+      input = dense_apply(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, use_bias, activation);
     }
     //Max and avg pooling
     else if (LAYER_TYPE[current_layer_index - 1] == lt_max_pooling || LAYER_TYPE[current_layer_index - 1] == lt_avg_pooling)
     {
-      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
-      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
+      uint16_t input_columns = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
+      uint16_t input_rows = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
       uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index - 1];
 
-      uint16_t output_width = LAYER_OUTPUT_WIDTH[current_layer_index];
-      uint16_t output_height = LAYER_OUTPUT_HEIGHT[current_layer_index];
+      uint16_t output_columns = LAYER_OUTPUT_WIDTH[current_layer_index];
+      uint16_t output_rows = LAYER_OUTPUT_HEIGHT[current_layer_index];
       uint16_t output_depth = LAYER_OUTPUT_DEPTH[current_layer_index];
 
-      uint16_t pool_width = POOL_WIDTH[current_layer_index];
-      uint16_t pool_height = POOL_HEIGHT[current_layer_index];
+      uint16_t pool_size_width = POOL_WIDTH[current_layer_index];
+      uint16_t pool_size_height = POOL_HEIGHT[current_layer_index];
       uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
       uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
       uint8_t padding = PADDING[current_layer_index];
-
-      input = pooling_apply(LAYER_TYPE[current_layer_index - 1], input, input_width, input_height, input_depth, output_width, output_height, output_depth, pool_width, pool_height, horizontal_stride, vertical_stride, padding);
+      uint8_t pooling_type = LAYER_TYPE[current_layer_index - 1];
+      input = pooling_apply(input, input_columns, input_rows, input_depth, pooling_type, pool_size_width, pool_size_height, horizontal_stride, vertical_stride, padding, output_columns, output_rows);
     }
     //Activation
     else if (LAYER_TYPE[current_layer_index - 1] == lt_activation)
     {
-      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
-      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
+      uint16_t input_columns = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
+      uint16_t input_rows = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
       uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index -1];
-      uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
-      input = activation_apply(input, input_width, input_height, input_depth, activation_function);
+      uint8_t activation = ACTIVATION_FUNCTION[current_layer_index - 1];
+      input = activation_apply(input, input_columns, input_rows, input_depth, activation);
     }
     //Convolution
     /*
     else if(LAYER_TYPE[current_layer_index -1] == lt_convolution)
     {
-      uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
-      uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
+      uint16_t input_columns = LAYER_output_columns[current_layer_index - 1];
+      uint16_t input_rows = LAYER_output_rows[current_layer_index - 1];
       uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index - 1];
 
       uint16_t kernel_width = KERNEL_WIDTH[current_layer_index-1];
@@ -563,11 +612,11 @@ float *predict(float *input)
       uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
       uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
 
-      uint16_t output_width = LAYER_OUTPUT_WIDTH[current_layer_index];
-      uint16_t output_height = LAYER_OUTPUT_HEIGHT[current_layer_index];
+      uint16_t output_columns = LAYER_output_columns[current_layer_index];
+      uint16_t output_rows = LAYER_output_rows[current_layer_index];
       uint16_t output_depth = LAYER_OUTPUT_DEPTH[current_layer_index];
 
-      input = convolution_apply(input, input_width, input_height, input_depth, KERNEL_VALUES, kernel_start_index, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
+      input = convolution_apply(input, input_columns, input_rows, input_depth, KERNEL_VALUES, kernel_start_index, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_columns, output_rows, output_depth);
 
     }
     */
