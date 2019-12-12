@@ -120,10 +120,14 @@ def get_output_dimensions(input):
             act_width = 1
             act_depth = 1
         if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
-            vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
-            act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
+            vertical_padding = 0
+            horizontal_padding = 0
 
-            horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
+            if (layer['config']['padding'].lower() == 'same'):
+                vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
+                horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
+
+            act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
 
             act_depth = last_output_depth
