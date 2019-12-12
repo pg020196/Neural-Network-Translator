@@ -19,6 +19,24 @@ enum
   af_softmax = 4
 };
 
+enum
+{
+  padding_valid = 0,
+  padding_same = 1
+};
+
+enum
+{
+  lt_dropout = 0,
+  lt_dense = 1,
+  lt_flatten = 2,
+  lt_max_pooling = 3,
+  lt_avg_pooling = 4,
+  lt_convolution = 5,
+  lt_activation = 6,
+  lt_batch_normalization = 7,
+  lt_bias = 8
+}
 
 // TODO enum for padding (same, valid)
 // TODO enum for layer type
@@ -263,7 +281,7 @@ static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_
   uint16_t vertical_padding = padding_calculate_size(pool_height);
   uint16_t horizontal_padding = padding_calculate_size(pool_width);
 
-  if (padding == 1)
+  if (padding == padding_same)
   {
     input = padding_zero_apply(input, input_width, input_height, input_depth, pool_width, pool_height);
     /* Update input_width and input_height to the new padded size */
@@ -272,11 +290,11 @@ static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_
     input_height = padding_calculate_output_size(input_height, vertical_padding);
   }
 
-  if (pooling_type == 3)
+  if (pooling_type == lt_max_pooling)
   {
     return pooling_max_apply(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
   }
-  else if (pooling_type == 4)
+  else if (pooling_type == lt_avg_pooling)
   {
     return pooling_avg_apply(input, input_width, input_height, pool_width, pool_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
   }
@@ -493,7 +511,7 @@ float *predict(float *input)
   for (current_layer_index = 1; current_layer_index < NUMBER_OF_LAYERS; current_layer_index++)
   {
     //Dense
-    if (LAYER_TYPE[current_layer_index - 1] == 1)
+    if (LAYER_TYPE[current_layer_index - 1] == lt_dense)
     {
       uint8_t activation_function = ACTIVATION_FUNCTION[current_layer_index - 1];
       uint16_t number_of_previous_units = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
@@ -505,7 +523,7 @@ float *predict(float *input)
       input = dense_apply(input, number_of_previous_units, number_of_current_units, WEIGHTS, weights_start_index, BIASES, bias_start_index, bias_enabled, activation_function);
     }
     //Max and avg pooling
-    else if (LAYER_TYPE[current_layer_index - 1] == 3 || LAYER_TYPE[current_layer_index - 1] == 4)
+    else if (LAYER_TYPE[current_layer_index - 1] == lt_max_pooling || LAYER_TYPE[current_layer_index - 1] == lt_avg_pooling)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
       uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
@@ -524,7 +542,7 @@ float *predict(float *input)
       input = pooling_apply(LAYER_TYPE[current_layer_index - 1], input, input_width, input_height, input_depth, output_width, output_height, output_depth, pool_width, pool_height, horizontal_stride, vertical_stride, padding);
     }
     //Activation
-    else if (LAYER_TYPE[current_layer_index - 1] == 6)
+    else if (LAYER_TYPE[current_layer_index - 1] == lt_activation)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
       uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
@@ -534,7 +552,7 @@ float *predict(float *input)
     }
     //Convolution
     /*
-    else if(LAYER_TYPE[current_layer_index -1] == 5)
+    else if(LAYER_TYPE[current_layer_index -1] == lt_convolution)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
       uint16_t input_height = LAYER_OUTPUT_HEIGHT[current_layer_index - 1];
