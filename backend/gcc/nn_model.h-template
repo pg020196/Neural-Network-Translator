@@ -55,6 +55,9 @@ const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
 //? NEW
 const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
 
+/*
+Variables for Convolution Layer:
+
 const float KERNEL_VALUES[###dimKernelValues###] = ###kernelValues###;
 
 const uint16_t KERNEL_WIDTH[###dimNumberLayers###] = ###kernelwidth###;
@@ -62,7 +65,7 @@ const uint16_t KERNEL_WIDTH[###dimNumberLayers###] = ###kernelwidth###;
 const uin16_t KERNEL_HEIGHT[###dimNumberLayers###] = ###kernelheight###;
 
 const uint16_t KERNEL_VALUES_START_INDEX[###dimNumberLayers###] = ###kernelvaluesstartindex###;
-
+*/
 
 float * predict(float input[]);
 
@@ -74,7 +77,8 @@ static float * pooling_max_apply(float *input, uint16_t input_width, uint16_t in
 static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth,uint16_t output_width, uint16_t output_height, uint16_t output_depth, uint16_t pool_width, uint16_t pool_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding);
 static float * activation_apply(float *values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func);
 static float * bias_apply(float *input, uint16_t input_size, const float biases[], uint16_t bias_start_index);
-static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
+
+//static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
 
 static uint16_t padding_calculate_size(uint16_t pool_dimension);
 static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t padding_dimension);

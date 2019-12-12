@@ -19,6 +19,7 @@ enum
   af_softmax = 4
 };
 
+
 // TODO enum for padding (same, valid)
 // TODO enum for layer type
 // TODO unify variable names for Loops
@@ -418,6 +419,7 @@ static float *padding_values_apply(float *input, uint16_t input_width, uint16_t 
   return input;
 }
 
+/*
 static float * convolution_apply(float * input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_width, uint16_t output_height, uint16_t output_depth)
 {
   uint16_t input_y_index;
@@ -474,6 +476,7 @@ static float * convolution_apply(float * input, uint16_t input_width, uint16_t i
   // TODO: Implement activation function call here
   return output;
 }
+*/
 
 /*
 Purpose: Generates the output predictions for the input samples.
@@ -530,6 +533,7 @@ float *predict(float *input)
       input = activation_apply(input, input_width, input_height, input_depth, activation_function);
     }
     //Convolution
+    /*
     else if(LAYER_TYPE[current_layer_index -1] == 5)
     {
       uint16_t input_width = LAYER_OUTPUT_WIDTH[current_layer_index - 1];
@@ -550,6 +554,7 @@ float *predict(float *input)
       input = convolution_apply(input, input_width, input_height, input_depth, KERNEL_VALUES, kernel_start_index, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_width, output_height, output_depth);
 
     }
+    */
   }
 
   /* We do not need to do anything for flatten layers since we're already using a flattened array structure
