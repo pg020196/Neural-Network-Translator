@@ -4,12 +4,6 @@
 #include <stdlib.h>
 #include "nn_model.h"
 
-/*
-Purpose: Applies the activation function to the input value
-Arguments: An integer value to specify the activation function, a float value
-Returns: The given value with the activation function applied
-*/
-
 enum
 {
   af_linear = 0,
@@ -38,14 +32,17 @@ enum
   lt_bias = 8
 }
 
-// TODO enum for padding (same, valid)
-// TODO enum for layer type
 // TODO unify variable names for Loops
 // TODO unify argument names
 // TODO implement missing code segments
 // TODO insert new avg and max pooling
 // TODO Update method signatures
 
+/*
+Purpose: Applies the activation function to the input value
+Arguments: An integer value to specify the activation function, a float value
+Returns: The given value with the activation function applied
+*/
 static float activation_function_apply(uint8_t act_func, float value, float denominator)
 {
   if (act_func == af_sigmoid)
@@ -73,7 +70,7 @@ static float activation_function_apply(uint8_t act_func, float value, float deno
   return value;
 }
 
-static float * activation_apply(float *values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func)
+static float * activation_apply(float * values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func)
 {
   uint16_t current_x_index;
   uint16_t current_y_index;
@@ -206,28 +203,30 @@ static float *pooling_avg_apply(float *input, uint16_t input_width, uint16_t inp
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t input_index;
-  uint16_t output_index;
-
+  uint16_t output_index = 0;
   float result;
-  float *output = calloc(output_height * output_width * output_depth, sizeof(float));
+  uint16_t initial_result_index;
+  float *output = calloc(output_height * output_width * output_height, sizeof(float));
 
-  for (current_z_index = 0; current_z_index < output_width; current_z_index++)
+  for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
   {
-    for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
+    for (vertical_step_index = 0; vertical_step_index <= input_height - pool_height; vertical_step_index += vertical_stride)
     {
-      for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+      for (horizontal_step_index = 0; horizontal_step_index <= input_width - pool_width; horizontal_step_index += horizontal_stride)
       {
+        //Initial result index represents the index of the upper left corner of the filter matrix
+        initial_result_index = (vertical_step_index * input_width + horizontal_step_index) + current_z_index * (input_width * input_height);
         result = 0;
         for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
         {
           for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
           {
-            input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index + current_z_index * (input_width * input_height);
-            result = result + *(input + input_index);
+            input_index = initial_result_index + vertical_pool_index * input_width + horizontal_pool_index;
+            result = result + *(input+input_index);
           }
         }
-        output_index = (horizontal_step_index + vertical_step_index * pool_width) + current_z_index * (output_height * output_width);
-        *(output + output_index) = (float)result / (pool_width * pool_height);
+        *(output + output_index) = (float)result / (pool_width*pool_height);
+        output_index++;
       }
     }
   }
@@ -243,32 +242,33 @@ static float *pooling_max_apply(float *input, uint16_t input_width, uint16_t inp
   uint16_t vertical_pool_index;
   uint16_t horizontal_pool_index;
   uint16_t input_index;
-  uint16_t output_index;
+  uint16_t output_index = 0;
   float result;
   uint16_t initial_result_index;
-  float *output = calloc(output_height * output_width, sizeof(float));
+  float *output = calloc(output_height * output_width * output_height, sizeof(float));
 
   for (current_z_index = 0; current_z_index < output_depth; current_z_index++)
   {
-    for (vertical_step_index = 0; vertical_step_index < output_height; vertical_step_index += vertical_stride)
+    for (vertical_step_index = 0; vertical_step_index <= input_height - pool_height; vertical_step_index += vertical_stride)
     {
-      for (horizontal_step_index = 0; horizontal_step_index < output_width; horizontal_step_index += horizontal_stride)
+      for (horizontal_step_index = 0; horizontal_step_index <= input_width - pool_width; horizontal_step_index += horizontal_stride)
       {
+        //Initial result index represents the index of the upper left corner of the filter matrix
         initial_result_index = (vertical_step_index * input_width + horizontal_step_index) + current_z_index * (input_width * input_height);
         result = *(input + initial_result_index);
         for (vertical_pool_index = 0; vertical_pool_index < pool_height; vertical_pool_index++)
         {
-          for (horizontal_pool_index = 1; horizontal_pool_index < pool_width; horizontal_pool_index++)
+          for (horizontal_pool_index = 0; horizontal_pool_index < pool_width; horizontal_pool_index++)
           {
-            input_index = horizontal_pool_index + vertical_pool_index * input_width + vertical_step_index * input_width + horizontal_step_index + current_z_index * (input_width * input_height);
+            input_index = initial_result_index + vertical_pool_index * input_width + horizontal_pool_index;
             if (*(input + input_index) > result)
             {
               result = *(input + input_index);
             }
           }
         }
-        output_index = (horizontal_step_index + vertical_step_index * pool_width) + current_z_index * (output_width * output_height);
         *(output + output_index) = result;
+        output_index++;
       }
     }
   }
