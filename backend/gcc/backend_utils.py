@@ -39,7 +39,7 @@ def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_
     copyfile(c_file_source, c_file_dest)
 
     if (exec_file is not None):
-        exec_file_dest = out_dir + '/' + os.path.basename(exec_file)
+        exec_file_dest = out_dir + '/' + os.path.basename(out_dir) + os.path.splitext(exec_file)[-1]
         copyfile(exec_file, exec_file_dest)
 
 def convert_array_to_string(array):
