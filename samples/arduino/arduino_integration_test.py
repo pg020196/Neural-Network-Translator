@@ -67,10 +67,13 @@ class ArduinoIntegrationTest(unittest.TestCase):
             for digit in str(float(results_framework[i][0][0])):
                 if (digit=='.'):
                     dot_index=counter
-                if (digit==str(float(results_arduino[i]))[counter]):
+                if (counter<len(results_arduino[i]) and digit==str(float(results_arduino[i]))[counter]):
                     counter=counter+1
                 else:
                     break
+
+                if (counter>=len(str(float(results_framework[i][0][0])))):
+                    counter=self.precision + dot_index
 
             if ((counter-dot_index +1)<self.precision):
                 self.assertTrue(False)
