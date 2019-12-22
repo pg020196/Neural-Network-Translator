@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "nn_model.h"
 
+// Activation function
 enum
 {
   af_linear = 0,
@@ -19,6 +20,14 @@ enum
   padding_same = 1
 };
 
+// Padding type
+enum
+{
+  pt_zero = 0,
+  pt_value = 1
+}
+
+// Layer type
 enum
 {
   lt_dropout = 0,
@@ -541,6 +550,66 @@ static float * convolution_apply(float * input, uint16_t input_columns, uint16_t
   return output;
 }
 */
+
+/*
+Purpose:
+Arguments:
+Returns:
+*/
+static float * convolution_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_columns, uint16_t output_rows, uint16_t output_depth)
+{
+  uint16_t current_depth_index;
+  uint16_t current_row_index;
+  uint16_t current_column_index;
+  uint16_t filter_current_row_index;
+  uint16_t filter_current_column_index;
+  uint16_t input_index;
+  uint16_t output_index = 0;
+  float result;
+  uint16_t filter_position_index; // Represents the index of the upper left corner of the filter matrix
+  uint16_t filter_index;
+  float *output = calloc(output_rows * output_columns * output_rows, sizeof(float));
+
+  // TODO: Calculate correct padding width and height and update the input column and row size
+  //uint16_t number_of_padding_layers = padding_calculate_size();
+  //input = padding_values_apply(input, input_columns, input_rows, input_depth, number_of_padding_layers);
+  //input_columns = input_columns + number_of_padding_layers * 2;
+  //input_rows = input_rows + number_of_padding_layers * 2;
+
+  for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
+  {
+    for (current_row_index = 0; current_row_index <= input_rows - kernel_height; current_row_index += vertical_stride)
+    {
+      for (current_column_index = 0; current_column_index <= input_columns - kernel_width; current_column_index += horizontal_stride)
+      {
+        filter_position_index = (current_row_index * input_columns + current_column_index) + current_depth_index * (input_columns * input_rows);
+        result = 0;
+        filter_index = 0;
+        for (filter_current_row_index = 0; filter_current_row_index < kernel_height; filter_current_row_index = filter_current_row_index + horizontal_dilation_rate)
+        {
+          for (filter_current_column_index = 0; filter_current_column_index < kernel_width; filter_current_column_index = filter_current_column_index + vertical_dilation_rate)
+          {
+            input_index = filter_position_index + filter_current_row_index * input_columns + filter_current_column_index;
+            filter_index = filter_current_row_index * kernel_width + filter_current_column_index;
+            result = *(input + input_index) * kernel[filter_index];
+          }
+        }
+        *(output + output_index) = result;
+        output_index++;
+      }
+    }
+  }
+
+  // TODO: Implement logic to apply bias and / or activation function to the output
+  // float output_bias[] = calloc(output_columns*output_rows*output_depth, sizeof(float));
+  // output_bias = bias_apply(output, output_columns*output_rows*output_depth, biases, bias_start_index);
+
+  // float output_with_activation_function[] = calloc(output_columns*output_rows*output_depth, sizeof(float));
+  // output_with_activation_function = activation_apply(output, output_columns, output_rows, output_depth, activation);
+
+  free(input);
+  return output;
+}
 
 /*
 Purpose: Generates the output predictions for the input samples.
