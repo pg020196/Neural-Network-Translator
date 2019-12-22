@@ -51,6 +51,13 @@ def convert_array_to_string(array):
         string = string[:-1]
     return string + '}'
 
+def flatten(input):
+    if isinstance(input, (list, tuple, set, range)):
+        for sub in input:
+            yield from flatten(sub)
+    else:
+        yield input
+
 def get_number_of_layers(input):
     """Returns the number of layers in the neural network"""
     count=0
@@ -119,7 +126,7 @@ def get_output_dimensions(input):
             act_height = last_output_height * last_output_width * last_output_depth
             act_width = 1
             act_depth = 1
-        if (layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER):
+        if (layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER ):
             vertical_padding = 0
             if (layer['config']['padding'].lower() == 'same'):
                 vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
@@ -127,7 +134,6 @@ def get_output_dimensions(input):
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width=1
             act_depth = last_output_depth
-
         if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER):
             vertical_padding = 0
             horizontal_padding = 0
@@ -138,6 +144,25 @@ def get_output_dimensions(input):
 
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
+            act_depth = last_output_depth
+        if (layer['class_name']==CONV_1D_LAYER):
+            vertical_padding = 0
+            if (layer['config']['padding'].lower() == 'same'):
+                vertical_padding = int((layer['config']['kernel_size'][0] - 1) / 2)
+
+            act_height = ((input_height - layer['config']['kernel_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
+            act_width=1
+            act_depth = last_output_depth
+        if (layer['class_name']==CONV_2D_LAYER):
+            vertical_padding = 0
+            horizontal_padding = 0
+
+            if (layer['config']['padding'].lower() == 'same'):
+                vertical_padding = int((layer['config']['kernel_size'][0] - 1) / 2)
+                horizontal_padding = int((layer['config']['kernel_size'][1] - 1) / 2)
+
+            act_height = ((input_height - layer['config']['kernel_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
+            act_width = ((input_width - layer['config']['kernel_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
             act_depth = last_output_depth
 
         height_array.append(int(act_height))
@@ -169,13 +194,14 @@ def get_strides_strings(input):
     width_array=[]
     height_array=[]
     for layer in input['config']['layers']:
-        if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
+        if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==CONV_2D_LAYER):
             height_array.append(layer['config']['strides'][0])
             width_array.append(layer['config']['strides'][1])
-        elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
-            height_array.append(layer['config']['pool_size'][0])
+        elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==CONV_1D_LAYER):
+            height_array.append(layer['config']['strides'][0])
             width_array.append(1)
         else:
+            width_array.append(0)
             height_array.append(0)
 
     return convert_array_to_string(height_array), convert_array_to_string(width_array)
@@ -195,7 +221,7 @@ def get_activation_function_string(input, activation_functions):
     array = []
     for layer in input['config']['layers']:
         #? Dictionary activation_functions contains the mapping to the indices
-        if (layer['class_name']==DENSE_LAYER):
+        if (layer['class_name']==DENSE_LAYER or layer['class_name']==CONV_2D_LAYER or layer['class_name']==CONV_1D_LAYER):
             array.append(str(activation_functions[layer['config']['activation'].lower()]))
         else:
             array.append('0')
@@ -206,17 +232,19 @@ def get_bias_information(input):
        a string containing an array of indices indicating the start position of biases for each layer,
        and a flattened array of weights values"""
     last_layer_values = 0
-    count=0
     output= []
     bias_indices_array=[]
     use_bias_array = []
     for layer in input['config']['layers']:
-        if (layer['class_name']==DENSE_LAYER):
+        if (layer['class_name']==DENSE_LAYER or layer['class_name']==CONV_2D_LAYER or layer['class_name']==CONV_1D_LAYER):
             use_bias_array.append(int(layer['config']['use_bias']))
             bias_indices_array.append(int(last_layer_values))
-            last_layer_values = last_layer_values + layer['config']['units']
-            output.append(layer['bias_values'])
-            count = count + 1
+            if (layer['class_name']==DENSE_LAYER):
+                last_layer_values = last_layer_values + layer['config']['units']
+            else:
+                last_layer_values = last_layer_values + len(layer['bias_values'])
+            if 'bias_values' in layer:
+                output.append(layer['bias_values'])
         else:
             use_bias_array.append(0)
             bias_indices_array.append(0)
@@ -248,3 +276,46 @@ def get_weight_information(input, layerOutputHeight):
     #? Flattening the array before returning
     weights_array = list(chain.from_iterable(output))
     return convert_array_to_string(weights_indices_array), weights_array
+
+def get_dilation_strings(input):
+    width_array=[]
+    height_array=[]
+    for layer in input['config']['layers']:
+        if (layer['class_name']==CONV_2D_LAYER):
+            height_array.append(layer['config']['dilation_rate'][0])
+            width_array.append(layer['config']['dilation_rate'][1])
+        elif (layer['class_name']==CONV_1D_LAYER):
+            height_array.append(layer['config']['dilation_rate'][0])
+            width_array.append(1)
+        else:
+            width_array.append(0)
+            height_array.append(0)
+
+    return convert_array_to_string(height_array), convert_array_to_string(width_array)
+
+def get_kernel_information(input):
+    kernel_width_array=[]
+    kernel_height_array=[]
+    kernel_values=[]
+    kernel_indices=[]
+    last_layer_index=0
+
+    for layer in input['config']['layers']:
+        if (layer['class_name']==CONV_1D_LAYER or layer['class_name']==CONV_2D_LAYER):
+            if (layer['class_name']==CONV_1D_LAYER):
+                kernel_height_array.append(layer['config']['kernel_size'][0])
+                kernel_width_array.append(1)
+            elif (layer['class_name']==CONV_2D_LAYER):
+                kernel_height_array.append(layer['config']['kernel_size'][0])
+                kernel_width_array.append(layer['config']['kernel_size'][1])
+
+            kernel_values.append(list(chain.from_iterable(layer['kernel_values'])))
+
+            kernel_indices.append(last_layer_index)
+            last_layer_index = last_layer_index + len(list(chain.from_iterable(layer['kernel_values'])))
+        else:
+            kernel_indices.append(0)
+            kernel_height_array.append(0)
+            kernel_width_array.append(0)
+
+    return convert_array_to_string(kernel_height_array), convert_array_to_string(kernel_width_array), convert_array_to_string(kernel_indices), list(flatten(kernel_values))

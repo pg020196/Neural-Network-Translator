@@ -18,7 +18,7 @@ class Keras(FrontendPlugin):
         count=0
         #? Adding batch_input_shape, units, weight- and bias-values for each layer to the generated json object
         for layer in model_json['config']['layers']:
-            if (layer['class_name']=='Dense'):
+            if (layer['class_name']=='Dense' or layer['class_name']=='Conv2D' or layer['class_name']=='Conv1D'):
                 weights = model.layers[count].get_weights()[0]
                 biases = model.layers[count].get_weights()[1]
                 layer['kernel_values'] = weights.tolist()

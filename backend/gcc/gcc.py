@@ -70,4 +70,16 @@ class GCC(BackendPlugin):
         markers['###verticalStride###'] = verticalStrides
         markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
+        #? Convolution layer specific markers
+        kernel_height_string, kernel_width_string, kernel_indices_string, kernel_values = backend_utils.get_kernel_information(input)
+        markers['###kernelValues###'] = backend_utils.convert_array_to_string(kernel_values)
+        markers['###kernelvaluesstartindex###'] = kernel_indices_string
+        markers['###kernelwidth###'] = kernel_width_string
+        markers['###kernelheight###'] = kernel_height_string
+
+        markers['###dimKernelValues###'] = len(kernel_values)
+
+        verticalDilation, horizontalDilation = backend_utils.get_dilation_strings(input)
+        markers['###HorizontalDilationRate###'] = verticalDilation
+        markers['###VerticalDilationRate###'] = horizontalDilation
         return markers

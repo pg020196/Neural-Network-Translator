@@ -7,6 +7,19 @@ import json
 class Pytorch(FrontendPlugin):
     """Pytorch frontend plugin transforms given Pytorch pt-file to the intermediate format"""
 
+    layerMappings = { 'Linear' : 'Dense',
+                      'Conv1d':'Conv1D',
+                      'Conv2d':'Conv2D',
+                      'MaxPool2d':'MaxPooling2D',
+                      'MaxPool1d':'MaxPooling1D',
+                      'AvgPool2d':'AveragePooling2D',
+                      'AvgPool1d':'AveragePooling1D',
+                      'ReLU':'ReLU',
+                      'Sigmoid':'Sigmoid',
+                      'Tanh':'Tanh',
+                      'Softmax':'Softmax'
+                      }
+
     def __init__(self):
         super().__init__('pytorch', 'Pytorch Frontend Plugin')
 
@@ -19,7 +32,7 @@ class Pytorch(FrontendPlugin):
         counter=0
         for layer in model:
             out_layer = dict()
-            out_layer["class_name"] = str(type(layer).__name__)
+            out_layer["class_name"] = self.layerMappings[str(type(layer).__name__)]
             out_layer["config"] = dict()
             if (type(layer)==torch.nn.modules.activation.ReLU or type(layer)==torch.nn.modules.activation.Sigmoid
                 or type(layer)==torch.nn.modules.activation.Tanh or type(layer)==torch.nn.modules.activation.Softmax):
@@ -33,6 +46,9 @@ class Pytorch(FrontendPlugin):
                 out_layer["kernel_values"] = layer.weight.detach().numpy().tolist()
                 if (layer.bias is not None):
                     out_layer["bias_values"] = layer.bias.detach().numpy().tolist()
+                    out_layer["config"]["use_bias"] = True
+                else:
+                    out_layer["config"]["use_bias"] = False
                 out_layer["config"]["activation"]="linear"
             elif (type(layer)==torch.nn.modules.conv.Conv2d or type(layer)==torch.nn.modules.conv.Conv1d):
                 if (counter==0):
@@ -40,12 +56,20 @@ class Pytorch(FrontendPlugin):
                 out_layer["config"]["kernel_size"] = list(tuple(layer.kernel_size))
                 out_layer["config"]["strides"] = list(tuple(layer.stride))
                 out_layer["config"]["padding"] = "valid" if layer.padding==0 else "same"
-                out_layer["config"]["dilation"] = list(tuple(layer.dilation))
+                out_layer["config"]["dilation_rate"] = list(tuple(layer.dilation))
+                out_layer["config"]["activation"] = "linear"
+                if (layer.bias is not None):
+                    out_layer["bias_values"] = layer.bias.detach().numpy().tolist()
+                    out_layer["config"]["use_bias"] = True
+                else:
+                    out_layer["config"]["use_bias"] = False
+                #! are those the right values?
+                out_layer["kernel_values"] = layer.weight.detach().numpy().tolist()
             elif (type(layer)==torch.nn.modules.pooling.MaxPool2d or type(layer)==torch.nn.modules.pooling.MaxPool1d
                 or type(layer)==torch.nn.modules.pooling.AvgPool2d or type(layer)==torch.nn.modules.pooling.AvgPool1d):
                 if (counter==0):
                     out_layer["config"]["batch_input_shape"] = [None, layer.in_channels]
-                out_layer["config"]["kernel_size"] = list(tuple(layer.kernel_size))
+                out_layer["config"]["pool_size"] = list(tuple(layer.kernel_size))
                 out_layer["config"]["strides"] = list(tuple(layer.stride))
                 out_layer["config"]["padding"] = "valid" if layer.padding==0 else "same"
                 if (type(layer)==torch.nn.modules.pooling.MaxPool2d or type(layer)==torch.nn.modules.pooling.MaxPool1d):
