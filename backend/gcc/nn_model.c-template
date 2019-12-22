@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include "nn_model.h"
 
+// Enumeration for activation function types
 enum
 {
   af_linear = 0,
@@ -13,12 +14,14 @@ enum
   af_softmax = 4
 };
 
+// Enumeration for padding states
 enum
 {
   padding_valid = 0,
   padding_same = 1
 };
 
+// Enumeration for layer types
 enum
 {
   lt_dropout = 0,
@@ -31,8 +34,6 @@ enum
   lt_batch_normalization = 7,
   lt_bias = 8
 };
-
-// TODO implement missing code segments
 
 /*
 Purpose: Applies the activation function to the input value
@@ -484,65 +485,6 @@ static float * padding_values_apply(float *input, uint16_t input_columns, uint16
 }
 
 /*
-static float * convolution_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, const float kernel[], uint16_t kernel_start_index, uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t horizontal_dilation_rate, uint16_t vertical_dilation_rate, uint16_t output_columns, uint16_t output_rows, uint16_t output_depth)
-{
-  uint16_t input_y_index;
-  uint16_t input_x_index;
-  uint16_t input_z_index;
-  uint16_t initial_result_index;
-  uint16_t kernel_row_index;
-  uint16_t kernel_column_index;
-  uint16_t input_index;
-  uint16_t kernel_index;
-  uint16_t output_index = 0;
-  float result;
-  float *output;
-
-  //! TODO Calculate the number of padding_layers later
-  uint16_t number_of_padding_layers = 1;
-
-  input = padding_values_apply(input, input_columns, input_rows, input_depth, number_of_padding_layers);
-
-
-  input_columns = input_columns + number_of_padding_layers * 2;
-  input_rows = input_rows + number_of_padding_layers * 2;
-
-  output = calloc(output_rows * output_columns * output_depth, sizeof(float));
-
-  for (input_z_index = 0; input_z_index < input_depth; input_z_index++)
-  {
-    //Loop through input matrix
-    for (input_y_index = 0; input_y_index < input_rows - kernel_height; input_y_index += vertical_stride)
-    {
-      //Loop through input matrix
-      for (input_x_index = 0; input_x_index < input_columns - kernel_width; input_x_index += horizontal_stride)
-      {
-        initial_result_index = (input_y_index * input_columns + input_x_index) + input_z_index * (input_columns * input_rows);
-        result = 0;
-        for (kernel_row_index = 0; kernel_row_index < kernel_height; kernel_row_index = kernel_row_index + vertical_dilation_rate)
-        {
-          for (kernel_column_index = 0; kernel_column_index < kernel_width; kernel_column_index = kernel_column_index + horizontal_dilation_rate)
-          {
-            input_index = kernel_column_index + kernel_row_index * input_columns + input_y_index * input_columns + initial_result_index;
-            kernel_index =  kernel_column_index + kernel_row_index * kernel_width + kernel_start_index;
-            result = result + (*(input + input_index) * kernel[kernel_index]);
-          }
-        }
-        *(output + output_index) = result;
-        output_index++;
-      }
-    }
-  }
-
-  free(input);
-
-  // TODO: Implement bias function call here
-  // TODO: Implement activation function call here
-  return output;
-}
-*/
-
-/*
 Purpose: Generates the output predictions for the input samples.
 Arguments: A float array
 Returns: A float (will be extended in future versions)
@@ -596,33 +538,10 @@ float * predict(float * input)
       uint8_t activation = ACTIVATION_FUNCTION[current_layer_index - 1];
       input = activation_apply(input, input_columns, input_rows, input_depth, activation);
     }
-    //Convolution
-    /*
-    else if(LAYER_TYPE[current_layer_index -1] == lt_convolution)
-    {
-      uint16_t input_columns = LAYER_output_columns[current_layer_index - 1];
-      uint16_t input_rows = LAYER_output_rows[current_layer_index - 1];
-      uint16_t input_depth = LAYER_OUTPUT_DEPTH[current_layer_index - 1];
 
-      uint16_t kernel_width = KERNEL_WIDTH[current_layer_index-1];
-      uin16_t kernel_height = KERNEL_HEIGHT[current_layer_index-1];
-      uint16_t kernel_start_index = KERNEL_VALUES_START_INDEX[current_layer_index-1];
-
-      uint16_t horizontal_stride = HORIZONTAL_STRIDE[current_layer_index];
-      uint16_t vertical_stride = VERTICAL_STRIDE[current_layer_index];
-
-      uint16_t output_columns = LAYER_output_columns[current_layer_index];
-      uint16_t output_rows = LAYER_output_rows[current_layer_index];
-      uint16_t output_depth = LAYER_OUTPUT_DEPTH[current_layer_index];
-
-      input = convolution_apply(input, input_columns, input_rows, input_depth, KERNEL_VALUES, kernel_start_index, kernel_width, kernel_height, horizontal_stride, vertical_stride, output_columns, output_rows, output_depth);
-
-    }
-    */
-  }
-
-  /* We do not need to do anything for flatten layers since we're already using a flattened array structure
+    /* We do not need to do anything for flatten layers since we're already using a flattened array structure
       and the calculation of the proper sizing is already performed by the python backend. */
+  }
 
   return input;
 }
