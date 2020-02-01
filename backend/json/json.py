@@ -21,5 +21,6 @@ class Json(BackendPlugin):
         if (out_ext!='.json'):
             out = out + '.json'
 
+        #? Writing input as json to outputfile
         with open(out, 'w') as file:
             file.write(json.dumps(input))

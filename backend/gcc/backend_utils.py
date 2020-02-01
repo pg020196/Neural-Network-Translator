@@ -2,6 +2,7 @@ from itertools import chain
 from shutil import copyfile
 import os
 
+#? Definition of the layer names/class names
 DENSE_LAYER = 'Dense'
 CONV_2D_LAYER = 'Conv2D'
 CONV_1D_LAYER = 'Conv1D'
@@ -67,6 +68,7 @@ def get_layer_types_string(input, layer_types):
     return convert_array_to_string(array)
 
 def get_output_dimensions(input):
+    """Returns an array with height values, an array with width values and an array with depth values of the given input"""
     height_array = []
     last_output_height=0
     width_array = []
@@ -80,7 +82,7 @@ def get_output_dimensions(input):
         input_depth = last_output_depth
 
         if 'batch_input_shape' in layer['config']:
-            #? Extraction of 3rd dimension (height)
+            #? Extraction of 1st dimension (height)
             height_array.append(layer['config']['batch_input_shape'][1])
             input_height = layer['config']['batch_input_shape'][1]
 
@@ -111,6 +113,7 @@ def get_output_dimensions(input):
                 input_depth = 1
                 last_output_depth = input_depth
 
+        #? Differentiation between layer types and specific processing
         if (layer['class_name']==DENSE_LAYER):
             act_height = len(layer['kernel_values'][0])
             act_width = 1
@@ -121,9 +124,11 @@ def get_output_dimensions(input):
             act_depth = 1
         if (layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER):
             vertical_padding = 0
+            #? Only calculating padding if it is enabled in the layer definition
             if (layer['config']['padding'].lower() == 'same'):
                 vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
 
+            #? Calculating height in dependence of padding
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width=1
             act_depth = last_output_depth
@@ -132,10 +137,12 @@ def get_output_dimensions(input):
             vertical_padding = 0
             horizontal_padding = 0
 
+            #? Only calculating padding if it is enabled in the layer definition
             if (layer['config']['padding'].lower() == 'same'):
                 vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
                 horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
 
+            #? Calculating height and width in dependence of padding
             act_height = ((input_height - layer['config']['pool_size'][0] + 2 * vertical_padding) / layer['config']['strides'][0]) + 1
             act_width = ((input_width - layer['config']['pool_size'][1] + 2 * horizontal_padding) / layer['config']['strides'][1]) + 1
             act_depth = last_output_depth
@@ -151,8 +158,10 @@ def get_output_dimensions(input):
     return height_array, width_array, depth_array
 
 def get_pool_size_strings(input):
+    """Returns an array with pool height values and an array with pool width values of the given input"""
     width_array=[]
     height_array=[]
+
     for layer in input['config']['layers']:
         if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
             height_array.append(layer['config']['pool_size'][0])
@@ -163,9 +172,11 @@ def get_pool_size_strings(input):
         else:
             height_array.append(0)
             width_array.append(0)
+
     return convert_array_to_string(height_array), convert_array_to_string(width_array)
 
 def get_strides_strings(input):
+    """Returns an array with stride height values and an array with stride width values of the given input"""
     width_array=[]
     height_array=[]
     for layer in input['config']['layers']:

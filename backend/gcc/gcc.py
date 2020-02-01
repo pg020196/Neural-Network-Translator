@@ -33,7 +33,7 @@ class GCC(BackendPlugin):
         backend_utils.write_header_and_c_file(out_dir_path, h_file, h_file_name, c_file_source_path, c_file_name, executable_file)
 
     def build_markers(self, input):
-        """Returns a markers array build from intermediate input information """
+        """Returns a markers dict built from intermediate input information """
         markers = dict()
 
         #? common markers
