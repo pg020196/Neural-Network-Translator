@@ -6,6 +6,8 @@ from backend.gcc.gcc import GCC
 class TestGCCBackend(unittest.TestCase):
     """Test class for GCC Backend"""
 
+    #? Naming scheme for test classes: [test_MethodName_StateUnderTest_ExpectedBehavior]
+
     intermediate = None
 
     def __init__(self, testname):
@@ -20,7 +22,7 @@ class TestGCCBackend(unittest.TestCase):
         """Clean up after test cases"""
         return super().tearDown()
 
-    def test_build_markers(self):
+    def test_buildMarkers_validIntermediateFormat_validMarkerDict(self):
         """Test case for build_markers function"""
         markers = GCC().build_markers(self.intermediate)
         #? Check if all markers were correctly added to the dictionary
