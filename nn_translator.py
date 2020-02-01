@@ -71,6 +71,6 @@ except NotImplementedError:
 except IOError as ioerr:
     print('Error occurred while opening the file: ')
     print(traceback.format_exception_only(type(ioerr), ioerr))
-# except Exception as err:
-#     print('An error occurred: ')
-#     print(traceback.format_exception_only(type(err), err))
+except Exception as err:
+    print('An error occurred: ')
+    print(traceback.format_exception_only(type(err), err))
