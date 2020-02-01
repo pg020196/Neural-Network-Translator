@@ -30,6 +30,7 @@ class Keras(FrontendPlugin):
         del model_json['keras_version']
         del model_json['backend']
 
+        #? Removing unnecessary information from config object
         for layer in model_json['config']['layers']:
             layer['config'].pop('trainable', None)
             layer['config'].pop('kernel_initializer', None)
