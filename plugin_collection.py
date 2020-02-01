@@ -61,7 +61,7 @@ class PluginCollection(object):
         raise NotImplementedError
 
     def search_for_plugins(self, package):
-        """Searches the given directory for available plugins"""
+        """Searches the given directory and all sub directories for available plugins"""
 
         imported_package = __import__(package, fromlist=[''])
 
@@ -85,9 +85,9 @@ class PluginCollection(object):
             if pkg_path not in self.seen_paths:
                 self.seen_paths.append(pkg_path)
 
-                # Get all subdirectory of the current package path directory
+                #? Get all subdirectory of the current package path directory
                 child_pkgs = [p for p in os.listdir(pkg_path) if os.path.isdir(os.path.join(pkg_path, p))]
 
-                # For each subdirectory, apply the walk_package method recursively
+                #? For each subdirectory, apply the searcg_for_plugins method recursively
                 for child_pkg in child_pkgs:
                     self.search_for_plugins(package + '.' + child_pkg)
