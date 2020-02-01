@@ -83,7 +83,7 @@ class ArduinoIntegrationTest(unittest.TestCase):
 #? ############### INFO ###############
 #? This script has to be run with -m switch from parent directory in order to get the imports right
 #? Directory: Neural-Network-Translator (repository root directory)
-#? Command: python -m test.arduino_backend_test
+#? Command: python -m samples.arduino.arduino_integration_test
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Arduino integration test')
