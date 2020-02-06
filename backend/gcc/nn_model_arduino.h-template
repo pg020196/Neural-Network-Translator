@@ -1,35 +1,27 @@
 #include <avr/pgmspace.h>
 
-/* Defines the number of layers. */
+/* Defines the number of layers. Including input and output layer. */
 const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
 
-/* */
-//? NEW
+/* Defines the width of the output of each layer when seen as a matrix. */
 const uint16_t PROGMEM LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;
 
-/**/
-//? NEW
+/* Defines the height of the output of each layer when seen as a matrix. */
 const uint16_t PROGMEM LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerOutputHeight###;
 
+/* Defines the depth of the output of each layer when seen as a matrix. */
 const uint16_t PROGMEM LAYER_OUTPUT_DEPTH[###numberLayers###] = ###layerOutputDepth###;
 
-/* Defines the layer types */
+/* Defines the type of the layer. See layer_type enumeration for possible values. */
 const uint8_t PROGMEM LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
 
-/*
-   Defines the activation functions for each layer as follows:
-   0: Linera
-   1: Sigmoid
-   2: Relu
-   3: TanH
-   4: Softmax
-*/
+/* Defines the type of activation function for the layer. Default value for layers without activation function is 0. */
 const uint8_t PROGMEM ACTIVATION_FUNCTION[###dimNumberLayers###] = ###activationFunctions###;
 
-/*  Defines the index in which the first weight-element of the layer is present. */
+/*  Defines the index at which the first weight-element of each layer is present. */
 const uint16_t PROGMEM WEIGHTS_START_INDEX[###dimNumberLayers###] = ###indicesWeights###;
 
-/* Defines the index in which the first weight-element of the layer is present. */
+/* Defines the index at which the first bias-element of each layer is present. */
 const uint16_t PROGMEM BIASES_START_INDEX[###dimNumberLayers###] = ###indicesBias###;
 
 /* Defines whether bias values should be applied to the layer. */
@@ -41,24 +33,31 @@ const float PROGMEM WEIGHTS[###dimWeights###] = ###weights###;
 /* Holds the biases for each layer as flatted one-dimensional array. */
 const float PROGMEM BIASES[###dimBias###] = ###bias###;
 
-//? NEW
+/* Defines the width of the filter/pool for each layer when seen as a matrix.
+Default value for layers without filters/pools is 0. */
 const uint16_t PROGMEM POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
 
-//? NEW
+/* Defines the height of the filter/pool for each layer when seen as a matrix.
+Default value for layers without filters/pools is 0. */
 const uint16_t PROGMEM POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
 
-//? NEW
+/* Defines the horizontal stride/step size for the filter/pool for each layer.
+Default value for layers without filters/pools is 0. */
 const uint16_t PROGMEM HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
 
-//? NEW
+/* Defines the vertical stride/step size for the filter/pool for each layer.
+Default value for layers without filters/pools is 0. */
 const uint16_t PROGMEM VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
 
-//? NEW
+/* Defines if padding should be applied for each layer. See padding enumeration for possible values. */
 const uint8_t PROGMEM PADDING[###dimNumberLayers###] = ###padding###;
 
-
+/* Performs the prediction for a given set of input values. The input lenght must match the specification. */
 float * predict(float input[]);
 
+/* Functions for each layer are specified in .h file to allow direct references for testing purposes.
+Otherwise only prediction should be referenced externally.
+The name of each helper function is composed as follows: LAYERNAME_(IF AVAILABLE:TYPE)_ACTION */
 static float * dense_apply(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t bias_enabled, uint8_t activation_function);
 static float * padding_zero_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t pool_width, uint16_t pool_height);
 static float * padding_values_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, uint16_t number_of_padding_layers);
@@ -68,7 +67,7 @@ static float * pooling_apply(uint8_t pooling_type, float *input, uint16_t input_
 static float * activation_apply(float *values, uint16_t values_width, uint16_t values_height, uint16_t values_depth, uint8_t act_func);
 static float * convolution_apply(float *input, uint16_t input_width, uint16_t input_height, uint16_t input_depth, const float kernel[], uint16_t kernel_width, uint16_t kernel_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_width, uint16_t output_height, uint16_t output_depth);
 
+/* Helper functions to perform calculations*/
 static uint16_t padding_calculate_size(uint16_t pool_dimension);
 static uint16_t padding_calculate_output_size(uint16_t input_dimension, uint16_t padding_dimension);
-
 static float activation_function_apply(uint8_t act_func, float value, float denominator);
