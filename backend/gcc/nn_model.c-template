@@ -73,7 +73,12 @@ static float activation_function_apply(uint8_t activation, float value, float de
 /*
 Purpose: Implementation of the activation layer
 Arguments:
-Returns:
+- input: A reference to the input values for this layer
+- input_columns: Number of columns of the input when seen as a matrix
+- input_rows: Number of rows of the input when seen as a matrix
+- input_depth: Number of the z-layers of the input when seen as a matrix
+- activation: The type of the activation function
+Returns: A reference to the output of the layer with the activation function applied
 */
 static float * activation_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint8_t activation)
 {
@@ -88,7 +93,10 @@ static float * activation_apply(float * input, uint16_t input_columns, uint16_t 
   for (input_depth_index = 0; input_depth_index < input_depth; input_depth_index++)
   {
     denominator = 1;
-    if (activation == 4)
+
+    /* If the activation function is the softmax function, the denominator must be calculated
+    prior the activation function can be applied.*/
+    if (activation == af_softmax)
     {
       denominator = 0;
       for (input_row_index = 0; input_row_index < input_rows; input_row_index++)
@@ -101,6 +109,7 @@ static float * activation_apply(float * input, uint16_t input_columns, uint16_t 
       }
     }
 
+    /* Apply the activation function for each input value */
     for (input_row_index = 0; input_row_index < input_rows; input_row_index++)
     {
       for (input_column_index = 0; input_column_index < input_columns; input_column_index++)
@@ -118,12 +127,18 @@ static float * activation_apply(float * input, uint16_t input_columns, uint16_t 
 /*
 Purpose: Implementation of the bias layer
 Arguments:
-Returns:
+- input: A reference to the input values for this layer
+- input_length: Total numbers of elements in the input array
+- biases: An array containing all bias values as in BIASES (not only the bias values for this layer)
+- bias_start_index: Index of the first bias value in the biases array
+Returns: A reference to the output of the layer with the bias values applied
 */
 static float * bias_apply(float * input, uint16_t input_length, const float biases[], uint16_t bias_start_index)
 {
   float * output = calloc(input_length, sizeof(float));
   uint16_t input_index;
+
+  /* Apply the bias to each input value */
   for (input_index = 0; input_index < input_length; input_index++)
   {
     *(output + input_index) = *(input + input_index) + biases[bias_start_index + input_index];
@@ -135,7 +150,16 @@ static float * bias_apply(float * input, uint16_t input_length, const float bias
 /*
 Purpose: Implementation of the dense layer
 Arguments:
-Returns:
+- input: A reference to the input values for this layer
+- number_of_previous_units: The number of units/elements of the previous layer. Must be equivalent to the lenght of the input array.
+- number_of_current_units: The number of units/elements which is expected for the output.
+- weights: An array containing all weight values as in WEIGHTS (not only the weight values for this layer)
+- weights_start_index: Index of the first weight value in the weights array
+- biases: An array containing all the bias values as in BIASES (not only the bias values for this layer)
+- biases_start_index: Index of the first bias value in the biases array
+- use_bias: Defines whether bias values should be applied or not
+- activation: Defines the desired activation function. Use af_linear if you don't want to apply an activation function
+Returns: A reference to the output of the layer with the dense function applied
 */
 static float * dense_apply(float * input, uint16_t number_of_previous_units, uint16_t number_of_current_units, const float weights[], uint16_t weights_start_index, const float biases[], uint16_t bias_start_index, uint8_t use_bias, uint8_t activation)
 {
@@ -147,7 +171,7 @@ static float * dense_apply(float * input, uint16_t number_of_previous_units, uin
 
   for (current_unit_index = 0; current_unit_index < number_of_current_units; current_unit_index++)
   {
-    /* Loops through the number of previous units to calculate the dot product. */
+    /* Loops through the number of previous units to calculate the dot product between the weights and the units. */
     for (previous_unit_index = 0; previous_unit_index < number_of_previous_units; previous_unit_index++)
     {
       *(output + current_unit_index) =
@@ -157,6 +181,7 @@ static float * dense_apply(float * input, uint16_t number_of_previous_units, uin
     }
   }
 
+  /* We need to differentiate if the bias is activated or not, since it also changes the input of the activation function */
   if (use_bias == 1)
   {
     output_with_bias = calloc(number_of_current_units, sizeof(float));
@@ -173,9 +198,15 @@ static float * dense_apply(float * input, uint16_t number_of_previous_units, uin
 }
 
 /*
-Purpose:
+Purpose: Applies a padding with zeros around the input matrix
 Arguments:
-Returns:
+- input: A reference to the input values
+- input_columns: The number of columns when the input is seen as a matrix
+- input_rows: The number of rows when the input is seen as a matrix
+- input_depth: The number of z-layers when the input is seen as a three dimensional matrix
+- pool_size_width: The width of the filter/pool
+- pool_size_height: The height of the filter/pool
+Returns: A reference to the output as matrix with zero padding values applied
 */
 static float * padding_zero_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height)
 {
@@ -185,15 +216,19 @@ static float * padding_zero_apply(float * input, uint16_t input_columns, uint16_
   uint16_t output_index;
   uint16_t input_index;
 
+  /* Calculate the thickness of the padding */
   uint16_t padding_size_height = padding_calculate_size(pool_size_height);
   uint16_t padding_size_width = padding_calculate_size(pool_size_width);
 
+  /* Calculate the new output size with the padding applied */
   uint16_t output_columns = padding_calculate_output_size(input_columns, padding_size_width);
   uint16_t output_rows = padding_calculate_output_size(input_rows, padding_size_height);
   uint16_t output_depth = input_depth;
 
   float *output = calloc(output_columns * output_rows * output_depth, sizeof(float));
 
+  /* As the output array is initialized with zeros in it, we can simply copy the input values
+  in the output array. We only must make sure that we don't copy them into the padding borders. */
   for (current_depth_index = 0; current_depth_index < output_depth; current_depth_index++)
   {
     input_index = current_depth_index * output_depth;
@@ -215,9 +250,19 @@ static float * padding_zero_apply(float * input, uint16_t input_columns, uint16_
 }
 
 /*
-Purpose:
+Purpose: Implementation of the average pooling function
 Arguments:
-Returns:
+- input: A reference to the input values
+- input_columns: The number of columns when the input is seen as a matrix
+- input_rows: The number of rows when the input is seen as a matrix
+- input_depth: The numer of z-layers when the input is seen as a three-dimensional matrix
+- pool_size_width: The width of the pool/filter
+- pool_size_height: The height of the pool/filter
+- horizontal_stride: The horizontal stride/stepsize of the pool/filter
+- vertical_stride: The vertical stride/stepsize of the pool/filter
+- output_columns: The number of expected output columns when seen as a matrix
+- output_rows: The number of expected output rows when seen as amatrix
+Returns: A reference to the output values with the average pooling applied
 */
 static float * pooling_avg_apply(float * input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_columns, uint16_t output_rows)
 {
@@ -232,6 +277,7 @@ static float * pooling_avg_apply(float * input, uint16_t input_columns, uint16_t
   uint16_t filter_position_index; // Represents the index of the upper left corner of the filter matrix
   float *output = calloc(output_rows * output_columns * output_rows, sizeof(float));
 
+  /* Loop through the input matrix */
   for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
   {
     for (current_row_index = 0; current_row_index <= input_rows - pool_size_height; current_row_index += vertical_stride)
@@ -240,6 +286,8 @@ static float * pooling_avg_apply(float * input, uint16_t input_columns, uint16_t
       {
         filter_position_index = (current_row_index * input_columns + current_column_index) + current_depth_index * (input_columns * input_rows);
         result = 0;
+
+        /* Loop through the filter to perform the filter calculations */
         for (filter_current_row_index = 0; filter_current_row_index < pool_size_height; filter_current_row_index++)
         {
           for (filter_current_column_index = 0; filter_current_column_index < pool_size_width; filter_current_column_index++)
@@ -258,9 +306,19 @@ static float * pooling_avg_apply(float * input, uint16_t input_columns, uint16_t
 }
 
 /*
-Purpose:
+Purpose: Implementation of the max pooling function
 Arguments:
-Returns:
+- input: A reference to the input values
+- input_columns: The number of columns when the input is seen as a matrix
+- input_rows: The number of rows when the input is seen as a matrix
+- input_depth: The numer of z-layers when the input is seen as a three-dimensional matrix
+- pool_size_width: The width of the pool/filter
+- pool_size_height: The height of the pool/filter
+- horizontal_stride: The horizontal stride/stepsize of the pool/filter
+- vertical_stride: The vertical stride/stepsize of the pool/filter
+- output_columns: The number of expected output columns when seen as a matrix
+- output_rows: The number of expected output rows when seen as amatrix
+Returns: A reference to the output values with the max pooling applied
 */
 static float * pooling_max_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint16_t output_columns, uint16_t output_rows)
 {
@@ -275,6 +333,7 @@ static float * pooling_max_apply(float *input, uint16_t input_columns, uint16_t 
   uint16_t filter_position_index; // Represents the index of the upper left corner of the filter matrix
   float *output = calloc(output_rows * output_columns * output_rows, sizeof(float));
 
+  /* Loop through the input matrix */
   for (current_depth_index = 0; current_depth_index < input_depth; current_depth_index++)
   {
     for (current_row_index = 0; current_row_index <= input_rows - pool_size_height; current_row_index += vertical_stride)
@@ -283,6 +342,8 @@ static float * pooling_max_apply(float *input, uint16_t input_columns, uint16_t 
       {
         filter_position_index = (current_row_index * input_columns + current_column_index) + current_depth_index * (input_columns * input_rows);
         result = *(input + filter_position_index);
+
+        /* Loop through the filter to perform the filter calculations */
         for (filter_current_row_index = 0; filter_current_row_index < pool_size_height; filter_current_row_index++)
         {
           for (filter_current_column_index = 0; filter_current_column_index < pool_size_width; filter_current_column_index++)
@@ -304,9 +365,21 @@ static float * pooling_max_apply(float *input, uint16_t input_columns, uint16_t 
 }
 
 /*
-Purpose:
+Purpose: The general function for pooling layers. Call this function if you want to apply padding before the pooling
 Arguments:
-Returns:
+- input: A reference to the input values
+- input_columns: The number of columns of the input when seen as a matrix
+- input_rows: The number of rows of the input when seen as a matrix
+- input_depth: The number of z-layers of the input when seen as a three-dimensional matrix
+- pooling_type: The desired pooling type, e.g. max or avg - Use lt_max_pooling or lt_avg_pooling here
+- pool_size_width: The width of the pool/filter
+- pool_size_height: The height of the pool/filter
+- horizontal_stride: The horizontal stride/stepsize
+- vertical_stride: The vertical stride/stepsize
+- padding: The desired padding type, e.g. padding_same or padding_valid - Use padding_same to apply padding
+- output_columns: The expected number of columns for the output
+- output_rows: The expected number of rows for the output
+Returns: A reference to the output values with the pooling applied
 */
 static float * pooling_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint8_t pooling_type, uint16_t pool_size_width, uint16_t pool_size_height, uint16_t horizontal_stride, uint16_t vertical_stride, uint8_t padding, uint16_t output_columns, uint16_t output_rows)
 {
@@ -340,24 +413,37 @@ static float * pooling_apply(float *input, uint16_t input_columns, uint16_t inpu
 }
 
 /*
-Purpose:
+Purpose: Calculates the "thickness" of the padding
 Arguments:
-Returns:
+- pool_size: Either the horizontal or the vertical pool size
+Returns: The "thickness" of the horizontal or vertical padding according to the given pool size
 */
 static uint16_t padding_calculate_size(uint16_t pool_size)
 {
   return (pool_size - 1) / 2;
 }
 
+/*
+Purpose: Calculates the width or height of after the padding is applied
+Arguments:
+- input_size: The width or height of the matrix
+- padding_size: The thickness of the padding
+Returns: The new width or height of the matrix after applying the padding values
+*/
 static uint16_t padding_calculate_output_size(uint16_t input_size, uint16_t padding_size)
 {
   return input_size + padding_size * 2;
 }
 
 /*
-Purpose:
+Purpose: Applies a padding with the outer values around the input matrix
 Arguments:
-Returns:
+- input: A reference to the input values
+- input_columns: The number of columns of the input when seen as a matrix
+- input_rows: The number of rows of the input when seen as a matrix
+- input_depth: The number of z-layers of the input when seen as three-dimensional matrix
+- number_of_padding_layers: The thickness of the padding layer
+Returns: A reference to the output values with the value padding applied
 */
 static float * padding_values_apply(float *input, uint16_t input_columns, uint16_t input_rows, uint16_t input_depth, uint16_t number_of_padding_layers)
 {
@@ -486,8 +572,9 @@ static float * padding_values_apply(float *input, uint16_t input_columns, uint16
 
 /*
 Purpose: Generates the output predictions for the input samples.
-Arguments: A float array
-Returns: A float (will be extended in future versions)
+Arguments:
+- input: A reference to the input values as a flattened array
+Returns: A reference to the output as a flattened array
 */
 float * predict(float * input)
 {
