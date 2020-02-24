@@ -71,3 +71,6 @@ Currently, the project supports the following configurations:
 | ReLu                     |   ✔️    |
 | TanH                     |   ✔️    |
 | Softmax                  |   ✔️    |
+
+## How do I use this?
+For a detailed description on how to use or develop plug-ins for this translator, please see the project's wiki.
