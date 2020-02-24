@@ -73,4 +73,4 @@ Currently, the project supports the following configurations:
 | Softmax                  |   ✔️    |
 
 ## How do I use this?
-For a detailed description on how to use or develop plug-ins for this translator, please see the project's wiki.
+For a detailed description on how to use or develop plug-ins for this translator, please see the project's [wiki](https://github.com/pg020196/Neural-Network-Translator/wiki).
