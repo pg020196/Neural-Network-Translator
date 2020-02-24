@@ -22,7 +22,7 @@ Currently, the project supports the following configurations:
 | Recurrent Neural Network     |        |
 | Convolutional Neural Network |        |
 
-### Supported Frameworks
+### Supported Frameworks (Frontend)
 
 | Neural Network Structure   |  Status  |
 | :------------------------- | :------: |
@@ -34,6 +34,13 @@ Currently, the project supports the following configurations:
 | Apache mxnet               |          |
 
 *:candy:: Proof of concept for data extraction is available as a Jupyter Notebook. These notebooks can be used as a basis to develop additional frontend plug-ins for both of the frameworks.
+
+### Supported Output (Backend)
+
+| Neural Network Structure   |  Status  |
+| :------------------------- | :------: |
+| GCC-Compiler                     |    ✔️     |
+| JSON | ✔️ |
 
 ### Supported Layer Types
 
