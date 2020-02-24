@@ -1,122 +1,66 @@
-# Neural Network Translator
+# Welcome to the Neural-Network-Translator GitHub-Repository
 
-# 1 Set up environment
+![image-20200224135350982](C:\Users\philippgrandeit\AppData\Roaming\Typora\typora-user-images\image-20200224135350982.png)
 
-## 1.1 Required software
+## Project Motivation
 
-The following software components and dependencies are needed:
+Nowadays, neural networks are often modeled and trained with powerful frameworks, such as Microsoft Cognitive Toolkit, Keras or TensorFlow. While the training of these neural networks is often performed on very powerful hardware, the hardware of the final product on which the models will be executed later, however, is usually much less powerful due to the cost-driven requirements. Particularly in the embedded area, the question, therefore, arises how the trained models can be implemented on the embedded systems used in practice. This project provides a code translator, which makes it possible to translate a neural network model into native code for a specified platform of an embedded device. 
 
-- GIT: https://git-scm.com/
-- Anaconda Python 2019.07: https://www.anaconda.com/download/
+Basically, the implemented process is to translate a given neural network model containing information about its structure and data, such as weights and bias values, to a general intermediate file format. This file format simply is a JSON-file which holds all relevant information of the neural network model. Using the given JSON-file as an intermediate layer allows to split the translation process into two subprocesses. The frontent handles the information extraction from the neural network model and the parsing of these information in the general file format. After having populated the intermediate file completely, the backend can translate the information given in the intermediate file format into platform specific code. Thereby, the implementation of each the frontend and the backend is handled in a plug-in-fashion which means that you can add specific plug-ins for every desired framework. The following figure shows the concept in a compact way:
 
-## 1.2 Installation process
+<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/Sprint06/.github/resources/wiki/home_functionality_sketch.png" alt="Sketch of the translators function" width="70%"/></p>
 
-### 1.2.1 Install Anaconda Python 2019.07
+## Supported Components
 
-### 1.2.2 Clone GIT repository
+Currently, the project supports the following configurations:
 
-- Navigate to the desired target directory
-- Open Git Bash:
-- `git clone https://github.com/pg020196/Neural-Network-Translator.git`
+### Supported Neural Network Structures
 
-### 1.2.3 a) Set up python environment with requirements.txt
+| Neural Network Structure     | Status |
+| :--------------------------- | :----: |
+| Feed Forward Neural Network  |   ✔️    |
+| Recurrent Neural Network     |        |
+| Convolutional Neural Network |        |
 
-- Start Anaconda Prompt and execute the following commands:
+### Supported Frameworks
 
-  `conda create -n nnt pip python=3.7`
+| Neural Network Structure   |  Status  |
+| :------------------------- | :------: |
+| Keras                      |    ✔️     |
+| Micosoft Cognitive Toolkit | :candy:* |
+| PyTorch                    | :candy:*​ |
+| Theano                     |          |
+| Caffe                      |          |
+| Apache mxnet               |          |
 
-  `conda update -n base -c defaults conda`
+*:candy:: Proof of concept for data extraction is available as a Jupyter Notebook. These notebooks can be used as a basis to develop additional frontend plug-ins for both of the frameworks.
 
-  `activate nnt`
+### Supported Layer Types
 
-  `python -m pip install --upgrade pip==19.2.1`
+| Layer Type          | Status |
+| :------------------ | :----: |
+| DropOut             |   ✔️    |
+| Dense               |   ✔️    |
+| Flatten             |   ✔️    |
+| MaxPooling1D        |   ✔️    |
+| MaxPooling2D        |   ✔️    |
+| MaxPooling3D        |        |
+| AvgPooling1D        |   ✔️    |
+| AvgPooling2D        |   ✔️    |
+| AvgPooling3D        |        |
+| Conv1D              |        |
+| Conv2D              |        |
+| Conv3D              |        |
+| Activation          |   ✔️    |
+| Batch Normalization |        |
+| Bias                |   ✔️    |
 
-- Open Anaconda Navigator and install Jupyter Notebook in version **6.0.0**
+### Supported Activation Functions
 
-- Open Anaconda Prompt and navigate to `setup\`
-
-- Install NNT-Requirements: `pip install -r nnt_requirements.txt`
-
-### 1.2.3 b) Set up python environment with environment.yml
-
-- Create Anaconda environment from environment.yml
-  `conda env create -f environment.yml`
-- Activate new environment
-  `activate nnt`
-
-# 2 Components
-
-## 2.1 Supported Frameworks
-
-- [x] **Keras**
-- [ ] TensorFlow
-- [ ] Theano
-- [ ] Caffe
-- [ ] Microsoft Cognitive Toolkit
-- [ ] PyTorch
-- [ ] Apache mxnet
-
-## 2.2 Supported Activation Functions
-
-- [x] Linear (0)
-- [x] Sigmoid (1)
-- [x] ReLu (2)
-- [x] Tanh (3)
-- [x] Softmax (4)
-
-## 2.3. Neural Network Structures
-
-- [ ] **(Deep) Feed Forward**
-- [ ] Recurrent
-
-## 2.4. Supported Layers
-
-- [x] Dense
-- [ ] Convolutional
-- [ ] Pooling
-- [ ] Flatten
-
-# 3 Working with Git
-
-Clone Git-repository: `git clone https://github.com/pg020196/Neural-Network-Translator.git`
-
-Show changed files: `git status`
-
-Add modified files to your commit: `git add /Path/to/modified/file`
-
-Perform commit: `git commit -m "Commit message with #Issue"`
-
-Push commits to remote host: `git push`
-
-Change to specific branch: `git checkout SprintXX`
-
-Process to upload new changes:
-
-1. `git pull`
-2. `git status`
-3. `git add`
-4. `git status`
-5. `git commit`
-6. `git push`
-
-Merge branches:
-
-Checkout the branch in which you want to merge (`TARGETBRANCH` (Mostly master- or development-branch):
-
-`git checkout master`
-
-Pull desired branch from the online repository. This type of merge keeps the commit history:
-
-`git pull https://github.com/pg020196/Neural-Network-Translator.git BRANCH_NAME`
-
-Solve conflicts.
-
-Commit the merge and verify the changes.
-
-Push the merge to the github repository.
-
-`git push origin TARGETBRANCH`
-
-# 4 How to contribute
-
-Contributing is not available at this stage.
+| Activation Function (af) | Status |
+| :----------------------- | :----: |
+| Linear                   |   ✔️    |
+| Sigmoid                  |   ✔️    |
+| ReLu                     |   ✔️    |
+| TanH                     |   ✔️    |
+| Softmax                  |   ✔️    |
