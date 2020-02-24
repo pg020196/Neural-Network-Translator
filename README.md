@@ -1,6 +1,6 @@
-# Welcome to the Neural-Network-Translator GitHub-Repository
+# Welcome to the Neural-Network-Translator-Repository
 
-![image-20200224135350982](C:\Users\philippgrandeit\AppData\Roaming\Typora\typora-user-images\image-20200224135350982.png)
+<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/Sprint06/.github/resources/readme/nnt_icon.png" alt="Sketch of the translators function" width="70%"/></p>
 
 ## Project Motivation
 
