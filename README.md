@@ -1,6 +1,11 @@
 # Welcome to the Neural-Network-Translator-Repository
 
-<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/Sprint06/.github/resources/readme/nnt_icon.png" alt="Sketch of the translators function" width="70%"/></p>
+<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/nnt_icon.png" alt="NNT icon" width="70%"/></p>
+
+<p align="center">
+Project in cooperation with:
+</p>
+<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/thn_logo.jpeg" alt="THN logo" width="20%"/>  <img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/mp_logo.png" alt="Method Park logo" width="20%"/></p>
 
 ## Project Motivation
 
@@ -8,7 +13,7 @@ Nowadays, neural networks are often modeled and trained with powerful frameworks
 
 Basically, the implemented process is to translate a given neural network model containing information about its structure and data, such as weights and bias values, to a general intermediate file format. This file format simply is a JSON-file which holds all relevant information of the neural network model. Using the given JSON-file as an intermediate layer allows to split the translation process into two subprocesses. The frontent handles the information extraction from the neural network model and the parsing of these information in the general file format. After having populated the intermediate file completely, the backend can translate the information given in the intermediate file format into platform specific code. Thereby, the implementation of each the frontend and the backend is handled in a plug-in-fashion which means that you can add specific plug-ins for every desired framework. The following figure shows the concept in a compact way:
 
-<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/Sprint06/.github/resources/wiki/home_functionality_sketch.png" alt="Sketch of the translators function" width="70%"/></p>
+<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/wiki/home_functionality_sketch.png" alt="Sketch of the translators function" width="70%"/></p>
 
 ## Supported Components
 
