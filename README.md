@@ -5,7 +5,7 @@
 <p align="center">
 Project in cooperation with:
 </p>
-<p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/thn_logo.jpeg" alt="THN logo" width="20%"/>  <img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/mp_logo.png" alt="Method Park logo" width="20%"/></p>
+<p align="center"><a href="th-nuernberg.de"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/thn_logo.jpeg" alt="THN logo" width="20%"/></a>    <a href="methodpark.de"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/mp_logo.png" alt="Method Park logo" width="20%"/></a></p>
 
 ## Project Motivation
 
