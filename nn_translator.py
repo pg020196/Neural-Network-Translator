@@ -18,9 +18,9 @@ backend_plugins = PluginCollection('backend')
 
 #? Parsing command line arguments
 parser = argparse.ArgumentParser(description='Translates high-level neural network model to native code for specified backend')
-parser.add_argument('-f', '--frontend', type=str, required=True, help='Frontend type of the input file, available at the momement: '+ get_available_plugins(frontend_plugins.plugins))
-parser.add_argument('-b', '--backend', type=str, required=True, help='Backend type to translate into, available at the momement: '+ get_available_plugins(backend_plugins.plugins))
-parser.add_argument('-c', '--conversions', nargs='+', help='Conversions to be performed on data, available at the momement: '+ get_available_plugins(conversion_plugins.plugins))
+parser.add_argument('-f', '--frontend', type=str, required=True, help='Frontend type of the input file, available at the moment: '+ get_available_plugins(frontend_plugins.plugins))
+parser.add_argument('-b', '--backend', type=str, required=True, help='Backend type to translate into, available at the moment: '+ get_available_plugins(backend_plugins.plugins))
+parser.add_argument('-c', '--conversions', nargs='+', help='Conversions to be performed on data, available at the moment: '+ get_available_plugins(conversion_plugins.plugins))
 parser.add_argument('-i', '--input', type=str, required=True, help='Input file containing the neural network model')
 parser.add_argument('-o', '--output', type=str, required=True, help='Output file to write to')
 parser.add_argument('-e', '--executable', type=str, help='Path to an executable file which contains the prediction call, when set the given file will be copied into the output directory')
