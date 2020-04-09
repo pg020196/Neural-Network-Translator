@@ -2,6 +2,7 @@ name: nnt
 channels:
   - defaults
   - conda-forge
+  - pytorch
 dependencies:
   - attrs=19.1.0
   - backcall=0.1.0
@@ -30,6 +31,7 @@ dependencies:
   - pyrsistent=0.14.11
   - python=3.7.3
   - python-dateutil=2.8.0
+  - pytorch=1.4.0
   - send2trash=1.5.0
   - setuptools=41.0.1
   - sqlite=3.29.0
@@ -93,8 +95,6 @@ dependencies:
     - tensorflow==2.0.0
     - tensorflow-estimator==2.0.0
     - termcolor==1.1.0
-    - torch==1.4.0
-    - torchvision==0.5.0
     - typed-ast==1.4.0
     - werkzeug==0.15.5
     - wrapt==1.11.2
