@@ -49,7 +49,8 @@ class ArduinoIntegrationTest(unittest.TestCase):
             result = self.arduino.readline()
             self.arduino.readline()
             self.arduino.readline()
-            results_arduino.append(result.decode().rstrip('\r\n'))
+            prediction = float(result.decode().rstrip('\r\n').strip())
+            results_arduino.append(prediction)
 
         results_framework = []
         model = tf.keras.models.load_model(self.modelPath)
@@ -58,25 +59,12 @@ class ArduinoIntegrationTest(unittest.TestCase):
         for input_values in self.inputs:
             array = str(input_values).split(',')
             array = np.array(array).reshape(1,len(array))
-            results_framework.append(model.predict(array.astype(np.float)))
+            prediction = model.predict(array.astype(np.float))[0][0]
+            results_framework.append(prediction)
 
         #? Checking if results from framework and arduino differ or not
         for i in range(0, len(results_arduino)):
-            counter = 0
-            dot_index = 0
-            for digit in str(float(results_framework[i][0][0])):
-                if (digit=='.'):
-                    dot_index=counter
-                if (counter<len(results_arduino[i]) and digit==str(float(results_arduino[i]))[counter]):
-                    counter=counter+1
-                else:
-                    break
-
-                if (counter>=len(str(float(results_framework[i][0][0])))):
-                    counter=self.precision + dot_index
-
-            if ((counter-dot_index +1)<self.precision):
-                self.assertTrue(False)
+            self.assertAlmostEqual(results_arduino[i], results_framework[i], self.precision)
 
         self.assertTrue(True)
 
