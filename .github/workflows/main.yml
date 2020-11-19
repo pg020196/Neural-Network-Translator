@@ -9,11 +9,16 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [ '3.6', '3.7' ]
+    name: unit tests (python ${{ matrix.python-version }})
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: '3.7'
+          python-version: ${{ matrix.python-version }}
       - name: install dependencies
         run: pip install -r setup/nnt_requirements.txt
       - name: unit tests
