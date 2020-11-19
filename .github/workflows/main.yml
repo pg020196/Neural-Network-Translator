@@ -1,0 +1,20 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: '3.7'
+      - name: install dependencies
+        run: pip install -r setup/nnt_requirements.txt
+      - name: unit tests
+        run: python -m test.complete_test_suite
