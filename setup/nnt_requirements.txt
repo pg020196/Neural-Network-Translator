@@ -96,6 +96,7 @@ terminado==0.9.4
 testpath==0.4.4
 threadpoolctl==2.1.0
 tomlkit==0.7.0
+--find-links https://download.pytorch.org/whl/torch_stable.html
 torch==1.8.1+cpu
 torchaudio==0.8.1
 torchvision==0.9.1+cpu
