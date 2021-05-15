@@ -15,6 +15,11 @@ class Keras(FrontendPlugin):
         model = keras.models.load_model(input)
         model_json = json.loads(model.to_json())
 
+        #? Remove InputLayer from json file
+        #? Currently, it does not provide any necessary attributes
+        if(model_json['config']['layers'][0]['class_name']=='InputLayer'):
+            model_json['config']['layers'].pop(0)
+
         count=0
         #? Adding batch_input_shape, units, weight- and bias-values for each layer to the generated json object
         for layer in model_json['config']['layers']:

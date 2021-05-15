@@ -10,7 +10,7 @@ class ArduinoIntegrationTest(unittest.TestCase):
 
     inputs = []
     arduino = None
-    precision = 8
+    precision = 6
     modelPath = '../diabetes_model.h5'
     com = 'COM3'
     baud = 9600
