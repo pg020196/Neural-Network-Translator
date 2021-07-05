@@ -1,8 +1,8 @@
-from plugin_collection import BackendPlugin
+﻿from plugin_collection import BackendPlugin
 from backend import backend_utils
 import os
 
-class C_Sharp(BackendPlugin):
+class C_Sharp(BackendPlugin): 
     """C_Sharp backend plugin translates the intermediate format to native C#-code"""
 
     #? Dictionaries for mapping activation functions and layer types to integer values
@@ -26,13 +26,11 @@ class C_Sharp(BackendPlugin):
 
         #? Creating directory if not existing
         out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
-        # c_file_source_path = './backend/gcc/nn_model.c-template'
         cs_file_name = 'nn_model.cs'
-        # h_file_name = 'nn_model.h'
 
-        # backend_utils.write_header_and_c_file(out_dir_path, h_file, h_file_name, c_file_source_path, c_file_name, executable_file)
         backend_utils.write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file)
 
+    # TODO: refactor build_markers (identical in this class and in class GCC)
     def build_markers(self, input):
         """Returns a markers dict built from intermediate input information """
         markers = dict()
