@@ -1,5 +1,5 @@
 from plugin_collection import BackendPlugin
-import backend.gcc.backend_utils as backend_utils
+from backend import backend_utils
 import os
 
 class GCC(BackendPlugin):
