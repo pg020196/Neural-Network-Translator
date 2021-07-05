@@ -43,6 +43,20 @@ def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_
         exec_file_dest = out_dir + '/' + os.path.basename(out_dir) + os.path.splitext(exec_file)[-1]
         copyfile(exec_file, exec_file_dest)
 
+def write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file):
+    """Writes cs-file in given output directory (created if necessary)"""
+    #? Creating directory if not existing
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
+
+    cs_filename = out_dir + '/' + cs_file_name
+    with open(cs_filename, 'w') as file:
+        file.write(cs_file)
+
+    if (exec_file is not None):
+        exec_file_dest = out_dir + '/' + os.path.basename(out_dir) + os.path.splitext(exec_file)[-1]
+        copyfile(exec_file, exec_file_dest)
+
 def convert_array_to_string(array):
     """Returns a string containing the given array"""
     string = '{'
