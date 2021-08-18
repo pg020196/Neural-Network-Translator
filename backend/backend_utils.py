@@ -43,7 +43,7 @@ def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_
         exec_file_dest = out_dir + '/' + os.path.basename(out_dir) + os.path.splitext(exec_file)[-1]
         copyfile(exec_file, exec_file_dest)
 
-def write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file):
+def write_cs_file(out_dir, cs_file, cs_file_name, exec_file):
     """Writes cs-file in given output directory (created if necessary)"""
     #? Creating directory if not existing
     if not os.path.exists(out_dir):
@@ -268,7 +268,7 @@ def get_weight_information(input, layerOutputHeight):
             output.append(list(chain.from_iterable(layer['kernel_values'])))
         else:
             weights_indices_array.append(0)
-        count = count + 1
+        count = count + 1 
 
     #? Flattening the array before returning
     weights_array = list(chain.from_iterable(output))

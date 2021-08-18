@@ -22,13 +22,17 @@ class C_Sharp(BackendPlugin):
         markers = self.build_markers(input)
 
         #? Reading the C# template file with markers and replacing them with the markers array
-        cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/c_sharp/nn_model.cs-template'), markers)
+        # cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/c_sharp/nn_model.cs-template'), markers)
+        cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('NeuralNetworkLib_CSharp/NeuralNetwork/NeuralNetwork/NeuralNetworkBuilder.cs-template'), markers)
 
         #? Creating directory if not existing
-        out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
+        # out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
+        out_dir_path = 'NeuralNetworkLib_CSharp/NeuralNetwork/NeuralNetwork/' + os.path.splitext(outputfile)[0]
         cs_file_name = 'nn_model.cs'
 
         backend_utils.write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file)
+
+
 
     # TODO: refactor build_markers (identical in this class and in class GCC)
     def build_markers(self, input):
@@ -60,13 +64,13 @@ class C_Sharp(BackendPlugin):
         markers['###useBias###'] = use_bias_string
 
         #? Pooling layer specific markers
-        poolHeights, poolWidths = backend_utils.get_pool_size_strings(input)
-        markers['###poolWidth###'] = poolWidths
-        markers['###poolHeight###'] = poolHeights
+        # poolHeights, poolWidths = backend_utils.get_pool_size_strings(input)
+        # markers['###poolWidth###'] = poolWidths
+        # markers['###poolHeight###'] = poolHeights
 
-        verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
-        markers['###horizontalStride###'] = horizontalStrides
-        markers['###verticalStride###'] = verticalStrides
-        markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
+        # verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
+        # markers['###horizontalStride###'] = horizontalStrides
+        # markers['###verticalStride###'] = verticalStrides
+        # markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
         return markers
