@@ -1,0 +1,110 @@
+using System;
+using System.Collections.Generic;
+using NeuralNetwork;
+using Layers;
+using Tensor;
+
+namespace NeuralNetworkTemplate
+{
+	class NeuralNetworkTemplate
+    {
+        static private ActivationType decodeActivationType(int code)
+        {
+            switch (code)
+            {
+                case (0):
+                    return ActivationType.linear;
+                    break;
+                case (1):
+                    return ActivationType.sigmoid;
+                    break;
+                case (2):
+                    return ActivationType.relu;
+                    break;
+                case (3):
+                    return ActivationType.tanh;
+                    break;
+                case (4):
+                    return ActivationType.softmax;
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+        }
+
+        public static void Main(string[] args)
+        {
+            int batchSize = 100;
+            int numLayers = ###dimNumberLayers###;
+            int[] arrayWidth = ###layerOutputWidth###;
+            int[] arrayHeight = ###layerOutputHeight###;
+            int[] arrayDepth = ###layerOutputDepth###;
+            int[] layerTypes = ###layerTypes###;
+            int[] activationTypes = ###activationFunctions###;
+            var weights = new Tensor<double>(new double[] ###weights###);
+            int dimWeights = ###dimWeights###;
+            int[] indicesWeights = ###indicesWeights###;
+            var bias = new Tensor<double>(new double[] ###bias###);
+            int dimBias = ###dimBias###;
+            int[] indicesBias = ###indicesBias###;
+            int[] useBias = ###useBias###;
+
+            if (arrayWidth[0] != 1 || arrayDepth[0] != 1)
+                throw new ArgumentException();
+            var inputLayer = new InputLayer<double>(new int[] { arrayHeight[0] });
+
+            var layerList = new List<BaseLayer<double>>();
+            layerList.Add(inputLayer);
+
+            BaseLayer<double> prevLayer = inputLayer;
+
+            for (int layer_idx = 1; layer_idx <= numLayers; layer_idx++)
+            {
+                switch (layerTypes[layer_idx - 1])
+                {
+                    case (1): // dense layer
+                        int weightsIndexUpper;
+                        int biasIndexUpper;
+                        if (layer_idx == numLayers)
+                        {
+                            weightsIndexUpper = weights.Shape[0];
+                            biasIndexUpper = bias.Shape[0];
+                        }
+                        else
+                        {
+                            weightsIndexUpper = indicesWeights[layer_idx];
+                            biasIndexUpper = indicesBias[layer_idx];
+                        }
+                        var layer = new Dense<double>(prevLayer.OutputShape, arrayHeight[layer_idx],
+                            decodeActivationType(activationTypes[layer_idx - 1]), Convert.ToBoolean(useBias[layer_idx - 1]));
+
+                        int[] weightsShape = { prevLayer.OutputShape[0], arrayHeight[layer_idx] };
+                        var layerWeights = weights[indicesWeights[layer_idx - 1]..weightsIndexUpper];
+                        layerWeights = layerWeights.reshape(weightsShape);
+
+                        int biasShape = arrayHeight[layer_idx];
+                        var layerBias = bias[indicesBias[layer_idx - 1]..biasIndexUpper];
+                        layerBias = layerBias.reshape(biasShape);
+
+                        layer.Weights = layerWeights;
+                        layer.Bias = layerBias;
+
+                        layerList.Add(layer);
+                        prevLayer = layer;
+                        break;
+                    default:
+                        throw new NotImplementedException();
+                }
+            }
+            var net = new NeuralNetwork<double>(layerList);
+
+            var X = Tensor<double>.randNormal(0, 1, batchSize, arrayHeight[0], arrayWidth[0], arrayDepth[0]);
+            if (layerTypes[0] == 1)
+                X = X.reshape(batchSize, arrayHeight[0]);
+
+            var y = net.predict(X);
+            Console.WriteLine(y);
+
+        }
+    }
+}
