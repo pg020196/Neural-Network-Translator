@@ -201,7 +201,17 @@ namespace Layers
         }
     }
 
+    public class MaxPooling<T> : BaseLayer<T>
+    {
+        // padding size for padding type "same"
+        // (Math.ceil(input_shape / strides) - 1) * strides + pool_size - input_shape
+    }
 
 
+
+    class LayerUtils
+    {
+        static Tensor<T> 
+    }
 }
 

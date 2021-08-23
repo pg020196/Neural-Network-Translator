@@ -44,7 +44,7 @@ class C_Sharp(BackendPlugin):
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
         markers['###layerTypes###'] = backend_utils.get_layer_types_string(input, self.layer_types)
 
-        layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions(input)
+        layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions_csharp_backend(input)
         markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
         markers['###layerOutputHeight###'] = backend_utils.convert_array_to_string(layerOutputHeight)
         markers['###layerOutputDepth###'] = backend_utils.convert_array_to_string(layerOutputDepth)
