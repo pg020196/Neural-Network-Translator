@@ -1,7 +1,7 @@
 import unittest
 import sys
 import json
-import backend.gcc.backend_utils as backend_utils
+import backend.backend_utils as backend_utils
 from backend.gcc.gcc import GCC
 
 class TestBackendUtils(unittest.TestCase):
@@ -23,6 +23,7 @@ class TestBackendUtils(unittest.TestCase):
         self.dense_3layer_input = json.load(open('test/test_dense_3layer_input.json'))
         self.mnist_flatten_input = json.load(open('test/test_mnist_flatten_input.json'))
         self.mnist_pool_input = json.load(open('test/test_mnist_pool_input.json'))
+        self.avg_pool_1d_input = json.load(open('test/test_avg_pool_1d_input.json'))
         return super().setUp()
 
     def tearDown(self):
@@ -123,6 +124,15 @@ class TestBackendUtils(unittest.TestCase):
     def test_getOutputDimensions_activationLayerInput_correctHeightWidthDepthDimensions(self):
         # TODO implement for neural network with activation layer
         self.assertTrue(True)
+
+    def test_getOutputDimensions_avgPoolingLayerInput_correctHeightWidthDepthDimensions(self):
+        heights, widths, depths = backend_utils.get_output_dimensions(self.avg_pool_1d_input)
+        print(heights)
+        print(widths)
+        print(depths)
+        self.assertTrue(backend_utils.convert_array_to_string(heights) == '{6,6}'
+                    and backend_utils.convert_array_to_string(widths) =='{1,1}'
+                    and backend_utils.convert_array_to_string(depths) == '{1,1}')
 
     def test_getActivationFunctionString_differentActionfunctionReluSigmoidInput_correctActivationFunctionString(self):
         """Test case for get_activation_function_string function with relu and sigmoid function"""

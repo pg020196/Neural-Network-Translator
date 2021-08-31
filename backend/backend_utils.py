@@ -288,7 +288,7 @@ def get_strides_strings(input):
             height_array.append(layer['config']['strides'][0])
             width_array.append(layer['config']['strides'][1])
         elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
-            height_array.append(layer['config']['pool_size'][0])
+            height_array.append(layer['config']['strides'][0])
             width_array.append(1)
         else:
             height_array.append(0)
@@ -298,7 +298,8 @@ def get_strides_strings(input):
 def get_padding_string(input, padding_types):
     array=[]
     for layer in input['config']['layers']:
-        if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
+        if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER or 
+        layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
             array.append(padding_types[layer['config']['padding']])
         else:
             array.append(0)
