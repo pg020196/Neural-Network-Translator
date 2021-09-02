@@ -28,6 +28,20 @@ namespace Layers
         randUniform
     }
 
+    public enum PoolingType
+    {
+        average,
+        max
+    }
+
+    public enum PaddingType
+    {
+        valid,
+        same,
+        same_keras
+    }
+
+
     //public enum FloatPrecision
     //{
     //    singlePrecision,
@@ -201,17 +215,72 @@ namespace Layers
         }
     }
 
-    public class MaxPooling<T> : BaseLayer<T>
+    //public class MaxPooling<T> : BaseLayer<T>
+    //{
+    //    // padding size for padding type "same"
+    //    // (Math.ceil(input_shape / strides) - 1) * strides + pool_size - input_shape
+    //}
+
+
+    class PoolingLayer<T> : BaseLayer<T>
     {
-        // padding size for padding type "same"
-        // (Math.ceil(input_shape / strides) - 1) * strides + pool_size - input_shape
-    }
+        public PaddingType paddingType { get; private set; }
+        public PoolingType poolingType { get; private set; }
+        public int[] pool_size { get; private set; }
+        public int[] stride { get; private set; }
+        public int pooling_dim { get; private set; }
 
 
+        public PoolingLayer(int[] inputShape, PoolingType poolingType, int[] pool_size, int[] strides = null, PaddingType paddingType = PaddingType.valid)
+        {
+            if (inputShape.Length != 2)
+            {
+                string msg = "inputShape must be 2D, but is of dimension" + inputShape.Length;
+                throw new ArgumentException(msg);
+            }
+            InputShape = inputShape;
 
-    class LayerUtils
-    {
-        static Tensor<T> 
+            this.paddingType = paddingType;
+            this.poolingType = poolingType;
+            pooling_dim = pool_size.Length;
+
+            if (pooling_dim < 1 | pooling_dim > 2)
+            {
+                string msg = "pool_size must be a tuple of length 1 or 2, but is of length " + pooling_dim;
+                throw new ArgumentException(msg);
+            }
+            for (int i = 0; i < pooling_dim; i++) 
+            {
+                if (pool_size[i] < 1)
+                {
+                    string msg = "Every element of pool_size must be at least 1, but element " + i + " is " + pool_size[i];
+                    throw new ArgumentException(msg);
+                }
+                else if (paddingType == PaddingType.valid & pool_size[i] > inputShape[0])
+                {
+                    string msg = "Elements of pool_size cannot be larger than input_shape[0] for paddingType 'valid'";
+                    throw new ArgumentException(msg);
+                }
+            }
+
+            this.pool_size = pool_size;
+
+            if (stride == -1)
+            {
+                this.stride = pool_size;
+            }
+            else if (stride == 0 | stride < -1)
+            {
+                string msg = "Invalid argument (" + stride + ") for paramter stride. Cannot be zero or negative";
+            }
+
+            if (this.paddingType == PaddingType.same)
+
+            OutputShape = 
+        }
+
+
+        static Tensor<T> padding(Tensor<T> input, int h0=0, int h1=0, int w0=0, int w1=0, T value=)
     }
 }
 
