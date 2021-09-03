@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using Tensor;
 using Activation;
@@ -41,7 +42,6 @@ namespace Layers
         same_keras
     }
 
-
     //public enum FloatPrecision
     //{
     //    singlePrecision,
@@ -54,6 +54,27 @@ namespace Layers
         public int[] OutputShape { get; protected set; }
         public ActivationType ActivationType { get; protected set; }
         public abstract Tensor<T> FeedForward(Tensor<T> layer_input);
+
+        protected void checkShapeConsistency(int[] currentInputShape, int[] layerInputShape)
+        {
+            for (int i = 1; i < currentInputShape.Length; i++)
+            {
+                if (currentInputShape[i] != layerInputShape[i - 1])
+                {
+                    var sb = new StringBuilder();
+                    sb.Append("Wrong shape of tensor ");
+                    sb.Append(IntExtension.arrayToString(currentInputShape));
+                    sb.Append(",  must be of shape (?");
+                    for (int j = 0; j < layerInputShape.Length; j++)
+                    {
+                        sb.Append(" x ");
+                        sb.Append(layerInputShape[j]);
+                    }
+                    sb.Append(")");
+                    throw new ArgumentException(sb.ToString());
+                }
+            }
+        }
 
         // public abstract override String ToString();
     }
@@ -73,28 +94,14 @@ namespace Layers
             if (input.Dims < 2)
                 throw new ArgumentException("Feature vectors cannot be zero dimensional, i.e. input must be at least of two dimensions");
 
-            for (int i = 1; i < input.Shape.Length; i++)
-                if (input.Shape[i] != InputShape[i - 1])
-                {
-                    var sb = new StringBuilder();
-                    sb.Append("Wrong shape of tensor ");
-                    sb.Append(IntExtension.arrayToString(input.Shape));
-                    sb.Append(",  must be of shape (?");
-                    for (int j = 0; j < InputShape.Length; j++)
-                    {
-                        sb.Append(" x ");
-                        sb.Append(InputShape[j]);
-                    }
-                    sb.Append(")");
-                    throw new ArgumentException(sb.ToString());
-                }
+            checkShapeConsistency(input.Shape, InputShape);
+
             return input;
         }
     }
 
     public class Dense<T> : BaseLayer<T>
     {
-
         private Tensor<T> weights;
         private Tensor<T> bias;
 
@@ -202,6 +209,8 @@ namespace Layers
             if (input.Dims != 2)
                 throw new NotImplementedException("Currently only 1D samples supported");
 
+            checkShapeConsistency(input.Shape, InputShape);
+
             //var result = Tensor<T>.zeros(input.Shape[0], NumUnits);
             var result = input.dot(Weights);
             if (UseBias)
@@ -222,61 +231,126 @@ namespace Layers
     //}
 
 
-    class PoolingLayer<T> : BaseLayer<T>
+    class PoolingLayer1D<T> : BaseLayer<T>
     {
         public PaddingType paddingType { get; private set; }
         public PoolingType poolingType { get; private set; }
-        public int[] pool_size { get; private set; }
-        public int[] stride { get; private set; }
-        public int pooling_dim { get; private set; }
+        public int pool_size { get; private set; }
+        public int stride { get; private set; }
+
+        private delegate T Pooling(Tensor<T> inputWindow);
+
+        private T avgPoolingApply(Tensor<T> inputWindow)
+        {
+            if (inputWindow.Dims != 1)
+            {
+                throw new ArgumentException($"input must be 1D, but is of {inputWindow.Dims} dimensions");
+            }
+
+            return inputWindow.mean()[0];
+        }
+
+        private T maxPoolingApply(Tensor<T> inputWindow)
+        {
+            if (inputWindow.Dims != 1)
+            {
+                throw new ArgumentException($"input must be 1D, but is of {inputWindow.Dims} dimensions");
+            }
+
+            return inputWindow.max()[0];
+        }
 
 
-        public PoolingLayer(int[] inputShape, PoolingType poolingType, int[] pool_size, int[] strides = null, PaddingType paddingType = PaddingType.valid)
+        public PoolingLayer1D(int[] inputShape, PoolingType poolingType, int pool_size, int stride = -1, PaddingType paddingType = PaddingType.valid)
         {
             if (inputShape.Length != 2)
             {
-                string msg = "inputShape must be 2D, but is of dimension" + inputShape.Length;
+                string msg = $"inputShape must be 2D, but is of dimension {inputShape.Length}";
                 throw new ArgumentException(msg);
             }
             InputShape = inputShape;
 
-            this.paddingType = paddingType;
             this.poolingType = poolingType;
-            pooling_dim = pool_size.Length;
-
-            if (pooling_dim < 1 | pooling_dim > 2)
+            switch (poolingType)
             {
-                string msg = "pool_size must be a tuple of length 1 or 2, but is of length " + pooling_dim;
+                case PoolingType.average:
+                    this.poolingApply = avgPoolingApply;
+                    break;
+                case PoolingType.max
+            }
+            
+
+            this.paddingType = paddingType;
+
+            if (pool_size < 1)
+            {
+                string msg = $"pool_size must be at least 1, but is {pool_size}";
                 throw new ArgumentException(msg);
             }
-            for (int i = 0; i < pooling_dim; i++) 
+            else if (paddingType == PaddingType.valid & pool_size > inputShape[0])
             {
-                if (pool_size[i] < 1)
-                {
-                    string msg = "Every element of pool_size must be at least 1, but element " + i + " is " + pool_size[i];
-                    throw new ArgumentException(msg);
-                }
-                else if (paddingType == PaddingType.valid & pool_size[i] > inputShape[0])
-                {
-                    string msg = "Elements of pool_size cannot be larger than input_shape[0] for paddingType 'valid'";
-                    throw new ArgumentException(msg);
-                }
+                string msg = "pool_size cannot be larger than first dimension of input_shape for paddingType 'valid'";
+                throw new ArgumentException(msg);
             }
 
             this.pool_size = pool_size;
 
             if (stride == -1)
             {
-                this.stride = pool_size;
+                stride = pool_size;
             }
-            else if (stride == 0 | stride < -1)
+            else if (stride < 1)
             {
-                string msg = "Invalid argument (" + stride + ") for paramter stride. Cannot be zero or negative";
+                string msg = $"stride cannot be less than 1, but is {stride}";
+                throw new ArgumentException(msg);
             }
 
-            if (this.paddingType == PaddingType.same)
+            int outputShape_0;
+            if (paddingType == PaddingType.valid)
+            {
+                outputShape_0 = (int) Math.Ceiling((double)(InputShape[0] - pool_size + 1) / stride);
+            }
+            else
+            {
+                outputShape_0 = (int) Math.Ceiling((double)InputShape[0] / stride);
+            }
 
-            OutputShape = 
+            OutputShape = new int[] { outputShape_0, inputShape[1] };
+        }
+
+        public override Tensor<T> FeedForward(Tensor<T> input)
+        {
+            checkShapeConsistency(input.Shape, InputShape);
+
+
+
+            switch (paddingType)
+            {
+                case PaddingType.valid:
+                    var output = Tensor<T>.zeros(OutputShape);
+                    for (int i=0; i<input.Shape[0]; i++)
+                    {
+                        for (int j=0; j<input.Shape[2]; j++)
+                        {
+                            for (int k=0; k<OutputShape[0]; k++)
+                            {
+                                if ()
+                                output[i, k, j] = ;
+                            }
+                        }
+                    }
+
+                    break;
+                case PaddingType.same:
+                    throw new NotImplementedException();
+                    break;
+                case PaddingType.same_keras:
+                    throw new NotImplementedException();
+                    break;
+                default:
+                    throw new NotImplementedException();
+            }
+
         }
 
 
