@@ -79,7 +79,6 @@ namespace Layers
         // public abstract override String ToString();
     }
 
-
     public class InputLayer<T> : BaseLayer<T>
     {
         public InputLayer(int[] inputShape)
@@ -224,7 +223,6 @@ namespace Layers
         }
     }
 
-
     public class PoolingLayer1D<T> : BaseLayer<T>
     {
         public PaddingType paddingType { get; private set; }
@@ -237,9 +235,9 @@ namespace Layers
 
         private T avgPoolingApply(Tensor<T> inputWindow)
         {
-            if (inputWindow.Dims != 1)
+            if (inputWindow.Dims > 1)
             {
-                throw new ArgumentException($"input must be 1D, but is of {inputWindow.Dims} dimensions");
+                throw new ArgumentException($"input must be at most 1D, but is of {inputWindow.Dims} dimensions");
             }
 
             return inputWindow.mean()[0];
@@ -247,9 +245,9 @@ namespace Layers
 
         private T maxPoolingApply(Tensor<T> inputWindow)
         {
-            if (inputWindow.Dims != 1)
+            if (inputWindow.Dims > 1)
             {
-                throw new ArgumentException($"input must be 1D, but is of {inputWindow.Dims} dimensions");
+                throw new ArgumentException($"input must be at most 1D, but is of {inputWindow.Dims} dimensions");
             }
 
             return inputWindow.max()[0];
@@ -395,7 +393,6 @@ namespace Layers
         }
     }
 
-
     public class PoolingLayer2D<T> : BaseLayer<T>
     {
         public PaddingType paddingType { get; private set; }
@@ -408,9 +405,9 @@ namespace Layers
 
         private T avgPoolingApply(Tensor<T> inputWindow)
         {
-            if (inputWindow.Dims != 2)
+            if (inputWindow.Dims > 2)
             {
-                throw new ArgumentException($"input must be 2D, but is of {inputWindow.Dims} dimensions");
+                throw new ArgumentException($"input must be at most 2D, but is of {inputWindow.Dims} dimensions");
             }
 
             return inputWindow.mean()[0];
@@ -418,9 +415,9 @@ namespace Layers
 
         private T maxPoolingApply(Tensor<T> inputWindow)
         {
-            if (inputWindow.Dims != 2)
+            if (inputWindow.Dims > 2)
             {
-                throw new ArgumentException($"input must be 2D, but is of {inputWindow.Dims} dimensions");
+                throw new ArgumentException($"input must be at most 2D, but is of {inputWindow.Dims} dimensions");
             }
 
             return inputWindow.max()[0];
