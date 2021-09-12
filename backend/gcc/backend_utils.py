@@ -24,20 +24,20 @@ def read_marker_file(filename):
     with open(filename, 'r') as file:
         return file.read()
 
-def write_header_and_c_file(out_dir, h_file, h_file_name, c_file_source, c_file_name, exec_file):
+def write_header_and_c_file(out_dir, c_file, c_file_name, h_file_source, h_file_name, exec_file):
     """Writes header- and c-file in given output directory (created if necessary)"""
     #? Creating directory if not existing
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    h_filename = out_dir + '/' + h_file_name
-    with open(h_filename, 'w') as file:
-        file.write(h_file)
+    c_filename = out_dir + '/' + c_file_name
+    with open(c_filename, 'w') as file:
+        file.write(c_file)
 
-    c_file_dest = out_dir + '/' + c_file_name
+    h_file_dest = out_dir + '/' + h_file_name
 
     #? Copying files in defined output directory
-    copyfile(c_file_source, c_file_dest)
+    copyfile(h_file_source, h_file_dest)
 
     if (exec_file is not None):
         exec_file_dest = out_dir + '/' + os.path.basename(out_dir) + os.path.splitext(exec_file)[-1]

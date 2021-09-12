@@ -4,6 +4,58 @@
 #include <stdlib.h>
 #include "nn_model.h"
 
+/* Defines the number of layers. Including input and output layer. */
+const uint16_t NUMBER_OF_LAYERS = ###numberLayers###;
+
+/* Defines the width of the output of each layer when seen as a matrix. */
+const uint16_t LAYER_OUTPUT_WIDTH[###numberLayers###] = ###layerOutputWidth###;
+
+/* Defines the height of the output of each layer when seen as a matrix. */
+const uint16_t LAYER_OUTPUT_HEIGHT[###numberLayers###] = ###layerOutputHeight###;
+
+/* Defines the depth of the output of each layer when seen as a matrix. */
+const uint16_t LAYER_OUTPUT_DEPTH[###numberLayers###] = ###layerOutputDepth###;
+
+/* Defines the type of the layer. See layer_type enumeration for possible values. */
+const uint8_t LAYER_TYPE[###dimNumberLayers###] = ###layerTypes###;
+
+/* Defines the type of activation function for the layer. Default value for layers without activation function is 0. */
+const uint8_t ACTIVATION_FUNCTION[###dimNumberLayers###] = ###activationFunctions###;
+
+/*  Defines the index at which the first weight-element of each layer is present. */
+const uint16_t WEIGHTS_START_INDEX[###dimNumberLayers###] = ###indicesWeights###;
+
+/* Defines the index at which the first bias-element of each layer is present. */
+const uint16_t BIASES_START_INDEX[###dimNumberLayers###] = ###indicesBias###;
+
+/* Defines whether bias values should be applied to the layer. */
+const uint8_t BIAS_ENABLED[###dimNumberLayers###] = ###useBias###;
+
+/* Holds the weights for each layer as flatted one-dimensional array. */
+const float WEIGHTS[###dimWeights###] = ###weights###;
+
+/* Holds the biases for each layer as flatted one-dimensional array. */
+const float BIASES[###dimBias###] = ###bias###;
+
+/* Defines the width of the filter/pool for each layer when seen as a matrix.
+Default value for layers without filters/pools is 0. */
+const uint16_t POOL_WIDTH[###dimNumberLayers###] = ###poolWidth###;
+
+/* Defines the height of the filter/pool for each layer when seen as a matrix.
+Default value for layers without filters/pools is 0. */
+const uint16_t POOL_HEIGHT[###dimNumberLayers###] = ###poolHeight###;
+
+/* Defines the horizontal stride/step size for the filter/pool for each layer.
+Default value for layers without filters/pools is 0. */
+const uint16_t HORIZONTAL_STRIDE[###dimNumberLayers###] = ###horizontalStride###;
+
+/* Defines the vertical stride/step size for the filter/pool for each layer.
+Default value for layers without filters/pools is 0. */
+const uint16_t VERTICAL_STRIDE[###dimNumberLayers###] = ###verticalStride###;
+
+/* Defines if padding should be applied for each layer. See padding enumeration for possible values. */
+const uint8_t PADDING[###dimNumberLayers###] = ###padding###;
+
 // Enumeration for activation function types
 enum
 {
