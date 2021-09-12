@@ -188,6 +188,7 @@ def get_strides_strings(input):
             width_array.append(1)
         else:
             height_array.append(0)
+            width_array.append(0)
 
     return convert_array_to_string(height_array), convert_array_to_string(width_array)
 
