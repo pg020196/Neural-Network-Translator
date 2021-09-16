@@ -21,16 +21,16 @@ class GCC(BackendPlugin):
 
         markers = self.build_markers(input)
 
-        #? Reading the header file with markers and replacing them with the markers array
-        h_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/gcc/nn_model.h-template'), markers)
+        #? Reading the c file with markers and replacing them with the markers array
+        c_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/gcc/nn_model.c-template'), markers)
 
         #? Creating directory if not existing
         out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
-        c_file_source_path = './backend/gcc/nn_model.c-template'
+        h_file_source_path = './backend/gcc/nn_model.h-template'
         c_file_name = 'nn_model.c'
         h_file_name = 'nn_model.h'
 
-        backend_utils.write_header_and_c_file(out_dir_path, h_file, h_file_name, c_file_source_path, c_file_name, executable_file)
+        backend_utils.write_header_and_c_file(out_dir_path, c_file, c_file_name, h_file_source_path, h_file_name, executable_file)
 
     def build_markers(self, input):
         """Returns a markers dict built from intermediate input information """
