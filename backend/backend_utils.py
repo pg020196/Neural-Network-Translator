@@ -208,11 +208,13 @@ def get_output_dimensions_csharp_backend(input):
 
                     last_output_depth = input_depth
                 else:
-                    depth_array.append(1)
+                    # depth_array.append(1)
+                    depth_array.append(0)
                     input_depth = 1
                     last_output_depth = input_depth
             else:
-                width_array.append(1)
+                # width_array.append(1)
+                width_array.append(0)
                 input_width = 1
                 last_output_width = input_width
                 depth_array.append(1)
@@ -279,6 +281,24 @@ def get_pool_size_strings(input):
 
     return convert_array_to_string(height_array), convert_array_to_string(width_array)
 
+def get_pool_size_strings_c_sharp_backend(input):
+    """Returns an array with pool height values and an array with pool width values of the given input"""
+    width_array=[]
+    height_array=[]
+
+    for layer in input['config']['layers']:
+        if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
+            height_array.append(layer['config']['pool_size'][0])
+            width_array.append(layer['config']['pool_size'][1])
+        elif (layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
+            height_array.append(layer['config']['pool_size'][0])
+            width_array.append(0)
+        else:
+            height_array.append(0)
+            width_array.append(0)
+
+    return convert_array_to_string(height_array), convert_array_to_string(width_array)
+
 def get_strides_strings(input):
     """Returns an array with stride height values and an array with stride width values of the given input"""
     width_array=[]
@@ -305,6 +325,17 @@ def get_padding_string(input, padding_types):
             array.append(0)
 
     return convert_array_to_string(array)
+
+# def get_padding_string_c_sharp(input, padding_types):
+#     array=[]
+#     for layer in input['config']['layers']:
+#         if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER or 
+#         layer['class_name']==MAX_POOL_1D_LAYER or layer['class_name']==AVG_POOL_1D_LAYER):
+#             array.append(padding_types[layer['config']['padding']])
+#         else:
+#             array.append(0)
+
+#     return convert_array_to_string(array)
 
 def get_activation_function_string(input, activation_functions):
     """Returns a string containing an array of indices representing the activation function for each layer"""
