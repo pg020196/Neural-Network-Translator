@@ -4,58 +4,70 @@ using NeuralNetwork;
 using Layers;
 using Tensor;
 
-namespace NeuralNetworkTemplate
+namespace NeuralNetworkBuilder
 {
-	class NeuralNetworkTemplate
+	public class NeuralNetworkBuilder
     {
-        static private ActivationType decodeActivationType(int code)
+        private readonly int myNumLayers;
+        private readonly int[] myLayerOutputHeight;
+        private readonly int[] myLayerOutputWidth;
+        private readonly int[] myLayerOutputDepth;
+        private readonly int[] myLayerTypes;
+        private readonly int[] myActivationTypes;
+        private readonly Tensor<double> myWeights;
+        private readonly int[] myIndicesWeights;
+        private readonly Tensor<double> myBias;
+        private readonly int[] myIndicesBias;
+        private readonly int[] myUseBias;
+        private readonly int[] myPoolHeights;
+        private readonly int[] myPoolWidths;
+        private readonly int[] myVerticalStride;
+        private readonly int[] myHorizontalStride;
+        private readonly int[] myPadding;
+
+        public NeuralNetwork<double> NeuralNetwork { get; }
+
+        static private ActivationType DecodeActivationType(int code)
         {
             switch (code)
             {
                 case (0):
                     return ActivationType.linear;
-                    break;
                 case (1):
                     return ActivationType.sigmoid;
-                    break;
                 case (2):
                     return ActivationType.relu;
-                    break;
                 case (3):
                     return ActivationType.tanh;
-                    break;
                 case (4):
                     return ActivationType.softmax;
-                    break;
                 default:
                     throw new NotImplementedException();
             }
         }
 
-        public static void Main(string[] args)
+        public NeuralNetworkBuilder()
         {
-            int numLayers = ###dimNumberLayers###;
-            int[] layerOutputHeight = ###layerOutputHeight###;
-            int[] layerOutputWidth = ###layerOutputWidth###;
-            int[] layerOutputDepth = ###layerOutputDepth###;
-            int[] layerTypes = ###layerTypes###;
-            int[] activationTypes = ###activationFunctions###;
-            var weights = new Tensor<double>(new double[] ###weights###);
-            // int dimWeights = ###dimWeights###;
-            int[] indicesWeights = ###indicesWeights###;
-            var bias = new Tensor<double>(new double[] ###bias###);
-            // int dimBias = ###dimBias###;
-            int[] indicesBias = ###indicesBias###;
-            int[] useBias = ###useBias###;
-            int[] poolHeights = ###poolHeights###;
-            int[] poolWidths = ###poolWidths###;
-            int[] verticalStride = ###verticalStride###;
-            int[] horizontalStride = ###horizontalStride###;
-            int[] padding = ###padding###;
+            myNumLayers = ###dimNumberLayers###;
+            myLayerOutputHeight = new int[] ###layerOutputHeight###;
+            myLayerOutputWidth = new int[] ###layerOutputWidth###;
+            myLayerOutputDepth = new int[] ###layerOutputDepth###;
+            myLayerTypes = new int[] ###layerTypes###;
+            myActivationTypes = new int[] ###activationFunctions###;
+            myWeights = new Tensor<double>(new double[] ###weights###);
+            myIndicesWeights = new int[] ###indicesWeights###;
+            myBias = new Tensor<double>(new double[] ###bias###);
+            myIndicesBias = new int[] ###indicesBias###;
+            myUseBias = new int[] ###useBias###;
+            myPoolHeights = new int[] ###poolHeights###;
+            myPoolWidths = new int[] ###poolWidths###;
+            myVerticalStride = new int[] ###verticalStride###;
+            myHorizontalStride = new int[] ###horizontalStride###;
+            myPadding = new int[] ###padding###;
 
-            int inputHeight = layerOutputHeight[0];
-            int inputWidth = layerOutputWidth[0];
-            int inputDepth = layerOutputDepth[0];
+            int inputHeight = myLayerOutputHeight[0];
+            int inputWidth = myLayerOutputWidth[0];
+            int inputDepth = myLayerOutputDepth[0];
 
             int[] inputShape;
             if (inputWidth == 0)
@@ -76,129 +88,143 @@ namespace NeuralNetworkTemplate
             var layerList = new List<BaseLayer<double>>();
             layerList.Add(inputLayer);
 
-            BaseLayer<double> prevLayer = inputLayer;
-            int poolHeight, poolWidth;
-            PaddingType paddingType;
+            BaseLayer<double> previousLayer = inputLayer;
 
-            for (int layer_idx = 1; layer_idx <= numLayers; layer_idx++)
+            for (int layerIndex = 1; layerIndex <= myNumLayers; layerIndex++)
             {
-                switch (layerTypes[layer_idx - 1])
+                switch (myLayerTypes[layerIndex - 1])
                 {
-                    case (1): // dense layer
-                        int weightsIndexUpper;
-                        int biasIndexUpper;
-                        if (layer_idx == numLayers)
-                        {
-                            weightsIndexUpper = weights.Shape[0];
-                            biasIndexUpper = bias.Shape[0];
-                        }
-                        else
-                        {
-                            weightsIndexUpper = indicesWeights[layer_idx];
-                            biasIndexUpper = indicesBias[layer_idx];
-                        }
-                        var denseLayer = new Dense<double>(prevLayer.OutputShape, layerOutputHeight[layer_idx],
-                            decodeActivationType(activationTypes[layer_idx - 1]), Convert.ToBoolean(useBias[layer_idx - 1]));
-
-                        int[] weightsShape = { prevLayer.OutputShape[0], layerOutputHeight[layer_idx] };
-                        var layerWeights = weights[indicesWeights[layer_idx - 1]..weightsIndexUpper];
-                        layerWeights = layerWeights.reshape(weightsShape);
-
-                        int biasShape = layerOutputHeight[layer_idx];
-                        var layerBias = bias[indicesBias[layer_idx - 1]..biasIndexUpper];
-                        layerBias = layerBias.reshape(biasShape);
-
-                        denseLayer.Weights = layerWeights;
-                        denseLayer.Bias = layerBias;
-
+                    case (1):
+                        var denseLayer = CreateDenseLayer(layerIndex, previousLayer);
                         layerList.Add(denseLayer);
-                        prevLayer = denseLayer;
+                        previousLayer = denseLayer;
                         break;
                     case (2): // flatten
-                        var flattenLayer = new Flatten<double>(prevLayer.OutputShape);
+                        var flattenLayer = new Flatten<double>(previousLayer.OutputShape);
                         layerList.Add(flattenLayer);
-                        prevLayer = flattenLayer;
+                        previousLayer = flattenLayer;
                         break;
                     case (3): // maxpooling
-                        poolHeight = poolHeights[layer_idx - 1];
-                        poolWidth = poolWidths[layer_idx - 1];
-                        
-                        if (padding[layer_idx-1] == 0)
-                        {
-                            paddingType = PaddingType.valid;
-                        }
-                        else
-                        {
-                            paddingType = PaddingType.same_keras;
-                        }
-
-                        if (poolWidth == 0)
-                        {
-                            int stride = verticalStride[layer_idx - 1];
-                            // 1D Pooling
-                            var maxPoolingLayer = new PoolingLayer1D<double>(prevLayer.OutputShape, PoolingType.max, poolHeight, stride, paddingType);
-                            layerList.Add(maxPoolingLayer);
-                            prevLayer = maxPoolingLayer;
-                        }
-                        else
-                        {
-                            int[] stride = { verticalStride[layer_idx - 1], horizontalStride[layer_idx - 1] };
-                            int[] poolSize = { poolHeight, poolWidth };
-                            // 2D Pooling
-                            var maxPoolingLayer = new PoolingLayer2D<double>(prevLayer.OutputShape, PoolingType.max, poolSize, stride, paddingType);
-                            layerList.Add(maxPoolingLayer);
-                            prevLayer = maxPoolingLayer;
-                        }
-                        
+                        var maxPoolingLayer = CreateMaxPoolingLayer(layerIndex, previousLayer);
+                        layerList.Add(maxPoolingLayer);
+                        previousLayer = maxPoolingLayer;
                         break;
                     case (4): // avgpooling
-                        poolHeight = poolHeights[layer_idx - 1];
-                        poolWidth = poolWidths[layer_idx - 1];
-
-                        if (padding[layer_idx - 1] == 0)
-                        {
-                            paddingType = PaddingType.valid;
-                        }
-                        else
-                        {
-                            paddingType = PaddingType.same_keras;
-                        }
-
-                        if (poolWidth == 0)
-                        {
-                            int stride = verticalStride[layer_idx - 1];
-                            // 1D Pooling
-                            var avgPoolinglayer = new PoolingLayer1D<double>(prevLayer.OutputShape, PoolingType.average, poolHeight, stride, paddingType);
-                            layerList.Add(avgPoolinglayer);
-                            prevLayer = avgPoolinglayer;
-                        }
-                        else
-                        {
-                            int[] stride = { verticalStride[layer_idx - 1], horizontalStride[layer_idx - 1] };
-                            int[] poolSize = { poolHeight, poolWidth };
-                            // 2D Pooling
-                            var avgPoolinglayer = new PoolingLayer2D<double>(prevLayer.OutputShape, PoolingType.average, poolSize, stride, paddingType);
-                            layerList.Add(avgPoolinglayer);
-                            prevLayer = avgPoolinglayer;
-                        }
-                        
+                        var averagePoolingLayer = CreateAveragePoolingLayer(layerIndex, previousLayer);
+                        layerList.Add(averagePoolingLayer);
+                        previousLayer = averagePoolingLayer;
                         break;
                     default:
-                        throw new NotImplementedException();
+                        throw new NotImplementedException($"Layer type {myLayerTypes[layerIndex - 1]} not implemented");
                 }
             }
-            var net = new NeuralNetwork<double>(layerList);
 
-            int batchSize = 1;
-            var shape = new List<int>();
-            shape.Add(batchSize);
-            shape.AddRange(inputShape);
-            var X = Tensor<double>.randNormal(0, 1, shape.ToArray());
-            Console.WriteLine(X);
+            NeuralNetwork = new NeuralNetwork<double>(layerList);
+        }
 
-            var y = net.predict(X);
-            Console.WriteLine(y);
+        private Dense<double> CreateDenseLayer(int layerIndex, BaseLayer<double> prevLayer)
+        {
+            int weightsIndexUpper;
+            int biasIndexUpper;
+            if (layerIndex == myNumLayers)
+            {
+                weightsIndexUpper = myWeights.Shape[0];
+                biasIndexUpper = myBias.Shape[0];
+            }
+            else
+            {
+                weightsIndexUpper = myIndicesWeights[layerIndex];
+                biasIndexUpper = myIndicesBias[layerIndex];
+            }
 
+            var activationType = DecodeActivationType(myActivationTypes[layerIndex - 1]);
+            var useBias = Convert.ToBoolean(myUseBias[layerIndex - 1]);
+            var denseLayer = new Dense<double>(prevLayer.OutputShape, myLayerOutputHeight[layerIndex], activationType, useBias);
+
+            int[] weightsShape = { prevLayer.OutputShape[0], myLayerOutputHeight[layerIndex] };
+            var layerWeights = myWeights[myIndicesWeights[layerIndex - 1]..weightsIndexUpper];
+            layerWeights = layerWeights.reshape(weightsShape);
+
+            int biasShape = myLayerOutputHeight[layerIndex];
+            var layerBias = myBias[myIndicesBias[layerIndex - 1]..biasIndexUpper];
+            layerBias = layerBias.reshape(biasShape);
+
+            denseLayer.Weights = layerWeights;
+            denseLayer.Bias = layerBias;
+
+            return denseLayer;
+        }
+
+        private BaseLayer<double> CreateMaxPoolingLayer(int layerIndex, BaseLayer<double> previousLayer)
+        {
+            var poolHeight = myPoolHeights[layerIndex - 1];
+            var poolWidth = myPoolWidths[layerIndex - 1];
+            var is1dPooling = poolHeight != 0 && poolWidth == 0;
+            var is2dPooling = poolHeight != 0 && poolWidth != 0;
+
+            PaddingType paddingType;
+            if (myPadding[layerIndex - 1] == 0)
+            {
+                paddingType = PaddingType.valid;
+            }
+            else
+            {
+                paddingType = PaddingType.same_keras;
+            }
+
+            if (is1dPooling)
+            {
+                int stride = myVerticalStride[layerIndex - 1];
+                var maxPoolingLayer = new PoolingLayer1D<double>(previousLayer.OutputShape, PoolingType.max, poolHeight, stride, paddingType);
+                return maxPoolingLayer;
+            }
+            else if (is2dPooling)
+            {
+                int[] stride = { myVerticalStride[layerIndex - 1], myHorizontalStride[layerIndex - 1] };
+                int[] poolSize = { poolHeight, poolWidth };
+                var maxPoolingLayer = new PoolingLayer2D<double>(previousLayer.OutputShape, PoolingType.max, poolSize, stride, paddingType);
+                return maxPoolingLayer;
+            }
+            else
+            {
+                throw new NotSupportedException($"Layer {layerIndex} is average pooling, but pool height and width are zero.");
+            }
+        }
+
+        private BaseLayer<double> CreateAveragePoolingLayer(int layerIndex, BaseLayer<double> previousLayer)
+        {
+            var poolHeight = myPoolHeights[layerIndex - 1];
+            var poolWidth = myPoolWidths[layerIndex - 1];
+            var is1dPooling = poolHeight != 0 && poolWidth == 0;
+            var is2dPooling = poolHeight != 0 && poolWidth != 0;
+
+            PaddingType paddingType;
+            if (myPadding[layerIndex - 1] == 0)
+            {
+                paddingType = PaddingType.valid;
+            }
+            else
+            {
+                paddingType = PaddingType.same_keras;
+            }
+
+            if (is1dPooling)
+            {
+                int stride = myVerticalStride[layerIndex - 1];
+                var averagePoolinglayer = new PoolingLayer1D<double>(previousLayer.OutputShape, PoolingType.average, poolHeight, stride, paddingType);
+                return averagePoolinglayer;
+            }
+            else if (is2dPooling)
+            {
+                int[] stride = { myVerticalStride[layerIndex - 1], myHorizontalStride[layerIndex - 1] };
+                int[] poolSize = { poolHeight, poolWidth };
+                var averagePoolinglayer = new PoolingLayer2D<double>(previousLayer.OutputShape, PoolingType.average, poolSize, stride, paddingType);
+                return averagePoolinglayer;
+            }
+            else
+            {
+                throw new NotSupportedException($"Layer {layerIndex} is average pooling, but pool height and width are zero.");
+            }
         }
     }
 }
