@@ -1013,9 +1013,8 @@ namespace Tensor
         // call the ToString(string, string, bool) method with default arguments
         public override string ToString()
         {
-            return this.ToString();
+            return ToString();
         }
-
 
         public string ToString(string culture = "en-US", bool display_brackets = true, int indent = 4)
         {
@@ -1119,6 +1118,52 @@ namespace Tensor
                 sb.Append("\n)");
                 return sb.ToString();
             }
+        }
+
+        /*******************************************************************************\
+         *  EQUALITY CHECK
+        \*******************************************************************************/
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj);
+        }
+
+        public bool Equals(object obj, double eps=1e-8)
+        {
+            var other = obj as Tensor<T>;
+
+            if (other == null)
+            {
+                return false;
+            }
+
+            if (other.Dims != Dims)
+            {
+                return false;
+            }
+
+            for (var i = 0; i < Shape.Length; i++)
+            {
+                if (other.Shape[i] != Shape[i])
+                {
+                    return false;
+                }
+            }
+
+            T eps_ = calculator.getValue(eps);
+
+            T absDiff;
+            for (var i = 0; i < NumElems; i++)
+            {
+                absDiff = calculator.abs(calculator.subtract(other.Data[i], Data[i]));
+                if (calculator.isGreater(absDiff, eps_))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 }

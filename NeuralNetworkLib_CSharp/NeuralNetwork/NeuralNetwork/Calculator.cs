@@ -53,7 +53,7 @@ namespace Tensor
         }
     }
 
-    class FloatCalculator : ICalculator<float>
+    public class FloatCalculator : ICalculator<float>
     {
         Random rand = new Random();
         public float getZero() { return 0f; }
@@ -94,7 +94,7 @@ namespace Tensor
         public float modulo(float a, float b) { return a % b; }
     }
 
-    class DoubleCalculator : ICalculator<double>
+    public class DoubleCalculator : ICalculator<double>
     {
         Random rand = new Random();
         public double getZero() { return 0d; }
