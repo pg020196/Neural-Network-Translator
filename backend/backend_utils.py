@@ -208,28 +208,26 @@ def get_output_dimensions_csharp_backend(input):
 
                     last_output_depth = input_depth
                 else:
-                    # depth_array.append(1)
                     depth_array.append(0)
                     input_depth = 1
                     last_output_depth = input_depth
             else:
-                # width_array.append(1)
                 width_array.append(0)
                 input_width = 1
                 last_output_width = input_width
-                depth_array.append(1)
+                depth_array.append(0)
                 input_depth = 1
                 last_output_depth = input_depth
 
         #? Differentiation between layer types and specific processing
         if (layer['class_name']==DENSE_LAYER):
             act_height = len(layer['kernel_values'][0])
-            act_width = 1
-            act_depth = 1
+            act_width = 0
+            act_depth = 0
         if (layer['class_name']==FLATTEN_LAYER):
             act_height = last_output_height * last_output_width * last_output_depth
-            act_width = 1
-            act_depth = 1
+            act_width = 0
+            act_depth = 0
         if (layer['class_name']==AVG_POOL_1D_LAYER or layer['class_name']==MAX_POOL_1D_LAYER):
 
             # compare https://keras.io/api/layers/pooling_layers/average_pooling1d/
@@ -238,8 +236,8 @@ def get_output_dimensions_csharp_backend(input):
             else:
                 act_height = np.ceil((input_height - layer['config']['pool_size'][0] + 1) / layer['config']['strides'][0])
             
-            act_width=1
-            act_depth = last_output_depth
+            act_width = 1
+            act_depth = 0
 
         if (layer['class_name']==AVG_POOL_2D_LAYER or layer['class_name']==MAX_POOL_2D_LAYER):
 

@@ -1,5 +1,6 @@
 ﻿using Tensor;
 using NUnit.Framework;
+using NeuralNetwork;
 
 namespace NeuralNetwork_iTests
 {

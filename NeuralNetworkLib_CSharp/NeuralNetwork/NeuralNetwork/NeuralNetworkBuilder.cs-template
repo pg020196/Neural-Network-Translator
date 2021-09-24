@@ -4,9 +4,9 @@ using NeuralNetwork;
 using Layers;
 using Tensor;
 
-namespace NeuralNetworkBuilder
+namespace NeuralNetwork
 {
-	public class NeuralNetworkBuilder
+	public class ###ClassName###
     {
         private readonly int myNumLayers;
         private readonly int[] myLayerOutputHeight;
@@ -46,7 +46,7 @@ namespace NeuralNetworkBuilder
             }
         }
 
-        public NeuralNetworkBuilder()
+        public ###ClassName###()
         {
             myNumLayers = ###dimNumberLayers###;
             myLayerOutputHeight = new int[] ###layerOutputHeight###;
@@ -139,13 +139,13 @@ namespace NeuralNetworkBuilder
 
             var activationType = DecodeActivationType(myActivationTypes[layerIndex - 1]);
             var useBias = Convert.ToBoolean(myUseBias[layerIndex - 1]);
-            var denseLayer = new Dense<double>(prevLayer.OutputShape, myLayerOutputHeight[layerIndex], activationType, useBias);
+            var denseLayer = new Dense<double>(prevLayer.OutputShape, myLayerOutputHeight[layerIndex-1], activationType, useBias);
 
-            int[] weightsShape = { prevLayer.OutputShape[0], myLayerOutputHeight[layerIndex] };
+            int[] weightsShape = { prevLayer.OutputShape[0], myLayerOutputHeight[layerIndex-1] };
             var layerWeights = myWeights[myIndicesWeights[layerIndex - 1]..weightsIndexUpper];
             layerWeights = layerWeights.reshape(weightsShape);
 
-            int biasShape = myLayerOutputHeight[layerIndex];
+            int biasShape = myLayerOutputHeight[layerIndex-1];
             var layerBias = myBias[myIndicesBias[layerIndex - 1]..biasIndexUpper];
             layerBias = layerBias.reshape(biasShape);
 

@@ -1126,10 +1126,10 @@ namespace Tensor
 
         public override bool Equals(object obj)
         {
-            return Equals(obj);
+            return Equals(obj, 1e-6);
         }
 
-        public bool Equals(object obj, double eps=1e-8)
+        private bool Equals(object obj, double eps)
         {
             var other = obj as Tensor<T>;
 

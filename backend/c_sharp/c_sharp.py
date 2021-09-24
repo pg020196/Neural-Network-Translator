@@ -19,7 +19,7 @@ class C_Sharp(BackendPlugin):
     def translate_to_native_code(self, input, outputfile, executable_file):
         """Translates the given input (intermediate format) to native C#-code and writes a cs-file"""
 
-        markers = self.build_markers(input)
+        markers = self.build_markers(input, outputfile)
 
         #? Reading the C# template file with markers and replacing them with the markers array
         # cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/c_sharp/nn_model.cs-template'), markers)
@@ -28,25 +28,23 @@ class C_Sharp(BackendPlugin):
         #? Creating directory if not existing
         # out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
         out_dir_path = 'NeuralNetworkLib_CSharp/NeuralNetwork/NeuralNetwork/' + os.path.splitext(outputfile)[0]
-        cs_file_name = 'nn_model.cs'
+        cs_file_name = f'{outputfile}.cs'
 
         backend_utils.write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file)
 
-
-
-    # TODO: refactor build_markers (identical in this class and in class GCC)
-    def build_markers(self, input):
+    def build_markers(self, input, outname):
         """Returns a markers dict built from intermediate input information """
         markers = dict()
 
         #? common markers
+        markers['###ClassName###'] = outname
         markers['###numberLayers###'] = backend_utils.get_number_of_layers(input)
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
         markers['###layerTypes###'] = backend_utils.get_layer_types_string(input, self.layer_types)
 
         layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions_csharp_backend(input)
-        markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
         markers['###layerOutputHeight###'] = backend_utils.convert_array_to_string(layerOutputHeight)
+        markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
         markers['###layerOutputDepth###'] = backend_utils.convert_array_to_string(layerOutputDepth)
 
         #? Dense layer specific markers
@@ -64,13 +62,13 @@ class C_Sharp(BackendPlugin):
         markers['###useBias###'] = use_bias_string
 
         #? Pooling layer specific markers
-        # poolHeights, poolWidths = backend_utils.get_pool_size_strings(input)
-        # markers['###poolWidth###'] = poolWidths
-        # markers['###poolHeight###'] = poolHeights
+        poolHeights, poolWidths = backend_utils.get_pool_size_strings_c_sharp_backend(input)
+        markers['###poolWidths###'] = poolWidths
+        markers['###poolHeights###'] = poolHeights
 
-        # verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
-        # markers['###horizontalStride###'] = horizontalStrides
-        # markers['###verticalStride###'] = verticalStrides
-        # markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
+        verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
+        markers['###verticalStride###'] = verticalStrides
+        markers['###horizontalStride###'] = horizontalStrides
+        markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
         return markers
