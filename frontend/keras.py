@@ -29,7 +29,35 @@ class Keras(FrontendPlugin):
                 layer['kernel_values'] = weights.tolist()
                 layer['bias_values'] = biases.tolist()
 
+            #? Calculate padding size if necessary
+            if(layer['class_name'] in ['AveragePooling1D','AveragePooling2D', 'MaxPooling1D', 'MaxPooling2D']):
+
+                # In keras, padding has the value 'same' if it should be applied
+                if (layer['config']['padding'] == 'same'):
+                    #? Init padding size placeholder variables
+                    vertical_padding = 0
+                    horizontal_padding = 0
+
+                    #? Formula for padding: padding = (pool_size - 1) / 2
+                    #? Calculate vertical padding
+                    vertical_padding = int((layer['config']['pool_size'][0] - 1) / 2)
+
+                    #? Horizontal padding only exists in two or more dimensions
+                    if (layer['class_name'] in ['AveragePooling2D', 'MaxPooling2D']):
+                        #? Calculate horizontal padding  
+                        horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
+
+                    #? Insert padding values into intermediate format [top, bottom, left, right]
+                    layer['config']['padding'] = [vertical_padding,horizontal_padding,vertical_padding,horizontal_padding]
+                
+                # In keras, padding has the value 'valid' if it should not be applied
+                elif (layer['config']['padding'] == 'valid'):
+                    # No padding should be applied
+                    layer['config']['padding'] = [0,0,0,0]
+
             count+=1
+
+            
 
         #? Deleting unnecessary information from the json object
         del model_json['keras_version']
