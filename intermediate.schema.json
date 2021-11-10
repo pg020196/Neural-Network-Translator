@@ -117,8 +117,13 @@
                                     },
                                     "padding": {
                                         "$id": "#/properties/config/properties/layers/items/properties/config/properties/padding",
-                                        "type": "string",
-                                        "title": "The Padding Schema"
+                                        "type": "array",
+                                        "title": "The Padding Schema",
+                                        "items": {
+                                            "$id": "#/properties/config/properties/layers/items/properties/config/properties/padding/items",
+                                            "type": "integer",
+                                            "title": "The Items Schema"
+                                        }
                                     },
                                     "data_format": {
                                         "$id": "#/properties/config/properties/layers/items/properties/config/properties/data_format",
