@@ -62,7 +62,10 @@ class Pytorch(FrontendPlugin):
                     out_layer["config"]["batch_input_shape"] = [None, layer.in_channels]
                 out_layer["config"]["pool_size"] = list(tuple(layer.kernel_size))
                 out_layer["config"]["strides"] = list(tuple(layer.stride))
-                out_layer["config"]["padding"] = "valid" if layer.padding==0 else "same"
+
+                # TODO: Calculate padding size here and add it in the next line
+
+                out_layer["config"]["padding"] = [0,0,0,0] if layer.padding==0 else "same"
                 if (type(layer)==torch.nn.modules.pooling.MaxPool2d or type(layer)==torch.nn.modules.pooling.MaxPool1d):
                     out_layer["config"]["dilation"] = [layer.dilation]
 

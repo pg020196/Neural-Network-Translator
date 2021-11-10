@@ -196,9 +196,9 @@ def get_padding_string(input, padding_types):
     array=[]
     for layer in input['config']['layers']:
         if (layer['class_name']==MAX_POOL_2D_LAYER or layer['class_name']==AVG_POOL_2D_LAYER):
-            array.append(padding_types[layer['config']['padding']])
+            array.append([layer['config']['padding']])
         else:
-            array.append(0)
+            array.append([0,0,0,0])
 
     return convert_array_to_string(array)
 

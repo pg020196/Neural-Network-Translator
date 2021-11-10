@@ -48,6 +48,7 @@ class Keras(FrontendPlugin):
                         horizontal_padding = int((layer['config']['pool_size'][1] - 1) / 2)
 
                     #? Insert padding values into intermediate format [top, bottom, left, right]
+                    #! TODO: Check if the padding values must be divided by two in order to get the correc upper and lower padding
                     layer['config']['padding'] = [vertical_padding,horizontal_padding,vertical_padding,horizontal_padding]
                 
                 # In keras, padding has the value 'valid' if it should not be applied
@@ -55,9 +56,7 @@ class Keras(FrontendPlugin):
                     # No padding should be applied
                     layer['config']['padding'] = [0,0,0,0]
 
-            count+=1
-
-            
+            count+=1         
 
         #? Deleting unnecessary information from the json object
         del model_json['keras_version']
