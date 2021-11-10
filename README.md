@@ -32,7 +32,6 @@ Currently, the project supports the following configurations:
 | Neural Network Structure   |  Status  |
 | :------------------------- | :------: |
 | Keras                      |    ✔️     |
-| Microsoft Cognitive Toolkit (CNTK) | :candy:* |
 | PyTorch                    | :candy:*​ |
 | Theano                     |          |
 | Caffe                      |          |
