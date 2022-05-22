@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.31424.327
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeuralNetwork", "NeuralNetwork\NeuralNetwork.csproj", "{4C5753EA-DD5C-4DE8-9EF6-E7ABFC4D431E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeuralNetwork_uTests", "NeuralNetwork_uTests\NeuralNetwork_uTests.csproj", "{BD824E02-0921-4973-8F50-3E38FFCF3F97}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NeuralNetwork_iTests", "NeuralNetwork_iTests\NeuralNetwork_iTests.csproj", "{FD9EC5E0-CA85-4600-9176-1DB0E73202BC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4C5753EA-DD5C-4DE8-9EF6-E7ABFC4D431E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C5753EA-DD5C-4DE8-9EF6-E7ABFC4D431E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C5753EA-DD5C-4DE8-9EF6-E7ABFC4D431E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C5753EA-DD5C-4DE8-9EF6-E7ABFC4D431E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD824E02-0921-4973-8F50-3E38FFCF3F97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD824E02-0921-4973-8F50-3E38FFCF3F97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD824E02-0921-4973-8F50-3E38FFCF3F97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD824E02-0921-4973-8F50-3E38FFCF3F97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FD9EC5E0-CA85-4600-9176-1DB0E73202BC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FD9EC5E0-CA85-4600-9176-1DB0E73202BC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FD9EC5E0-CA85-4600-9176-1DB0E73202BC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FD9EC5E0-CA85-4600-9176-1DB0E73202BC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {A61E530F-A09F-413E-9000-1CED12B7643B}
+	EndGlobalSection
+EndGlobal

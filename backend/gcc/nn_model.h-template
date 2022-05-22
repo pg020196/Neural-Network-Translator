@@ -19,4 +19,3 @@ static float * padding_values_apply(float *input, uint16_t input_columns, uint16
 static uint16_t padding_calculate_size(uint16_t pool_size);
 static uint16_t padding_calculate_output_size(uint16_t input_size, uint16_t padding_size);
 static float activation_function_apply(uint8_t activation, float value, float denominator);
-

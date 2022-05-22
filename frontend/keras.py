@@ -20,7 +20,8 @@ class Keras(FrontendPlugin):
         if(model_json['config']['layers'][0]['class_name']=='InputLayer'):
             model_json['config']['layers'].pop(0)
 
-        count=0
+        # count=0
+        count = 1
         #? Adding batch_input_shape, units, weight- and bias-values for each layer to the generated json object
         for layer in model_json['config']['layers']:
             if (layer['class_name']=='Dense'):

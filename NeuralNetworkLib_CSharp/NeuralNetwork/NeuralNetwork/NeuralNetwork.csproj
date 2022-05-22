@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <StartupObject></StartupObject>
+    <ApplicationIcon />
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Folder Include="test_csharp_out\" />
+  </ItemGroup>
+
+</Project>

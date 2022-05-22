@@ -1,9 +1,9 @@
-from plugin_collection import BackendPlugin
+﻿from plugin_collection import BackendPlugin
 from backend import backend_utils
 import os
 
-class GCC(BackendPlugin):
-    """GCC backend plugin translates the intermediate format to native C-code"""
+class C_Sharp(BackendPlugin): 
+    """C_Sharp backend plugin translates the intermediate format to native C#-code"""
 
     #? Dictionaries for mapping activation functions and layer types to integer values
     activation_functions = {'linear':0,'sigmoid':1, 'relu':2, 'tanh':3, 'softmax':4}
@@ -14,36 +14,37 @@ class GCC(BackendPlugin):
     padding_types = {'valid':0, 'same':1}
 
     def __init__(self):
-        super().__init__('gcc','GCC Backend Plugin', None)
+        super().__init__('c_sharp','C# Backend Plugin', None)
 
     def translate_to_native_code(self, input, outputfile, executable_file):
-        """Translates the given input (intermediate format) to native C-code and writes a header- and a c-file"""
+        """Translates the given input (intermediate format) to native C#-code and writes a cs-file"""
 
-        markers = self.build_markers(input)
+        markers = self.build_markers(input, outputfile)
 
-        #? Reading the c file with markers and replacing them with the markers array
-        c_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/gcc/nn_model.c-template'), markers)
+        #? Reading the C# template file with markers and replacing them with the markers array
+        # cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('./backend/c_sharp/nn_model.cs-template'), markers)
+        cs_file = backend_utils.replace_markers(backend_utils.read_marker_file('NeuralNetworkLib_CSharp/NeuralNetwork/NeuralNetwork/NeuralNetworkBuilder.cs-template'), markers)
 
         #? Creating directory if not existing
-        out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
-        h_file_source_path = './backend/gcc/nn_model.h-template'
-        c_file_name = 'nn_model.c'
-        h_file_name = 'nn_model.h'
+        # out_dir_path = '_out/' + os.path.splitext(outputfile)[0]
+        out_dir_path = 'NeuralNetworkLib_CSharp/NeuralNetwork/NeuralNetwork/' + os.path.splitext(outputfile)[0]
+        cs_file_name = f'{outputfile}.cs'
 
-        backend_utils.write_header_and_c_file(out_dir_path, c_file, c_file_name, h_file_source_path, h_file_name, executable_file)
+        backend_utils.write_cs_file(out_dir_path, cs_file, cs_file_name, executable_file)
 
-    def build_markers(self, input):
+    def build_markers(self, input, outname):
         """Returns a markers dict built from intermediate input information """
         markers = dict()
 
         #? common markers
+        markers['###ClassName###'] = outname
         markers['###numberLayers###'] = backend_utils.get_number_of_layers(input)
         markers['###dimNumberLayers###'] = markers['###numberLayers###'] - 1
         markers['###layerTypes###'] = backend_utils.get_layer_types_string(input, self.layer_types)
 
-        layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions(input)
-        markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
+        layerOutputHeight, layerOutputWidth, layerOutputDepth = backend_utils.get_output_dimensions_csharp_backend(input)
         markers['###layerOutputHeight###'] = backend_utils.convert_array_to_string(layerOutputHeight)
+        markers['###layerOutputWidth###'] = backend_utils.convert_array_to_string(layerOutputWidth)
         markers['###layerOutputDepth###'] = backend_utils.convert_array_to_string(layerOutputDepth)
 
         #? Dense layer specific markers
@@ -61,13 +62,13 @@ class GCC(BackendPlugin):
         markers['###useBias###'] = use_bias_string
 
         #? Pooling layer specific markers
-        poolHeights, poolWidths = backend_utils.get_pool_size_strings(input)
-        markers['###poolWidth###'] = poolWidths
-        markers['###poolHeight###'] = poolHeights
+        poolHeights, poolWidths = backend_utils.get_pool_size_strings_c_sharp_backend(input)
+        markers['###poolWidths###'] = poolWidths
+        markers['###poolHeights###'] = poolHeights
 
         verticalStrides, horizontalStrides = backend_utils.get_strides_strings(input)
-        markers['###horizontalStride###'] = horizontalStrides
         markers['###verticalStride###'] = verticalStrides
+        markers['###horizontalStride###'] = horizontalStrides
         markers['###padding###'] = backend_utils.get_padding_string(input, self.padding_types)
 
         return markers
