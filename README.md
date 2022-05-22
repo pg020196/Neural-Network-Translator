@@ -1,3 +1,7 @@
+```
+Note: This repository will no longer be maintained and no additional functionality will be added to the NNT.
+The existing code works for the use cases described below. Feel free to fork and expand this project!
+```
 # Welcome to the Neural-Network-Translator-Repository
 
 <p align="center"><img src="https://github.com/pg020196/Neural-Network-Translator/blob/master/.github/resources/readme/nnt_icon.png" alt="NNT icon" width="70%"/></p>
